@@ -1,13 +1,13 @@
 create:
-	migrate create -ext sql -dir ./db/migrations/ -seq $(name)
+	migrate create -ext sql -dir ./database/migrations/ -seq $(name)
 
 migrateup:
-	migrate -path ./db/migrations/ -database "postgresql://mystique09:mystique09@localhost/class-management?sslmode=disable" -verbose up
+	migrate -path ./database/migrations/ -database "postgresql://mystique09:mystique09@localhost/class-management?sslmode=disable" -verbose up
 
 migratedown:
-	migrate -path ./db/migrations/ -database "postgresql://mystique09:mystique09@localhost/class-management?sslmode=disable" -verbose down
+	migrate -path ./database/migrations/ -database "postgresql://mystique09:mystique09@localhost/class-management?sslmode=disable" -verbose down
 
 force:
-	migrate -path ./db/migrations/ -database "postgresql://mystique09:mystique09@localhost/class-management?sslmode=disable" -verbose force 1
+	migrate -path ./database/migrations/ -database "postgresql://mystique09:mystique09@localhost/class-management?sslmode=disable" -verbose force 1
 
 .PHONY: create migrate reset force
