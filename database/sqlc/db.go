@@ -24,11 +24,23 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.createClassStmt, err = db.PrepareContext(ctx, createClass); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateClass: %w", err)
+	}
 	if q.createUserStmt, err = db.PrepareContext(ctx, createUser); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateUser: %w", err)
 	}
+	if q.deleteClassStmt, err = db.PrepareContext(ctx, deleteClass); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteClass: %w", err)
+	}
 	if q.deleteUserStmt, err = db.PrepareContext(ctx, deleteUser); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteUser: %w", err)
+	}
+	if q.getClassStmt, err = db.PrepareContext(ctx, getClass); err != nil {
+		return nil, fmt.Errorf("error preparing query GetClass: %w", err)
+	}
+	if q.getClassWorkStmt, err = db.PrepareContext(ctx, getClassWork); err != nil {
+		return nil, fmt.Errorf("error preparing query GetClassWork: %w", err)
 	}
 	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
@@ -42,6 +54,15 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getUsersStmt, err = db.PrepareContext(ctx, getUsers); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUsers: %w", err)
 	}
+	if q.listClassStmt, err = db.PrepareContext(ctx, listClass); err != nil {
+		return nil, fmt.Errorf("error preparing query ListClass: %w", err)
+	}
+	if q.listClassWorkStmt, err = db.PrepareContext(ctx, listClassWork); err != nil {
+		return nil, fmt.Errorf("error preparing query ListClassWork: %w", err)
+	}
+	if q.updateClassStmt, err = db.PrepareContext(ctx, updateClass); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateClass: %w", err)
+	}
 	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
 	}
@@ -53,14 +74,34 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
+	if q.createClassStmt != nil {
+		if cerr := q.createClassStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createClassStmt: %w", cerr)
+		}
+	}
 	if q.createUserStmt != nil {
 		if cerr := q.createUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createUserStmt: %w", cerr)
 		}
 	}
+	if q.deleteClassStmt != nil {
+		if cerr := q.deleteClassStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteClassStmt: %w", cerr)
+		}
+	}
 	if q.deleteUserStmt != nil {
 		if cerr := q.deleteUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteUserStmt: %w", cerr)
+		}
+	}
+	if q.getClassStmt != nil {
+		if cerr := q.getClassStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getClassStmt: %w", cerr)
+		}
+	}
+	if q.getClassWorkStmt != nil {
+		if cerr := q.getClassWorkStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getClassWorkStmt: %w", cerr)
 		}
 	}
 	if q.getUserStmt != nil {
@@ -81,6 +122,21 @@ func (q *Queries) Close() error {
 	if q.getUsersStmt != nil {
 		if cerr := q.getUsersStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getUsersStmt: %w", cerr)
+		}
+	}
+	if q.listClassStmt != nil {
+		if cerr := q.listClassStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listClassStmt: %w", cerr)
+		}
+	}
+	if q.listClassWorkStmt != nil {
+		if cerr := q.listClassWorkStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listClassWorkStmt: %w", cerr)
+		}
+	}
+	if q.updateClassStmt != nil {
+		if cerr := q.updateClassStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateClassStmt: %w", cerr)
 		}
 	}
 	if q.updateUserStmt != nil {
@@ -132,12 +188,19 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                     DBTX
 	tx                     *sql.Tx
+	createClassStmt        *sql.Stmt
 	createUserStmt         *sql.Stmt
+	deleteClassStmt        *sql.Stmt
 	deleteUserStmt         *sql.Stmt
+	getClassStmt           *sql.Stmt
+	getClassWorkStmt       *sql.Stmt
 	getUserStmt            *sql.Stmt
 	getUserByUsernameStmt  *sql.Stmt
 	getUserWithPostsStmt   *sql.Stmt
 	getUsersStmt           *sql.Stmt
+	listClassStmt          *sql.Stmt
+	listClassWorkStmt      *sql.Stmt
+	updateClassStmt        *sql.Stmt
 	updateUserStmt         *sql.Stmt
 	updateUserPasswordStmt *sql.Stmt
 }
@@ -146,12 +209,19 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                     tx,
 		tx:                     tx,
+		createClassStmt:        q.createClassStmt,
 		createUserStmt:         q.createUserStmt,
+		deleteClassStmt:        q.deleteClassStmt,
 		deleteUserStmt:         q.deleteUserStmt,
+		getClassStmt:           q.getClassStmt,
+		getClassWorkStmt:       q.getClassWorkStmt,
 		getUserStmt:            q.getUserStmt,
 		getUserByUsernameStmt:  q.getUserByUsernameStmt,
 		getUserWithPostsStmt:   q.getUserWithPostsStmt,
 		getUsersStmt:           q.getUsersStmt,
+		listClassStmt:          q.listClassStmt,
+		listClassWorkStmt:      q.listClassWorkStmt,
+		updateClassStmt:        q.updateClassStmt,
 		updateUserStmt:         q.updateUserStmt,
 		updateUserPasswordStmt: q.updateUserPasswordStmt,
 	}

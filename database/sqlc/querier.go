@@ -11,12 +11,38 @@ import (
 )
 
 type Querier interface {
+	//description: Create a class
+	//parameters: id(uuid), admin_id, name, description, section, room, subject, invite_code, created_at, updated_at
+	//returns: class
+	CreateClass(ctx context.Context, arg CreateClassParams) (Class, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	//description: Delete a class
+	//parameters: id
+	DeleteClass(ctx context.Context, id uuid.UUID) error
 	DeleteUser(ctx context.Context, id uuid.UUID) error
+	//description: Get a class by id
+	//parameters: id
+	//returns: class
+	GetClass(ctx context.Context, id uuid.UUID) (Class, error)
+	//description: Get a class work by id
+	//parameters: id
+	//returns: class_work
+	GetClassWork(ctx context.Context, id uuid.UUID) (ClassWork, error)
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUserWithPosts(ctx context.Context) (interface{}, error)
 	GetUsers(ctx context.Context) ([]interface{}, error)
+	//description: List all classes
+	//parameters: none
+	//returns: classes
+	ListClass(ctx context.Context) ([]Class, error)
+	//description: List all class works
+	//parameters: none
+	//returns: class_work
+	ListClassWork(ctx context.Context) ([]ClassWork, error)
+	//description: Update a class
+	//parameters: name, description, section, room, subject, invite_code, updated_at
+	UpdateClass(ctx context.Context, arg UpdateClassParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error
 }
