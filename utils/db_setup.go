@@ -12,7 +12,7 @@ func SetupDB(DATABASE_URL string) *sql.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	//defer db.Close()
 
 	return db
 }
