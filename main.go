@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"server/app"
@@ -28,12 +29,13 @@ func main() {
 		PORT = "8080"
 	}
 
-	db := utils.SetupDB(DATABASE_URL)
-
-	qr := database.New(db)
+	conn := utils.SetupDB(DATABASE_URL)
+	db := database.New(conn)
+	ctx := context.Background()
 
 	rt := routes.Route{
-		DB: qr,
+		DB:  db,
+		CTX: ctx,
 	}
 
 	config := app.Config{
@@ -42,7 +44,13 @@ func main() {
 
 	server := echo.New()
 	server.GET("/api/v1", indexHandler)
-	server.GET("/api/v1/users", rt.GetUsers)
+	user_route := server.Group("/api/v1/users")
+	{
+		user_route.GET("", rt.GetUsers)
+		user_route.GET("/:id", rt.GetUser)
+		user_route.PUT("/:id", rt.UpdateUser)
+		server.DELETE("/:id", rt.DeleteUser)
+	}
 
 	server.Logger.Fatal(server.Start(config.Port))
 }
