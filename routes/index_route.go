@@ -2,6 +2,7 @@ package routes
 
 import (
 	// import the postgres driver
+	"context"
 	database "server/database/sqlc"
 )
 
@@ -9,7 +10,8 @@ import (
 The Route struct to hold the route information.
 */
 type Route struct {
-	DB *database.Queries
+	DB  *database.Queries
+	CTX context.Context
 }
 
 /*
