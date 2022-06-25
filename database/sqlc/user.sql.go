@@ -3,7 +3,7 @@
 //   sqlc v1.13.0
 // source: user.sql
 
-package db
+package database
 
 import (
 	"context"
@@ -49,6 +49,16 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM "user"
+WHERE id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
+	_, err := q.exec(ctx, q.deleteUserStmt, deleteUser, id)
+	return err
+}
+
 const getUser = `-- name: GetUser :one
 SELECT id, username, password, email, user_role, created_at, updated_at
 FROM "user"
@@ -70,8 +80,42 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 	return i, err
 }
 
+const getUserByUsername = `-- name: GetUserByUsername :one
+SELECT id, username, password, email, user_role, created_at, updated_at
+FROM "user"
+WHERE username = $1
+`
+
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+	row := q.queryRow(ctx, q.getUserByUsernameStmt, getUserByUsername, username)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Email,
+		&i.UserRole,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserWithPosts = `-- name: GetUserWithPosts :one
+SELECT (id, username, email, user_role)
+FROM "user"
+LEFT JOIN "post" ON "user".id = "post".user_id
+`
+
+func (q *Queries) GetUserWithPosts(ctx context.Context) (interface{}, error) {
+	row := q.queryRow(ctx, q.getUserWithPostsStmt, getUserWithPosts)
+	var column_1 interface{}
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
 const getUsers = `-- name: GetUsers :many
-SELECT (id, username, email, role)
+SELECT (id, username, email, user_role)
 FROM "user"
 `
 
@@ -112,5 +156,21 @@ type UpdateUserParams struct {
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 	_, err := q.exec(ctx, q.updateUserStmt, updateUser, arg.Password, arg.Email, arg.ID)
+	return err
+}
+
+const updateUserPassword = `-- name: UpdateUserPassword :exec
+UPDATE "user"
+SET password = $1
+WHERE id =  $2
+`
+
+type UpdateUserPasswordParams struct {
+	Password string    `json:"password"`
+	ID       uuid.UUID `json:"id"`
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
+	_, err := q.exec(ctx, q.updateUserPasswordStmt, updateUserPassword, arg.Password, arg.ID)
 	return err
 }
