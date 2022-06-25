@@ -102,7 +102,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 }
 
 const getUserWithPosts = `-- name: GetUserWithPosts :one
-SELECT (id, username, email, role)
+SELECT (id, username, email, user_role)
 FROM "user"
 LEFT JOIN "post" ON "user".id = "post".user_id
 `
@@ -115,7 +115,7 @@ func (q *Queries) GetUserWithPosts(ctx context.Context) (interface{}, error) {
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT (id, username, email, role)
+SELECT (id, username, email, user_role)
 FROM "user"
 `
 

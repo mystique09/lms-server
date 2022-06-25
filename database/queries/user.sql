@@ -4,7 +4,7 @@ FROM "user"
 WHERE id = $1;
 
 -- name: GetUsers :many
-SELECT (id, username, email, role)
+SELECT (id, username, email, user_role)
 FROM "user";
 
 -- name: GetUserByUsername :one
@@ -13,7 +13,7 @@ FROM "user"
 WHERE username = $1;
 
 -- name: GetUserWithPosts :one
-SELECT (id, username, email, role)
+SELECT (id, username, email, user_role)
 FROM "user"
 LEFT JOIN "post" ON "user".id = "post".user_id;
 
