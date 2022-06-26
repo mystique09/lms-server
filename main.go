@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"server/app"
-	"server/database/sqlc"
+	database "server/database/sqlc"
 	"server/routes"
 	"server/utils"
 
@@ -44,6 +44,8 @@ func main() {
 
 	server := echo.New()
 	server.GET("/api/v1", indexHandler)
+	server.POST("/api/v1/auth", rt.CreateUser)
+
 	user_route := server.Group("/api/v1/users")
 	{
 		user_route.GET("", rt.GetUsers)
