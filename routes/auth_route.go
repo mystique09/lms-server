@@ -30,6 +30,11 @@ func (rt *Route) Login(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, "", err.Error()))
 	}
 
+	/*
+		if user.Username == "" {
+			return c.JSON(http.StatusBadRequest, utils.NewResponse(0, "", "User not found"))
+		}
+	*/
 	// check if password is correct
 	if payload.Password != user.Password {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, "", "Password mismatch"))
