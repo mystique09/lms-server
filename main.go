@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"log"
-	"os"
-	"server/app"
+	"net/http"
+	"server/config"
 	database "server/database/sqlc"
 	"server/routes"
 	"server/utils"
@@ -15,52 +15,48 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func main() {
+func Setup() routes.Route {
 	err := godotenv.Load()
 
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	DATABASE_URL := os.Getenv("DATABASE_URL")
-	PORT := os.Getenv("PORT")
+	config := config.Init()
 
-	if PORT == "" {
-		PORT = "8080"
-	}
-
-	conn := utils.SetupDB(DATABASE_URL)
+	conn := utils.SetupDB(config.DATABASE_URL)
 	db := database.New(conn)
 	ctx := context.Background()
 
-	rt := routes.Route{
+	return routes.Route{
 		DB:  db,
 		CTX: ctx,
+		Cfg: config,
 	}
+}
 
-	config := app.Config{
-		Port: ":" + PORT,
-	}
+func main() {
+	rt := Setup()
 
-	server := echo.New()
-	server.Use(routes.LoggerMiddleware())
-	server.Use(routes.RateLimitMiddleware(20))
-	server.Use(routes.CorsMiddleware())
+	e := echo.New()
+	e.Use(routes.LoggerMiddleware())
+	e.Use(routes.RateLimitMiddleware(20))
+	e.Use(routes.CorsMiddleware(rt.Cfg))
 
-	server.GET("/api/v1", indexHandler)
-	server.POST("/api/v1/auth", rt.CreateUser)
+	e.GET("/api/v1", indexHandler)
+	e.POST("/api/v1/auth", rt.CreateUser)
 
-	user_route := server.Group("/api/v1/users", routes.JwtAuthMiddleware())
+	user_route := e.Group("/api/v1/users", routes.JwtAuthMiddleware(rt.Cfg))
 	{
 		user_route.GET("", rt.GetUsers)
 		user_route.GET("/:id", rt.GetUser)
 		user_route.PUT("/:id", rt.UpdateUser)
-		server.DELETE("/:id", rt.DeleteUser)
+		user_route.DELETE("/:id", rt.DeleteUser)
 	}
 
-	server.Logger.Fatal(server.Start(config.Port))
+	e.Logger.Fatal(e.Start(rt.Cfg.PORT))
 }
 
 func indexHandler(c echo.Context) error {
-	return c.String(200, "Welcome! This is my backend API for my Class Management System personal project.")
+	return c.String(http.StatusOK, "Welcome! This is my backend API for my Class Management System personal project.")
 }
