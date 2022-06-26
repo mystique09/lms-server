@@ -1,8 +1,7 @@
 package routes
 
 import (
-	"log"
-	"os"
+	"server/config"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -17,16 +16,10 @@ func LoggerMiddleware() echo.MiddlewareFunc {
 	)
 }
 
-func CorsMiddleware() echo.MiddlewareFunc {
-	var FRONTEND_URL string = os.Getenv("FRONTEND_URL")
-
-	if FRONTEND_URL == "" {
-		log.Fatal("FRONTEND_URL is not set")
-	}
-
+func CorsMiddleware(cfg config.Config) echo.MiddlewareFunc {
 	return middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
-			FRONTEND_URL,
+			cfg.FRONTEND_URL,
 		},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders: []string{
@@ -42,9 +35,9 @@ func RateLimitMiddleware(limit rate.Limit) echo.MiddlewareFunc {
 	return middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(limit))
 }
 
-func JwtAuthMiddleware() echo.MiddlewareFunc {
+func JwtAuthMiddleware(cfg config.Config) echo.MiddlewareFunc {
 	return middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningMethod: "HS256",
-		SigningKey:    []byte(os.Getenv("JWT_SECRET_KEY")),
+		SigningKey:    cfg.JWT_SECRET_KEY,
 	})
 }
