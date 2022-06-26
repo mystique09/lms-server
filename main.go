@@ -45,6 +45,8 @@ func main() {
 	server := echo.New()
 	server.Use(routes.LoggerMiddleware())
 	server.Use(routes.RateLimitMiddleware())
+	server.Use(routes.CorsMiddleware())
+
 	server.GET("/api/v1", indexHandler)
 	server.POST("/api/v1/auth", rt.CreateUser)
 
