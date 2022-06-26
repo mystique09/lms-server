@@ -44,7 +44,7 @@ func main() {
 	e.Use(routes.CorsMiddleware(rt.Cfg))
 
 	e.GET("/api/v1", indexHandler)
-	e.POST("/api/v1/auth", rt.CreateUser)
+	e.POST("/api/v1/signup", rt.CreateUser)
 
 	user_route := e.Group("/api/v1/users", routes.JwtAuthMiddleware(rt.Cfg))
 	{
