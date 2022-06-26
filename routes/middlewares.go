@@ -15,6 +15,21 @@ func LoggerMiddleware() echo.MiddlewareFunc {
 	)
 }
 
+func CorsMiddleware() echo.MiddlewareFunc {
+	return middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{
+			os.Getenv("FRONTEND_URL"),
+		},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+		},
+		MaxAge: 86400,
+	})
+}
+
 func RateLimitMiddleware() echo.MiddlewareFunc {
 	return middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20))
 }
