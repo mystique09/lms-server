@@ -55,6 +55,42 @@ func (rt *Route) GetUser(c echo.Context) error {
 }
 
 /*
+A function to create new user.
+*/
+func (rt *Route) CreateUser(c echo.Context) error {
+	ctx := context.Background()
+	user_data := new(database.CreateUserParams)
+	if err := c.Bind(user_data); err != nil {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
+	}
+
+	// check if inputs is not empty
+	if user_data.Username == "" || user_data.Email == "" || user_data.Password == "" {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Please provide all inputs."))
+	}
+
+	// check if email is valid
+	if !utils.IsEmail(user_data.Email) {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Please provide a valid email."))
+	}
+
+	// check if user already exist
+	check_user, err := rt.DB.GetUserByUsername(ctx, user_data.Username)
+
+	if check_user.Username != "" {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
+	}
+
+	user, err := rt.DB.CreateUser(ctx, *user_data)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, utils.NewResponse(1, user, ""))
+}
+
+/*
 A function to update a user by ID.
 */
 func (rt *Route) UpdateUser(c echo.Context) error {
