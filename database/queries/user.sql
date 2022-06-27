@@ -4,8 +4,9 @@ FROM "user"
 WHERE id = $1;
 
 -- name: GetUsers :many
-SELECT (id, username, email, user_role)
-FROM "user";
+SELECT *
+FROM "user"
+ORDER BY created_at DESC;
 
 -- name: GetUserByUsername :one
 SELECT *

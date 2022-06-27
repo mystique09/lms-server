@@ -31,7 +31,7 @@ type Querier interface {
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUserWithPosts(ctx context.Context) (interface{}, error)
-	GetUsers(ctx context.Context) ([]interface{}, error)
+	GetUsers(ctx context.Context) ([]User, error)
 	//description: List all classes
 	//parameters: none
 	//returns: classes

@@ -115,23 +115,32 @@ func (q *Queries) GetUserWithPosts(ctx context.Context) (interface{}, error) {
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT (id, username, email, user_role)
+SELECT id, username, password, email, user_role, created_at, updated_at
 FROM "user"
+ORDER BY created_at DESC
 `
 
-func (q *Queries) GetUsers(ctx context.Context) ([]interface{}, error) {
+func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 	rows, err := q.query(ctx, q.getUsersStmt, getUsers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []interface{}
+	var items []User
 	for rows.Next() {
-		var column_1 interface{}
-		if err := rows.Scan(&column_1); err != nil {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Password,
+			&i.Email,
+			&i.UserRole,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
-		items = append(items, column_1)
+		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err
