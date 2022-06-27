@@ -15,7 +15,7 @@ Table user {
 
 Table class {
   id uuid [pk, unique]
-  admin_id uuid [unique]
+  admin_id uuid [ref: > user.id]
   name varchar [not null]
   description varchar
   section varchar
@@ -55,9 +55,8 @@ Table comment {
   updated_at timestamptz [default: `now()`]
 }
 
-Ref: user.id > class.admin_id
 Ref: class_work.user_id > user.id
-Ref: post.author_id - user.id
+Ref: user.id - post.author_id
 Ref: class_work.class_id > class.id
 Ref: comment.post_id > post.id
 Ref: comment.author_id > user.id
