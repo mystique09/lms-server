@@ -10,6 +10,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type UserCreateDTO struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type UserUpdateDTO struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
@@ -59,7 +65,7 @@ A function to create new user.
 */
 func (rt *Route) CreateUser(c echo.Context) error {
 	ctx := context.Background()
-	user_data := new(database.CreateUserParams)
+	user_data := new(UserCreateDTO)
 	if err := c.Bind(user_data); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
 	}
@@ -67,6 +73,16 @@ func (rt *Route) CreateUser(c echo.Context) error {
 	// check if inputs is not empty
 	if user_data.Username == "" || user_data.Email == "" || user_data.Password == "" {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Please provide all inputs."))
+	}
+
+	// check username length if greater than 8
+	if len(user_data.Username) < 8 {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Username must be at least 8 characters."))
+	}
+
+	// check password length if greater than 8
+	if len(user_data.Password) < 8 {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Password must be at least 8 characters."))
 	}
 
 	// check if email is valid
@@ -81,7 +97,15 @@ func (rt *Route) CreateUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
 	}
 
-	user, err := rt.DB.CreateUser(ctx, *user_data)
+	var new_user_param database.CreateUserParams = database.CreateUserParams{
+		ID:       uuid.New(),
+		Username: user_data.Username,
+		Email:    user_data.Email,
+		Password: user_data.Password,
+		UserRole: database.RoleSTUDENT,
+	}
+
+	user, err := rt.DB.CreateUser(ctx, new_user_param)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
