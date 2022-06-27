@@ -26,7 +26,8 @@ type UserUpdateDTO struct {
 A function to retrive all users.
 */
 func (rt *Route) GetUsers(c echo.Context) error {
-	users, err := rt.DB.GetUsers(rt.CTX)
+	ctx := context.Background()
+	users, err := rt.DB.GetUsers(ctx)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(0, nil, err.Error()))
