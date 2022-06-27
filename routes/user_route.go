@@ -32,7 +32,7 @@ func (rt *Route) GetUsers(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(0, nil, err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(1, users, ""))
+	return c.JSON(http.StatusOK, utils.NewResponse(1, &users, ""))
 }
 
 /*
@@ -93,8 +93,8 @@ func (rt *Route) CreateUser(c echo.Context) error {
 	// check if user already exist
 	check_user, err := rt.DB.GetUserByUsername(ctx, user_data.Username)
 
-	if check_user.Username != "" {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
+	if check_user.ID != uuid.Nil {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "User already exist."))
 	}
 
 	var new_user_param database.CreateUserParams = database.CreateUserParams{
