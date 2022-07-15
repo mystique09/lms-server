@@ -22,11 +22,73 @@ Tech used:
 | GET   | Class   | /api/v1/classrooms/:id   |
 | UPDATE    | Class    | /api/v1/classrooms/:id    |
 | DELETE    | ID   | /api/v1/classrooms/:id    |
+| GET    | []Post    | /api/v1/classrooms/:class_id/posts    |
+| POST    | String    | /api/v1/classrooms/:class_id/posts   |
+| GET   | Post   | /api/v1/classrooms/:class_id/posts/:post_id   |
+| UPDATE    | Post    | /api/v1/classrooms/:class_id/posts/:post_id    |
+| DELETE    | ID   | /api/v1/classrooms/:class_id/posts/:post_id    |
+| GET    | []Comment    | /api/v1/classrooms/:class_id/posts/:post_id/comments    |
+| POST    | String    | /api/v1/classrooms/:class_id/posts/:post_id/comments   |
+| GET   | Comment   | /api/v1/classrooms/:class_id/posts/:post_id/comments/:comment_id   |
+| UPDATE    | Comment    | /api/v1/classrooms/:class_id/posts/:post_id/comments/:comment_id    |
+| DELETE    | ID   | /api/v1/classrooms/:class_id/posts/:post_id/comments/:comment_id    |
+
 
 ## Response Types
-- User = { username, email, role, created_at, updated_at }
-- ID = UUID
-- String
+```go
+type (
+  User struct { 
+    username,
+    email,
+    role,
+    created_at,
+    updated_at
+  }
+
+  Class struct {
+    id,
+    admin_id,
+    name,
+    description,
+    section,
+    room,
+    subject,
+    invite_code,
+    created_at,
+    updated_at
+  }
+
+  ClassWork struct {
+    id,
+    name,
+    user_id,
+    class_id,
+    mark,
+    created_at,
+    updated_at
+  }
+
+  Post struct { 
+    id,
+    author_id,
+    class_id,
+    content,
+    created_at,
+    updated_at 
+  }
+
+  Comment struct { 
+    id,
+    author_id,
+    post_id,
+    content,
+    created_at,
+    updated_at
+  }
+)
+
+ID = UUID
+```
 
 ## TODO
 - [x] Get all user
