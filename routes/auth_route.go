@@ -27,14 +27,9 @@ func (rt *Route) Login(c echo.Context) error {
 	// check if user exists
 	user, err := rt.DB.GetUserByUsername(rt.CTX, payload.Username)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, "", err.Error()))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, "", "User doesn't exist."))
 	}
 
-	/*
-		if user.Username == "" {
-			return c.JSON(http.StatusBadRequest, utils.NewResponse(0, "", "User not found"))
-		}
-	*/
 	// check if password is correct
 	if payload.Password != user.Password {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, "", "Password mismatch"))
