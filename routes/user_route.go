@@ -10,21 +10,20 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type UserCreateDTO struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
+type (
+	UserCreateDTO struct {
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
 
-type UserUpdateDTO struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
+	UserUpdateDTO struct {
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+)
 
-/*
-A function to retrive all users.
-*/
 func (rt *Route) GetUsers(c echo.Context) error {
 	ctx := context.Background()
 	users, err := rt.DB.GetUsers(ctx)
@@ -36,9 +35,6 @@ func (rt *Route) GetUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(1, &users, ""))
 }
 
-/*
-A function to retrive a user by ID.
-*/
 func (rt *Route) GetUser(c echo.Context) error {
 	ctx := context.Background()
 	id := c.Param("id")
@@ -61,9 +57,6 @@ func (rt *Route) GetUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(1, user, ""))
 }
 
-/*
-A function to create new user.
-*/
 func (rt *Route) CreateUser(c echo.Context) error {
 	ctx := context.Background()
 	user_data := new(UserCreateDTO)
@@ -71,27 +64,22 @@ func (rt *Route) CreateUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
 	}
 
-	// check if inputs is not empty
 	if user_data.Username == "" || user_data.Email == "" || user_data.Password == "" {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Please provide all inputs."))
 	}
 
-	// check username length if greater than 8
 	if len(user_data.Username) < 8 {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Username must be at least 8 characters."))
 	}
 
-	// check password length if greater than 8
 	if len(user_data.Password) < 8 {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Password must be at least 8 characters."))
 	}
 
-	// check if email is valid
 	if !utils.IsEmail(user_data.Email) {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Please provide a valid email."))
 	}
 
-	// check if user already exist
 	check_user, err := rt.DB.GetUserByUsername(ctx, user_data.Username)
 
 	if check_user.ID != uuid.Nil {
@@ -115,9 +103,6 @@ func (rt *Route) CreateUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(1, user, ""))
 }
 
-/*
-A function to update a user by ID.
-*/
 func (rt *Route) UpdateUser(c echo.Context) error {
 	ctx := context.Background()
 	id := c.Param("id")
@@ -145,9 +130,6 @@ func (rt *Route) UpdateUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(1, user, ""))
 }
 
-/*
-A function to delete a user by ID.
-*/
 func (rt *Route) DeleteUser(c echo.Context) error {
 	ctx := context.Background()
 	id := c.Param("id")

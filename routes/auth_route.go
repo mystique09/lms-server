@@ -7,13 +7,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type AuthData struct {
+type AuthRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
 func (rt *Route) Login(c echo.Context) error {
-	var payload AuthData
+	var payload AuthRequest
 
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, "", err.Error()))
