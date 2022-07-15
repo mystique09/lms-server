@@ -10,4 +10,4 @@ drop:
 force:
 	migrate -path ./database/migrations/ -database "postgresql://mystique09:mystique09@localhost/class-manager-go?sslmode=disable" -verbose force 1
 
-.PHONY: create migrateup dropuforce
+.PHONY: create migrateup drop force
