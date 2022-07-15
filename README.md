@@ -40,6 +40,7 @@ Tech used:
 - [ ] Update a classroom
 - [ ] Delete a classroom
 - [x] Implement JWT
+- [x] Implement Bcrypt
 - [x] Implement Logger
 - [x] Implement Rate Limit
 - [x] Implement CORS
