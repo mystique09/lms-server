@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"context"
+	//	"context"
 	"net/http"
 	database "server/database/sqlc"
 	"server/utils"
@@ -25,8 +25,8 @@ type (
 )
 
 func (rt *Route) GetUsers(c echo.Context) error {
-	ctx := context.Background()
-	users, err := rt.DB.GetUsers(ctx)
+	//	ctx := context.Background()
+	users, err := rt.DB.GetUsers(rt.CTX)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(0, nil, err.Error()))
@@ -36,7 +36,7 @@ func (rt *Route) GetUsers(c echo.Context) error {
 }
 
 func (rt *Route) GetUser(c echo.Context) error {
-	ctx := context.Background()
+	//ctx := context.Background()
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
@@ -48,7 +48,7 @@ func (rt *Route) GetUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Please provide an ID.")
 	}
 
-	user, err := rt.DB.GetUser(ctx, uid)
+	user, err := rt.DB.GetUser(rt.CTX, uid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
@@ -58,7 +58,7 @@ func (rt *Route) GetUser(c echo.Context) error {
 }
 
 func (rt *Route) CreateUser(c echo.Context) error {
-	ctx := context.Background()
+	//ctx := context.Background()
 	user_data := new(UserCreateDTO)
 	if err := c.Bind(user_data); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
@@ -80,7 +80,7 @@ func (rt *Route) CreateUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Please provide a valid email."))
 	}
 
-	check_user, err := rt.DB.GetUserByUsername(ctx, user_data.Username)
+	check_user, err := rt.DB.GetUserByUsername(rt.CTX, user_data.Username)
 
 	if check_user.ID != uuid.Nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "User already exist."))
@@ -94,7 +94,7 @@ func (rt *Route) CreateUser(c echo.Context) error {
 		UserRole: database.RoleSTUDENT,
 	}
 
-	user, err := rt.DB.CreateUser(ctx, new_user_param)
+	user, err := rt.DB.CreateUser(rt.CTX, new_user_param)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
@@ -104,7 +104,7 @@ func (rt *Route) CreateUser(c echo.Context) error {
 }
 
 func (rt *Route) UpdateUser(c echo.Context) error {
-	ctx := context.Background()
+	//ctx := context.Background()
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
@@ -123,7 +123,7 @@ func (rt *Route) UpdateUser(c echo.Context) error {
 
 	user.ID = uid
 
-	if err := rt.DB.UpdateUser(ctx, *user); err != nil {
+	if err := rt.DB.UpdateUser(rt.CTX, *user); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
 	}
 
@@ -131,7 +131,7 @@ func (rt *Route) UpdateUser(c echo.Context) error {
 }
 
 func (rt *Route) DeleteUser(c echo.Context) error {
-	ctx := context.Background()
+	//ctx := context.Background()
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
@@ -143,7 +143,7 @@ func (rt *Route) DeleteUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Please provide an ID."))
 	}
 
-	if err := rt.DB.DeleteUser(ctx, uid); err != nil {
+	if err := rt.DB.DeleteUser(rt.CTX, uid); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
 	}
 
