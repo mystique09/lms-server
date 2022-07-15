@@ -5,6 +5,7 @@ import (
 	"server/utils"
 
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthRequest struct {
@@ -28,7 +29,7 @@ func (rt *Route) Login(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, "", "User doesn't exist."))
 	}
 
-	if payload.Password != user.Password {
+	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)) != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, "", "Password mismatch"))
 	}
 

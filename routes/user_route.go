@@ -86,11 +86,17 @@ func (rt *Route) CreateUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "User already exist."))
 	}
 
+	hashed_password, err := utils.Encrypt(user_data.Password)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.NewResponse(0, nil, err.Error()))
+	}
+
 	var new_user_param database.CreateUserParams = database.CreateUserParams{
 		ID:       uuid.New(),
 		Username: user_data.Username,
 		Email:    user_data.Email,
-		Password: user_data.Password,
+		Password: hashed_password,
 		UserRole: database.RoleSTUDENT,
 	}
 
