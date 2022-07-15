@@ -2,8 +2,8 @@ package utils
 
 type Response struct {
 	Status int         `json:"status"`
-	Data   interface{} `json:"data"`
-	Error  string      `json:"error"`
+	Data   interface{} `json:"data,omitempty"`
+	Error  string      `json:"error,omitempty"`
 }
 
 /*
