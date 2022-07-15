@@ -46,26 +46,26 @@ type (
   }
 
   Class struct {
-	  id
-	  admin_id
-	  name
-	  description
-	  section
-	  room
-	  subject
-	  invite_code
-	  created_at
-	  updated_at
+    id
+    admin_id
+    name
+    description
+    section
+    room
+    subject
+    invite_code
+    created_at
+    updated_at
   }
 
   ClassWork struct {
-	  id
-	  name
-	  user_id
-	  class_id
-	  mark
-	  created_at
-	  updated_at
+    id
+    name
+    user_id
+    class_id
+    mark
+    created_at
+    updated_at
   }
 
   Post struct { 
