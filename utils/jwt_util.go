@@ -1,6 +1,10 @@
 package utils
 
-import "github.com/golang-jwt/jwt"
+import (
+	"time"
+
+	"github.com/golang-jwt/jwt"
+)
 
 type (
 	JwtClaims struct {
@@ -31,7 +35,7 @@ func NewJwtClaims(payload JwtUserPayload) JwtClaims {
 		Email:    payload.Email,
 		Role:     payload.Role,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: 60 * 60 * 2,
+			ExpiresAt: time.Now().Add(time.Minute * 2).Unix(),
 		},
 	}
 }
