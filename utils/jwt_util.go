@@ -31,7 +31,7 @@ func NewJwtClaims(payload JwtUserPayload) JwtClaims {
 		Email:    payload.Email,
 		Role:     payload.Role,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: 0,
+			ExpiresAt: 60 * 60 * 2,
 		},
 	}
 }
