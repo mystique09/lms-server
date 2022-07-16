@@ -1,18 +1,25 @@
 package utils
 
+import (
+	"encoding/json"
+	"io"
+)
+
 type Response struct {
-	Status int         `json:"status"`
-	Data   interface{} `json:"data,omitempty"`
-	Error  string      `json:"error,omitempty"`
+	Data  interface{} `json:"data,omitempty"`
+	Error string      `json:"error,omitempty"`
 }
 
 /*
 A function to create a new response.
 */
-func NewResponse(status int, data interface{}, error string) Response {
+func NewResponse(data interface{}, error string) Response {
 	return Response{
-		Status: status,
-		Data:   data,
-		Error:  error,
+		Data:  data,
+		Error: error,
 	}
+}
+
+func GetJson(b io.Reader, t interface{}) error {
+	return json.NewDecoder(b).Decode(t)
 }
