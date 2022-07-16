@@ -39,12 +39,12 @@ func (rt *Route) loginRoute(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, utils.NewResponse(nil, "Incorrect username or password."))
 	}
 
-	access_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.Username, user.Email, string(user.UserRole))), rt.Cfg.JWT_SECRET_KEY)
+	access_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.Username, user.Email, string(user.UserRole)), 5), rt.Cfg.JWT_SECRET_KEY)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	refresh_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.Username, user.Email, string(user.UserRole))), rt.Cfg.JWT_REFRESH_SECRET_KEY)
+	refresh_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.Username, user.Email, string(user.UserRole)), 60*60*7*31), rt.Cfg.JWT_REFRESH_SECRET_KEY)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
