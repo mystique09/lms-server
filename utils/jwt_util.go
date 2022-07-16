@@ -44,3 +44,12 @@ func NewJwtToken(payload JwtClaims, secret_key []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 	return token.SignedString(secret_key)
 }
+
+func GetPayloadFromJwt(token *jwt.Token) JwtUserPayload {
+	var claims jwt.MapClaims = token.Claims.(jwt.MapClaims)
+	return JwtUserPayload{
+		Username: claims["username"].(string),
+		Email:    claims["email"].(string),
+		Role:     claims["role"].(string),
+	}
+}
