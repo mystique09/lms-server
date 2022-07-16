@@ -7,10 +7,11 @@ import (
 
 // A config struct to hold the app configuration.
 type Config struct {
-	PORT           string
-	DATABASE_URL   string
-	FRONTEND_URL   string
-	JWT_SECRET_KEY []byte
+	PORT                   string
+	DATABASE_URL           string
+	FRONTEND_URL           string
+	JWT_SECRET_KEY         []byte
+	JWT_REFRESH_SECRET_KEY []byte
 }
 
 func Init() Config {
@@ -18,6 +19,7 @@ func Init() Config {
 	var DATABASE_URL string = os.Getenv("DATABASE_URL")
 	var FRONTEND_URL string = os.Getenv("FRONTEND_URL")
 	var JWT_SECRET_KEY string = os.Getenv("JWT_SECRET_KEY")
+	var JWT_REFRESH_SECRET_KEY string = os.Getenv("JWT_REFRESH_SECRET_KEY")
 
 	if PORT == "" {
 		PORT = "8080"
@@ -32,9 +34,10 @@ func Init() Config {
 	}
 
 	return Config{
-		PORT:           ":" + PORT,
-		DATABASE_URL:   DATABASE_URL,
-		FRONTEND_URL:   FRONTEND_URL,
-		JWT_SECRET_KEY: []byte(JWT_SECRET_KEY),
+		PORT:                   ":" + PORT,
+		DATABASE_URL:           DATABASE_URL,
+		FRONTEND_URL:           FRONTEND_URL,
+		JWT_SECRET_KEY:         []byte(JWT_SECRET_KEY),
+		JWT_REFRESH_SECRET_KEY: []byte(JWT_REFRESH_SECRET_KEY),
 	}
 }
