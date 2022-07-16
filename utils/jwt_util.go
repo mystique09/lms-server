@@ -29,13 +29,13 @@ func NewJwtPayload(username, email, role string) JwtUserPayload {
 	}
 }
 
-func NewJwtClaims(payload JwtUserPayload) JwtClaims {
+func NewJwtClaims(payload JwtUserPayload, duration time.Duration) JwtClaims {
 	return JwtClaims{
 		Username: payload.Username,
 		Email:    payload.Email,
 		Role:     payload.Role,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 2).Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * duration).Unix(),
 		},
 	}
 }
