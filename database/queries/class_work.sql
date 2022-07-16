@@ -4,7 +4,7 @@
 --returns: class_work
 SELECT * 
 FROM "class_work" 
-WHERE id = $1, user_id = $2, class_id = $3;
+WHERE id = $1 AND user_id = $2 AND class_id = $3;
 
 -- name: ListClassworkAdmin :many
 --description: List all class works
@@ -12,7 +12,7 @@ WHERE id = $1, user_id = $2, class_id = $3;
 --returns: class_work
 SELECT *
 FROM "class_work"
-WHERE class_id = $2
+WHERE class_id = $1
 ORDER BY created_at
 DESC;
 
@@ -22,7 +22,7 @@ DESC;
 --returns: class_work
 SELECT *
 FROM "class_work"
-WHERE class_id = $1, user_id = $2
+WHERE class_id = $1 AND user_id = $2
 ORDER BY created_at
 DESC;
 
@@ -30,14 +30,14 @@ DESC;
 INSERT INTO "class_work" (
   id, name, user_id, class_id
 ) VALUES (
-  $1, $2, $3, $4, $5
+  $1, $2, $3, $4
 ) RETURNING *;
 
 -- name: UpdateAClassworkMark :exec
 UPDATE "class_work"
 SET mark = $1
-WHERE id = $1, user_id = $2, class_id = $3;
+WHERE id = $2 AND user_id = $3 AND class_id = $4;
 
 -- name: DeleteClassworkFromClass :exec
 DELETE FROM "class_work"
-WHERE id = $1, user_id = $2, class_id = $3;
+WHERE id = $1 AND user_id = $2 AND class_id = $3;
