@@ -1,7 +1,8 @@
 -- name: GetUser :one
 SELECT *
 FROM "user"
-WHERE id = $1;
+WHERE id = $1
+LIMIT 1;
 
 -- name: GetUsers :many
 SELECT *
@@ -11,7 +12,8 @@ ORDER BY created_at DESC;
 -- name: GetUserByUsername :one
 SELECT *
 FROM "user"
-WHERE username = $1;
+WHERE username = $1
+LIMIT 1;
 
 -- name: GetUserWithPosts :one
 SELECT (id, username, email, user_role)
@@ -26,16 +28,25 @@ INSERT INTO "user"(
 )
 RETURNING *;
 
--- name: UpdateUser :exec
+-- name: UpdateUsername :one
 UPDATE "user"
-SET password = $1, email = $2
-WHERE id =  $3;
+SET username = $1
+WHERE id =  $2
+RETURNING *;
 
--- name: UpdateUserPassword :exec
+-- name: UpdateUserEmail :one
+UPDATE "user"
+SET email = $1
+WHERE id =  $2
+RETURNING *;
+
+-- name: UpdateUserPassword :one
 UPDATE "user"
 SET password = $1
-WHERE id =  $2;
+WHERE id =  $2
+RETURNING *;
 
--- name: DeleteUser :exec
+-- name: DeleteUser :one
 DELETE FROM "user"
-WHERE id = $1;
+WHERE id = $1
+RETURNING *;
