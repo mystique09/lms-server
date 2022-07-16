@@ -26,7 +26,7 @@ type (
 
 func (rt *Route) GetUsers(c echo.Context) error {
 	//	ctx := context.Background()
-	users, err := rt.DB.GetUsers(rt.CTX)
+	users, err := rt.DB.GetUsers(c.Request().Context())
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(0, nil, err.Error()))
@@ -48,7 +48,7 @@ func (rt *Route) GetUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Please provide an ID.")
 	}
 
-	user, err := rt.DB.GetUser(rt.CTX, uid)
+	user, err := rt.DB.GetUser(c.Request().Context(), uid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
@@ -80,7 +80,7 @@ func (rt *Route) CreateUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Please provide a valid email."))
 	}
 
-	check_user, err := rt.DB.GetUserByUsername(rt.CTX, user_data.Username)
+	check_user, err := rt.DB.GetUserByUsername(c.Request().Context(), user_data.Username)
 
 	if check_user.ID != uuid.Nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "User already exist."))
@@ -100,7 +100,7 @@ func (rt *Route) CreateUser(c echo.Context) error {
 		UserRole: database.RoleSTUDENT,
 	}
 
-	user, err := rt.DB.CreateUser(rt.CTX, new_user_param)
+	user, err := rt.DB.CreateUser(c.Request().Context(), new_user_param)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
@@ -129,7 +129,7 @@ func (rt *Route) UpdateUser(c echo.Context) error {
 
 	user.ID = uid
 
-	if err := rt.DB.UpdateUser(rt.CTX, *user); err != nil {
+	if err := rt.DB.UpdateUser(c.Request().Context(), *user); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
 	}
 
@@ -149,7 +149,7 @@ func (rt *Route) DeleteUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Please provide an ID."))
 	}
 
-	if err := rt.DB.DeleteUser(rt.CTX, uid); err != nil {
+	if err := rt.DB.DeleteUser(c.Request().Context(), uid); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
 	}
 
