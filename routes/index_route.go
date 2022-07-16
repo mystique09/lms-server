@@ -49,7 +49,7 @@ func Setup() Route {
 	}
 }
 
-func (rt *Route) IndexHandler(c echo.Context) error {
+func (rt *Route) indexRoute(c echo.Context) error {
 	return c.String(http.StatusOK, "Welcome! This is my backend API for my Class Management System personal project.")
 }
 
@@ -61,16 +61,16 @@ func Launch() {
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(rt.Cfg))
 
-	e.GET("/api/v1", rt.IndexHandler)
-	e.POST("/api/v1/signup", rt.CreateUser)
-	e.POST("/api/v1/login", rt.Login)
+	e.GET("/api/v1", rt.indexRoute)
+	e.POST("/api/v1/signup", rt.createUser)
+	e.POST("/api/v1/login", rt.loginRoute)
 
 	user_route := e.Group("/api/v1/users", JwtAuthMiddleware(rt.Cfg))
 	{
-		user_route.GET("", rt.GetUsers)
-		user_route.GET("/:id", rt.GetUser)
-		user_route.PUT("/:id", rt.UpdateUser)
-		user_route.DELETE("/:id", rt.DeleteUser)
+		user_route.GET("", rt.getUsers)
+		user_route.GET("/:id", rt.getUser)
+		user_route.PUT("/:id", rt.updateUser)
+		user_route.DELETE("/:id", rt.deleteUser)
 	}
 
 	e.Logger.Fatal(e.Start(rt.Cfg.PORT))

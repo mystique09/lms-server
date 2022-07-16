@@ -24,7 +24,7 @@ type (
 	}
 )
 
-func (rt *Route) GetUsers(c echo.Context) error {
+func (rt *Route) getUsers(c echo.Context) error {
 	//	ctx := context.Background()
 	users, err := rt.DB.GetUsers(c.Request().Context())
 
@@ -35,7 +35,7 @@ func (rt *Route) GetUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(1, &users, ""))
 }
 
-func (rt *Route) GetUser(c echo.Context) error {
+func (rt *Route) getUser(c echo.Context) error {
 	//ctx := context.Background()
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
@@ -57,7 +57,7 @@ func (rt *Route) GetUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(1, user, ""))
 }
 
-func (rt *Route) CreateUser(c echo.Context) error {
+func (rt *Route) createUser(c echo.Context) error {
 	//ctx := context.Background()
 	user_data := new(UserCreateDTO)
 	if err := c.Bind(user_data); err != nil {
@@ -109,7 +109,7 @@ func (rt *Route) CreateUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(1, user, ""))
 }
 
-func (rt *Route) UpdateUser(c echo.Context) error {
+func (rt *Route) updateUser(c echo.Context) error {
 	//ctx := context.Background()
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
@@ -136,7 +136,7 @@ func (rt *Route) UpdateUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(1, user, ""))
 }
 
-func (rt *Route) DeleteUser(c echo.Context) error {
+func (rt *Route) deleteUser(c echo.Context) error {
 	//ctx := context.Background()
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)

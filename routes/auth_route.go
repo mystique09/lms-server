@@ -13,7 +13,7 @@ type AuthRequest struct {
 	Password string `json:"password"`
 }
 
-func (rt *Route) Login(c echo.Context) error {
+func (rt *Route) loginRoute(c echo.Context) error {
 	var payload AuthRequest
 
 	if err := c.Bind(&payload); err != nil {
