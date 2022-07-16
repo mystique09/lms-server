@@ -26,7 +26,7 @@ func TestGetUsersRoute(t *testing.T) {
 			t.Fail()
 		}
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, res.Data, nil)
+		assert.NotEmpty(t, res.Data)
 	}
 
 }
