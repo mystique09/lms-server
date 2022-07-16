@@ -96,7 +96,7 @@ ID = UUID
 - [x] Create new user
 - [x] Update a user
 - [x] Delete a user
-- [x] Get all classroom
+- [ ] Get all classroom
 - [ ] Get one classroom
 - [ ] Create new classroom
 - [ ] Update a classroom
