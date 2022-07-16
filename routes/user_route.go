@@ -35,7 +35,6 @@ func (rt *Route) getUsers(c echo.Context) error {
 }
 
 func (rt *Route) getUser(c echo.Context) error {
-	//ctx := context.Background()
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
@@ -57,7 +56,6 @@ func (rt *Route) getUser(c echo.Context) error {
 }
 
 func (rt *Route) createUser(c echo.Context) error {
-	//ctx := context.Background()
 	user_data := new(UserCreateDTO)
 	if err := c.Bind(user_data); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
@@ -109,7 +107,6 @@ func (rt *Route) createUser(c echo.Context) error {
 }
 
 func (rt *Route) updateUser(c echo.Context) error {
-	//ctx := context.Background()
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
@@ -136,7 +133,6 @@ func (rt *Route) updateUser(c echo.Context) error {
 }
 
 func (rt *Route) deleteUser(c echo.Context) error {
-	//ctx := context.Background()
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
