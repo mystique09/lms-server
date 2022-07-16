@@ -25,7 +25,6 @@ type (
 )
 
 func (rt *Route) getUsers(c echo.Context) error {
-	//	ctx := context.Background()
 	users, err := rt.DB.GetUsers(c.Request().Context())
 
 	if err != nil {
