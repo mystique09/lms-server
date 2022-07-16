@@ -105,11 +105,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updatePostContentStmt, err = db.PrepareContext(ctx, updatePostContent); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdatePostContent: %w", err)
 	}
-	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
+	if q.updateUserEmailStmt, err = db.PrepareContext(ctx, updateUserEmail); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUserEmail: %w", err)
 	}
 	if q.updateUserPasswordStmt, err = db.PrepareContext(ctx, updateUserPassword); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUserPassword: %w", err)
+	}
+	if q.updateUsernameStmt, err = db.PrepareContext(ctx, updateUsername); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUsername: %w", err)
 	}
 	return &q, nil
 }
@@ -251,14 +254,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updatePostContentStmt: %w", cerr)
 		}
 	}
-	if q.updateUserStmt != nil {
-		if cerr := q.updateUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateUserStmt: %w", cerr)
+	if q.updateUserEmailStmt != nil {
+		if cerr := q.updateUserEmailStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserEmailStmt: %w", cerr)
 		}
 	}
 	if q.updateUserPasswordStmt != nil {
 		if cerr := q.updateUserPasswordStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateUserPasswordStmt: %w", cerr)
+		}
+	}
+	if q.updateUsernameStmt != nil {
+		if cerr := q.updateUsernameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUsernameStmt: %w", cerr)
 		}
 	}
 	return err
@@ -327,8 +335,9 @@ type Queries struct {
 	updateClassStmt                *sql.Stmt
 	updateCommentContentInPostStmt *sql.Stmt
 	updatePostContentStmt          *sql.Stmt
-	updateUserStmt                 *sql.Stmt
+	updateUserEmailStmt            *sql.Stmt
 	updateUserPasswordStmt         *sql.Stmt
+	updateUsernameStmt             *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -362,7 +371,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		updateClassStmt:                q.updateClassStmt,
 		updateCommentContentInPostStmt: q.updateCommentContentInPostStmt,
 		updatePostContentStmt:          q.updatePostContentStmt,
-		updateUserStmt:                 q.updateUserStmt,
+		updateUserEmailStmt:            q.updateUserEmailStmt,
 		updateUserPasswordStmt:         q.updateUserPasswordStmt,
+		updateUsernameStmt:             q.updateUsernameStmt,
 	}
 }
