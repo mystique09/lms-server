@@ -1,26 +1,11 @@
 package routes
 
 import (
-	"context"
-	"server/config"
-	database "server/database/sqlc"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
-type (
-	/*
-	   The Route struct to hold the route information.
-	*/
-	Route struct {
-		DB  *database.Queries
-		CTX context.Context
-		Cfg config.Config
-	}
-
-	/*
-	   A Response struct to hold the response information.
-	*/
-	Response struct {
-		Status int
-		Body   string
-	}
-)
+func (rt *Route) indexRoute(c echo.Context) error {
+	return c.String(http.StatusOK, "Welcome! This is my backend API for my Class Management System personal project.")
+}

@@ -24,72 +24,69 @@ type (
 	}
 )
 
-func (rt *Route) GetUsers(c echo.Context) error {
-	//	ctx := context.Background()
-	users, err := rt.DB.GetUsers(rt.CTX)
+func (rt *Route) getUsers(c echo.Context) error {
+	users, err := rt.DB.GetUsers(c.Request().Context())
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, utils.NewResponse(0, nil, err.Error()))
+		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(1, &users, ""))
+	return c.JSON(http.StatusOK, utils.NewResponse(&users, ""))
 }
 
-func (rt *Route) GetUser(c echo.Context) error {
-	//ctx := context.Background()
+func (rt *Route) getUser(c echo.Context) error {
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
 	if id == "" {
 		return c.JSON(http.StatusBadRequest, "Please provide an ID.")
 	}
 
-	user, err := rt.DB.GetUser(rt.CTX, uid)
+	user, err := rt.DB.GetUser(c.Request().Context(), uid)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(1, user, ""))
+	return c.JSON(http.StatusOK, utils.NewResponse(user, ""))
 }
 
-func (rt *Route) CreateUser(c echo.Context) error {
-	//ctx := context.Background()
+func (rt *Route) createUser(c echo.Context) error {
 	user_data := new(UserCreateDTO)
 	if err := c.Bind(user_data); err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
 	if user_data.Username == "" || user_data.Email == "" || user_data.Password == "" {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Please provide all inputs."))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide all inputs."))
 	}
 
 	if len(user_data.Username) < 8 {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Username must be at least 8 characters."))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Username must be at least 8 characters."))
 	}
 
 	if len(user_data.Password) < 8 {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Password must be at least 8 characters."))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Password must be at least 8 characters."))
 	}
 
 	if !utils.IsEmail(user_data.Email) {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Please provide a valid email."))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide a valid email."))
 	}
 
-	check_user, err := rt.DB.GetUserByUsername(rt.CTX, user_data.Username)
+	check_user, err := rt.DB.GetUserByUsername(c.Request().Context(), user_data.Username)
 
 	if check_user.ID != uuid.Nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "User already exist."))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "User already exist."))
 	}
 
 	hashed_password, err := utils.Encrypt(user_data.Password)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, utils.NewResponse(0, nil, err.Error()))
+		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
 	}
 
 	var new_user_param database.CreateUserParams = database.CreateUserParams{
@@ -100,58 +97,56 @@ func (rt *Route) CreateUser(c echo.Context) error {
 		UserRole: database.RoleSTUDENT,
 	}
 
-	user, err := rt.DB.CreateUser(rt.CTX, new_user_param)
+	user, err := rt.DB.CreateUser(c.Request().Context(), new_user_param)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(1, user, ""))
+	return c.JSON(http.StatusOK, utils.NewResponse(user, ""))
 }
 
-func (rt *Route) UpdateUser(c echo.Context) error {
-	//ctx := context.Background()
+func (rt *Route) updateUser(c echo.Context) error {
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Please provide an ID."))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide an ID."))
 	}
 
 	user := new(database.UpdateUserParams)
 	if err := c.Bind(user); err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
 	user.ID = uid
 
-	if err := rt.DB.UpdateUser(rt.CTX, *user); err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
+	if err := rt.DB.UpdateUser(c.Request().Context(), *user); err != nil {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(1, user, ""))
+	return c.JSON(http.StatusOK, utils.NewResponse(user, ""))
 }
 
-func (rt *Route) DeleteUser(c echo.Context) error {
-	//ctx := context.Background()
+func (rt *Route) deleteUser(c echo.Context) error {
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, "Please provide an ID."))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide an ID."))
 	}
 
-	if err := rt.DB.DeleteUser(rt.CTX, uid); err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, nil, err.Error()))
+	if err := rt.DB.DeleteUser(c.Request().Context(), uid); err != nil {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(1, id, ""))
+	return c.JSON(http.StatusOK, utils.NewResponse(id, ""))
 }

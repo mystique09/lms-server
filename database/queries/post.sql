@@ -1,7 +1,7 @@
 -- name: GetOnePost :one
 SELECT *
 FROM "post"
-WHERE id = $1, class_id = $2;
+WHERE id = $1 AND class_id = $2;
 
 -- name: ListAllPostsFromClass :many
 SELECT *
@@ -12,8 +12,8 @@ ASC;
 
 -- name: ListAllPostsByUser :many
 SELECT *
-FROM "pest"
-WHERE author_id = $1, class_id = $2
+FROM "post"
+WHERE author_id = $1 AND class_id = $2
 ORDER BY created_at
 ASC;
 
@@ -26,11 +26,11 @@ RETURNING *;
 -- name: UpdatePostContent :exec
 UPDATE "post"
 SET content = $1
-WHERE id = $2, author_id = $3, class_id = $4;
+WHERE id = $2 AND author_id = $3 AND class_id = $4;
 
 -- name: DeletePostFromClass :exec
 DELETE FROM "post"
-WHERE id = $1, author_id = $2, class_id = $3;
+WHERE id = $1 AND author_id = $2 AND class_id = $3;
 
 -- name: GetAllCommentsFromPost :many
 SELECT *
@@ -49,8 +49,8 @@ INSERT INTO "comment" (
 -- name: UpdateCommentContentInPost :exec
 UPDATE "comment"
 SET content = $1
-WHERE id = $2, author_id = $3, post_id = $4;
+WHERE id = $2 AND author_id = $3 AND post_id = $4;
 
 -- name: DeleteCommentFromPost :exec
 DELETE FROM "comment"
-WHERE id = $1, author_id = $3, post_id = $4;
+WHERE id = $1 AND author_id = $2 AND post_id = $3;
