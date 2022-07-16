@@ -32,21 +32,21 @@ func (rt *Route) loginRoute(c echo.Context) error {
 
 	user, err := rt.DB.GetUserByUsername(c.Request().Context(), payload.Username)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, utils.NewResponse("", "User doesn't exist."))
+		return c.JSON(http.StatusNotFound, utils.NewResponse(nil, "User doesn't exist."))
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)) != nil {
-		return c.JSON(http.StatusForbidden, utils.NewResponse("", "Incorrect username or password."))
+		return c.JSON(http.StatusForbidden, utils.NewResponse(nil, "Incorrect username or password."))
 	}
 
 	access_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.Username, user.Email, string(user.UserRole))), rt.Cfg.JWT_SECRET_KEY)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse("", err.Error()))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
 	refresh_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.Username, user.Email, string(user.UserRole))), rt.Cfg.JWT_REFRESH_SECRET_KEY)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse("", err.Error()))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 	return c.JSON(http.StatusOK, utils.NewResponse(AuthSuccessResponse{Message: "Logged in.", Access: access_token, Refresh: refresh_token}, ""))
 }
