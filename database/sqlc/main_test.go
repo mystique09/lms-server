@@ -4,17 +4,19 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"server/config"
 	"testing"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 var testQueries *Queries
 
-var DATABASE_URL string = "postgres://mystique09:mystique09@localhost:5432/class-manager?sslmode=disable"
-
 func TestMain(m *testing.M) {
-	conn, err := sql.Open("postgres", DATABASE_URL)
+	godotenv.Load("./.development.env")
+	cfg := config.Init()
+	conn, err := sql.Open("postgres", cfg.DATABASE_URL)
 
 	if err != nil {
 		log.Fatal(err.Error())
