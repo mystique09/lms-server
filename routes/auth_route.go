@@ -24,7 +24,7 @@ func (rt *Route) Login(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, "", "Username and password are required"))
 	}
 
-	user, err := rt.DB.GetUserByUsername(rt.CTX, payload.Username)
+	user, err := rt.DB.GetUserByUsername(c.Request().Context(), payload.Username)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(0, "", "User doesn't exist."))
 	}
