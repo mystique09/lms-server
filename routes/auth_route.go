@@ -13,30 +13,40 @@ type AuthRequest struct {
 	Password string `json:"password"`
 }
 
+type AuthSuccessResponse struct {
+	Message string `json:"message"`
+	Access  string `json:"access_token"`
+	Refresh string `json:"refresh_token"`
+}
+
 func (rt *Route) loginRoute(c echo.Context) error {
 	var payload AuthRequest
 
 	if err := c.Bind(&payload); err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse("", err.Error()))
+		return c.JSON(http.StatusBadRequest, utils.NewResponse("", "One field might be missing, fill in the missing fields."))
 	}
 
-	if payload.Username == "" || payload.Password == "" {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse("", "Username and password are required"))
+	if len(payload.Username) == 0 || len(payload.Password) == 0 {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse("", "One field might be missing, fill in the missing fields."))
 	}
 
 	user, err := rt.DB.GetUserByUsername(c.Request().Context(), payload.Username)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse("", "User doesn't exist."))
+		return c.JSON(http.StatusNotFound, utils.NewResponse("", "User doesn't exist."))
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)) != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse("", "Password mismatch"))
+		return c.JSON(http.StatusForbidden, utils.NewResponse("", "Incorrect username or password."))
 	}
 
-	token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.Username, user.Email, string(user.UserRole))), rt.Cfg.JWT_SECRET_KEY)
+	access_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.Username, user.Email, string(user.UserRole))), rt.Cfg.JWT_SECRET_KEY)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse("", err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(token, ""))
+	refresh_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.Username, user.Email, string(user.UserRole))), rt.Cfg.JWT_REFRESH_SECRET_KEY)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse("", err.Error()))
+	}
+	return c.JSON(http.StatusOK, utils.NewResponse(AuthSuccessResponse{Message: "Logged in.", Access: access_token, Refresh: refresh_token}, ""))
 }
