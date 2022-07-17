@@ -63,7 +63,7 @@ func (rt *Route) refreshToken(c echo.Context) error {
 
 	new_payload := utils.NewJwtPayload(updated_user.Username, updated_user.Email, string(updated_user.UserRole))
 	new_claims := utils.NewJwtClaims(new_payload, 5)
-	new_access_token, err := utils.NewJwtToken(new_claims, []byte(rt.Cfg.JWT_REFRESH_SECRET_KEY))
+	new_access_token, err := utils.NewJwtToken(new_claims, []byte(rt.Cfg.JWT_SECRET_KEY))
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
