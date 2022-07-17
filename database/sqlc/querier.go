@@ -22,7 +22,7 @@ type Querier interface {
 	DeleteClassworkFromClass(ctx context.Context, arg DeleteClassworkFromClassParams) error
 	DeleteCommentFromPost(ctx context.Context, arg DeleteCommentFromPostParams) error
 	DeletePostFromClass(ctx context.Context, arg DeletePostFromClassParams) error
-	DeleteUser(ctx context.Context, id uuid.UUID) error
+	DeleteUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetAllCommentsFromPost(ctx context.Context, postID uuid.NullUUID) ([]Comment, error)
 	//description: Get a class by id
 	//parameters: id
@@ -60,8 +60,9 @@ type Querier interface {
 	UpdateClass(ctx context.Context, arg UpdateClassParams) error
 	UpdateCommentContentInPost(ctx context.Context, arg UpdateCommentContentInPostParams) error
 	UpdatePostContent(ctx context.Context, arg UpdatePostContentParams) error
-	UpdateUser(ctx context.Context, arg UpdateUserParams) error
-	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error
+	UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) (User, error)
+	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
+	UpdateUsername(ctx context.Context, arg UpdateUsernameParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)

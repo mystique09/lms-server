@@ -41,6 +41,7 @@ func Launch() {
 	e.GET("/api/v1", rt.indexRoute)
 	e.POST("/api/v1/signup", rt.createUser)
 	e.POST("/api/v1/login", rt.loginRoute)
+	e.POST("/api/v1/refresh", rt.refreshToken, RefreshTokenAuthMiddleware(rt.Cfg))
 
 	user_route := e.Group("/api/v1/users", JwtAuthMiddleware(rt.Cfg))
 	{

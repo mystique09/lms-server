@@ -6,6 +6,7 @@ import (
 	database "server/database/sqlc"
 	"server/utils"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -43,7 +44,7 @@ func (rt *Route) getUser(c echo.Context) error {
 	}
 
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, "Please provide an ID.")
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide an ID."))
 	}
 
 	user, err := rt.DB.GetUser(c.Request().Context(), uid)
@@ -108,28 +109,98 @@ func (rt *Route) createUser(c echo.Context) error {
 
 func (rt *Route) updateUser(c echo.Context) error {
 	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide an ID."))
+	}
+
+	field := c.QueryParam("field")
+
+	if field == "" {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Invalid query field, idk what to update."))
+	}
+
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	if id == "" {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide an ID."))
-	}
-
-	user := new(database.UpdateUserParams)
-	if err := c.Bind(user); err != nil {
+	var updateDto UserUpdateDTO
+	if err := (&echo.DefaultBinder{}).BindBody(c, &updateDto); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	user.ID = uid
+	// check if the current user is the one being updated
+	token := c.Get("user").(*jwt.Token)
+	var payload utils.JwtUserPayload = utils.GetPayloadFromJwt(token)
 
-	if err := rt.DB.UpdateUser(c.Request().Context(), *user); err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+	check_user, err := rt.DB.GetUser(c.Request().Context(), uid)
+
+	if err != nil || check_user.ID == uuid.Nil {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "User not found."))
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(user, ""))
+	if check_user.Username != payload.Username || check_user.Email != payload.Email {
+		return c.JSON(http.StatusUnauthorized, "You don't have the permission to update this user.")
+	}
+
+	if field == "username" {
+		payload := database.UpdateUsernameParams{
+			ID:       uid,
+			Username: updateDto.Username,
+		}
+
+		if updateDto.Username == "" {
+			return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Empty required field."))
+		}
+
+		new_user, err := rt.DB.UpdateUsername(c.Request().Context(), payload)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+
+		return c.JSON(http.StatusOK, utils.NewResponse(new_user, ""))
+	} else if field == "email" {
+		payload := database.UpdateUserEmailParams{
+			ID:    uid,
+			Email: updateDto.Email,
+		}
+
+		if updateDto.Email == "" {
+			return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Empty required field."))
+		}
+
+		new_user, err := rt.DB.UpdateUserEmail(c.Request().Context(), payload)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+
+		return c.JSON(http.StatusOK, utils.NewResponse(new_user, ""))
+	} else if field == "password" {
+		hashed_password, err := utils.Encrypt(updateDto.Password)
+
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+		}
+
+		payload := database.UpdateUserPasswordParams{
+			ID:       uid,
+			Password: hashed_password,
+		}
+
+		if updateDto.Password == "" {
+			return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Empty required field."))
+		}
+
+		new_user, err := rt.DB.UpdateUserPassword(c.Request().Context(), payload)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+
+		return c.JSON(http.StatusOK, utils.NewResponse(new_user, ""))
+	}
+
+	return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Invalid query field, idk what to update."))
 }
 
 func (rt *Route) deleteUser(c echo.Context) error {
@@ -144,9 +215,24 @@ func (rt *Route) deleteUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide an ID."))
 	}
 
-	if err := rt.DB.DeleteUser(c.Request().Context(), uid); err != nil {
+	token := c.Get("user").(*jwt.Token)
+	var payload utils.JwtUserPayload = utils.GetPayloadFromJwt(token)
+
+	check_user, err := rt.DB.GetUser(c.Request().Context(), uid)
+
+	if err != nil || check_user.ID == uuid.Nil {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "User not found."))
+	}
+
+	if check_user.Username != payload.Username || check_user.Email != payload.Email {
+		return c.JSON(http.StatusUnauthorized, "You don't have the permission to delete this user.")
+	}
+
+	deleted_user, err := rt.DB.DeleteUser(c.Request().Context(), uid)
+
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(id, ""))
+	return c.JSON(http.StatusOK, utils.NewResponse(deleted_user, ""))
 }

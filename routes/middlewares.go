@@ -41,3 +41,11 @@ func JwtAuthMiddleware(cfg config.Config) echo.MiddlewareFunc {
 		SigningKey:    cfg.JWT_SECRET_KEY,
 	})
 }
+
+func RefreshTokenAuthMiddleware(cfg config.Config) echo.MiddlewareFunc {
+	return middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningMethod: "HS256",
+		SigningKey:    cfg.JWT_REFRESH_SECRET_KEY,
+		ContextKey:    "refresh",
+	})
+}

@@ -21,4 +21,12 @@ type (
 		Status int
 		Body   string
 	}
+
+	AccessToken struct {
+		Token string `json:"access_token"`
+	}
+
+	RefreshToken struct {
+		Token string `json:"refresh_token"`
+	}
 )
