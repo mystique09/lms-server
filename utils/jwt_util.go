@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -43,6 +45,12 @@ func NewJwtClaims(payload JwtUserPayload, duration time.Duration) JwtClaims {
 func NewJwtToken(payload JwtClaims, secret_key []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 	return token.SignedString(secret_key)
+}
+
+func ExtractTokenFromHeader(header http.Header) string {
+	authorization := strings.Split(header.Get("authorization"), " ")
+	token := authorization[1]
+	return token
 }
 
 func GetPayloadFromJwt(token *jwt.Token) JwtUserPayload {
