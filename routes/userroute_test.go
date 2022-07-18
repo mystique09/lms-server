@@ -31,12 +31,10 @@ func TestCreateUserRoute(t *testing.T) {
 		}
 		assert.Equal(t, http.StatusOK, rec.Code)
 		user := res.Data.(map[string]interface{})
-		t.Logf("User %v", user)
 		assert.Equal(t, "STUDENT", user["user_role"])
 		assert.Empty(t, user["password"])
 		assert.Equal(t, "testemail@gmail.com", user["email"])
 		testUserId = user["id"].(string)
-		t.Log(testUserId)
 	}
 }
 
@@ -126,7 +124,6 @@ func TestUpdateUsernameById(t *testing.T) {
 		if err := utils.GetJson(rec.Body, &res); err != nil {
 			t.Fail()
 		}
-		t.Log(res)
 		updated_user := res.Data.(map[string]interface{})
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.NotEqual(t, "mystique09", updated_user["username"])
