@@ -30,6 +30,25 @@ func (e *Role) Scan(src interface{}) error {
 	return nil
 }
 
+type Visibility string
+
+const (
+	VisibilityPUBLIC  Visibility = "PUBLIC"
+	VisibilityPRIVATE Visibility = "PRIVATE"
+)
+
+func (e *Visibility) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = Visibility(s)
+	case string:
+		*e = Visibility(s)
+	default:
+		return fmt.Errorf("unsupported scan type for Visibility: %T", src)
+	}
+	return nil
+}
+
 type Class struct {
 	ID          uuid.UUID      `json:"id"`
 	AdminID     uuid.NullUUID  `json:"admin_id"`
@@ -39,8 +58,17 @@ type Class struct {
 	Room        sql.NullString `json:"room"`
 	Subject     sql.NullString `json:"subject"`
 	InviteCode  uuid.NullUUID  `json:"invite_code"`
+	Visibility  Visibility     `json:"visibility"`
 	CreatedAt   sql.NullTime   `json:"created_at"`
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
+type ClassMember struct {
+	ID        uuid.UUID     `json:"id"`
+	ClassID   uuid.NullUUID `json:"class_id"`
+	UserID    uuid.NullUUID `json:"user_id"`
+	CreatedAt sql.NullTime  `json:"created_at"`
+	UpdatedAt sql.NullTime  `json:"updated_at"`
 }
 
 type ClassWork struct {
@@ -71,12 +99,30 @@ type Post struct {
 	UpdatedAt sql.NullTime  `json:"updated_at"`
 }
 
+type PostLike struct {
+	ID        uuid.UUID     `json:"id"`
+	PostID    uuid.NullUUID `json:"post_id"`
+	UserID    uuid.NullUUID `json:"user_id"`
+	CreatedAt sql.NullTime  `json:"created_at"`
+	UpdatedAt sql.NullTime  `json:"updated_at"`
+}
+
 type User struct {
-	ID        uuid.UUID    `json:"id"`
-	Username  string       `json:"username"`
-	Password  string       `json:"-"`
-	Email     string       `json:"email"`
-	UserRole  Role         `json:"user_role"`
-	CreatedAt sql.NullTime `json:"created_at"`
-	UpdatedAt sql.NullTime `json:"updated_at"`
+	ID       uuid.UUID `json:"id"`
+	Username string    `json:"username"`
+	// json:"-"
+	Password   string       `json:"password"`
+	Email      string       `json:"email"`
+	UserRole   Role         `json:"user_role"`
+	Visibility Visibility   `json:"visibility"`
+	CreatedAt  sql.NullTime `json:"created_at"`
+	UpdatedAt  sql.NullTime `json:"updated_at"`
+}
+
+type UserFollow struct {
+	ID        uuid.UUID     `json:"id"`
+	Follower  uuid.NullUUID `json:"follower"`
+	Following uuid.NullUUID `json:"following"`
+	CreatedAt sql.NullTime  `json:"created_at"`
+	UpdatedAt sql.NullTime  `json:"updated_at"`
 }

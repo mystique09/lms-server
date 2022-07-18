@@ -18,7 +18,7 @@ INSERT INTO "user"(
 ) VALUES (
   $1, $2, $3, $4, $5
 )
-RETURNING id, username, password, email, user_role, created_at, updated_at
+RETURNING id, username, password, email, user_role, visibility, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -44,6 +44,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Password,
 		&i.Email,
 		&i.UserRole,
+		&i.Visibility,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -53,7 +54,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 const deleteUser = `-- name: DeleteUser :one
 DELETE FROM "user"
 WHERE id = $1
-RETURNING id, username, password, email, user_role, created_at, updated_at
+RETURNING id, username, password, email, user_role, visibility, created_at, updated_at
 `
 
 func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) (User, error) {
@@ -65,6 +66,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.Password,
 		&i.Email,
 		&i.UserRole,
+		&i.Visibility,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -72,7 +74,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, password, email, user_role, created_at, updated_at
+SELECT id, username, password, email, user_role, visibility, created_at, updated_at
 FROM "user"
 WHERE id = $1
 LIMIT 1
@@ -87,6 +89,7 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.Password,
 		&i.Email,
 		&i.UserRole,
+		&i.Visibility,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -94,7 +97,7 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, username, password, email, user_role, created_at, updated_at
+SELECT id, username, password, email, user_role, visibility, created_at, updated_at
 FROM "user"
 WHERE username = $1
 LIMIT 1
@@ -109,6 +112,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.Password,
 		&i.Email,
 		&i.UserRole,
+		&i.Visibility,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -116,7 +120,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 }
 
 const getUserWithPosts = `-- name: GetUserWithPosts :one
-SELECT "user".id, username, password, email, user_role, "user".created_at, "user".updated_at, post.id, content, author_id, class_id, post.created_at, post.updated_at
+SELECT "user".id, username, password, email, user_role, visibility, "user".created_at, "user".updated_at, post.id, content, author_id, class_id, post.created_at, post.updated_at
 FROM "user"
 LEFT JOIN "post" ON "user".id = "post".author_id
 `
@@ -127,6 +131,7 @@ type GetUserWithPostsRow struct {
 	Password    string         `json:"password"`
 	Email       string         `json:"email"`
 	UserRole    Role           `json:"user_role"`
+	Visibility  Visibility     `json:"visibility"`
 	CreatedAt   sql.NullTime   `json:"created_at"`
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
 	ID_2        uuid.NullUUID  `json:"id_2"`
@@ -146,6 +151,7 @@ func (q *Queries) GetUserWithPosts(ctx context.Context) (GetUserWithPostsRow, er
 		&i.Password,
 		&i.Email,
 		&i.UserRole,
+		&i.Visibility,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.ID_2,
@@ -159,7 +165,7 @@ func (q *Queries) GetUserWithPosts(ctx context.Context) (GetUserWithPostsRow, er
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT id, username, password, email, user_role, created_at, updated_at
+SELECT id, username, password, email, user_role, visibility, created_at, updated_at
 FROM "user"
 ORDER BY created_at
 DESC
@@ -180,6 +186,7 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 			&i.Password,
 			&i.Email,
 			&i.UserRole,
+			&i.Visibility,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -200,7 +207,7 @@ const updateUserEmail = `-- name: UpdateUserEmail :one
 UPDATE "user"
 SET email = $1
 WHERE id =  $2
-RETURNING id, username, password, email, user_role, created_at, updated_at
+RETURNING id, username, password, email, user_role, visibility, created_at, updated_at
 `
 
 type UpdateUserEmailParams struct {
@@ -217,6 +224,7 @@ func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams
 		&i.Password,
 		&i.Email,
 		&i.UserRole,
+		&i.Visibility,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -227,7 +235,7 @@ const updateUserPassword = `-- name: UpdateUserPassword :one
 UPDATE "user"
 SET password = $1
 WHERE id =  $2
-RETURNING id, username, password, email, user_role, created_at, updated_at
+RETURNING id, username, password, email, user_role, visibility, created_at, updated_at
 `
 
 type UpdateUserPasswordParams struct {
@@ -244,6 +252,7 @@ func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPassword
 		&i.Password,
 		&i.Email,
 		&i.UserRole,
+		&i.Visibility,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -254,7 +263,7 @@ const updateUsername = `-- name: UpdateUsername :one
 UPDATE "user"
 SET username = $1
 WHERE id =  $2
-RETURNING id, username, password, email, user_role, created_at, updated_at
+RETURNING id, username, password, email, user_role, visibility, created_at, updated_at
 `
 
 type UpdateUsernameParams struct {
@@ -271,6 +280,7 @@ func (q *Queries) UpdateUsername(ctx context.Context, arg UpdateUsernameParams) 
 		&i.Password,
 		&i.Email,
 		&i.UserRole,
+		&i.Visibility,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

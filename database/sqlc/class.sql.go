@@ -15,7 +15,7 @@ import (
 const createClass = `-- name: CreateClass :one
 INSERT INTO "class" (id, admin_id, name, description, section, room, subject, invite_code, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-RETURNING id, admin_id, name, description, section, room, subject, invite_code, created_at, updated_at
+RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
 `
 
 type CreateClassParams struct {
@@ -57,6 +57,7 @@ func (q *Queries) CreateClass(ctx context.Context, arg CreateClassParams) (Class
 		&i.Room,
 		&i.Subject,
 		&i.InviteCode,
+		&i.Visibility,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -76,7 +77,7 @@ func (q *Queries) DeleteClass(ctx context.Context, id uuid.UUID) error {
 }
 
 const getClass = `-- name: GetClass :one
-SELECT id, admin_id, name, description, section, room, subject, invite_code, created_at, updated_at
+SELECT id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
 FROM "class"
 WHERE id = $1
 `
@@ -96,6 +97,7 @@ func (q *Queries) GetClass(ctx context.Context, id uuid.UUID) (Class, error) {
 		&i.Room,
 		&i.Subject,
 		&i.InviteCode,
+		&i.Visibility,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -103,7 +105,7 @@ func (q *Queries) GetClass(ctx context.Context, id uuid.UUID) (Class, error) {
 }
 
 const listClass = `-- name: ListClass :many
-SELECT id, admin_id, name, description, section, room, subject, invite_code, created_at, updated_at
+SELECT id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
 FROM "class"
 `
 
@@ -128,6 +130,7 @@ func (q *Queries) ListClass(ctx context.Context) ([]Class, error) {
 			&i.Room,
 			&i.Subject,
 			&i.InviteCode,
+			&i.Visibility,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
