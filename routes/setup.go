@@ -51,5 +51,14 @@ func Launch() {
 		user_route.DELETE("/:id", rt.deleteUser)
 	}
 
+	class_route := e.Group("/api/v1/classrooms", JwtAuthMiddleware(rt.Cfg))
+	{
+		class_route.GET("", rt.getClassrooms)
+		class_route.GET("/:id", rt.getClassroom)
+		class_route.POST("", rt.createNewClassroom)
+		class_route.PUT("/:id", rt.updateClassroom)
+		class_route.DELETE("/:id", rt.deleteClassroom)
+	}
+
 	e.Logger.Fatal(e.Start(rt.Cfg.PORT))
 }
