@@ -50,68 +50,67 @@ func (e *Visibility) Scan(src interface{}) error {
 }
 
 type Class struct {
-	ID          uuid.UUID      `json:"id"`
-	AdminID     uuid.NullUUID  `json:"admin_id"`
-	Name        string         `json:"name"`
-	Description sql.NullString `json:"description"`
-	Section     sql.NullString `json:"section"`
-	Room        sql.NullString `json:"room"`
-	Subject     sql.NullString `json:"subject"`
-	InviteCode  uuid.NullUUID  `json:"invite_code"`
-	Visibility  Visibility     `json:"visibility"`
-	CreatedAt   sql.NullTime   `json:"created_at"`
-	UpdatedAt   sql.NullTime   `json:"updated_at"`
+	ID          uuid.UUID    `json:"id"`
+	AdminID     uuid.UUID    `json:"admin_id"`
+	Name        string       `json:"name"`
+	Description string       `json:"description"`
+	Section     string       `json:"section"`
+	Room        string       `json:"room"`
+	Subject     string       `json:"subject"`
+	InviteCode  uuid.UUID    `json:"invite_code"`
+	Visibility  Visibility   `json:"visibility"`
+	CreatedAt   sql.NullTime `json:"created_at"`
+	UpdatedAt   sql.NullTime `json:"updated_at"`
 }
 
 type ClassMember struct {
-	ID        uuid.UUID     `json:"id"`
-	ClassID   uuid.NullUUID `json:"class_id"`
-	UserID    uuid.NullUUID `json:"user_id"`
-	CreatedAt sql.NullTime  `json:"created_at"`
-	UpdatedAt sql.NullTime  `json:"updated_at"`
+	ID        uuid.UUID    `json:"id"`
+	ClassID   uuid.UUID    `json:"class_id"`
+	UserID    uuid.UUID    `json:"user_id"`
+	CreatedAt sql.NullTime `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
 }
 
 type ClassWork struct {
 	ID        uuid.UUID     `json:"id"`
 	Name      string        `json:"name"`
-	UserID    uuid.NullUUID `json:"user_id"`
-	ClassID   uuid.NullUUID `json:"class_id"`
+	UserID    uuid.UUID     `json:"user_id"`
+	ClassID   uuid.UUID     `json:"class_id"`
 	Mark      sql.NullInt32 `json:"mark"`
 	CreatedAt sql.NullTime  `json:"created_at"`
 	UpdatedAt sql.NullTime  `json:"updated_at"`
 }
 
 type Comment struct {
-	ID        uuid.UUID     `json:"id"`
-	Content   string        `json:"content"`
-	AuthorID  uuid.NullUUID `json:"author_id"`
-	PostID    uuid.NullUUID `json:"post_id"`
-	CreatedAt sql.NullTime  `json:"created_at"`
-	UpdatedAt sql.NullTime  `json:"updated_at"`
+	ID        uuid.UUID    `json:"id"`
+	Content   string       `json:"content"`
+	AuthorID  uuid.UUID    `json:"author_id"`
+	PostID    uuid.UUID    `json:"post_id"`
+	CreatedAt sql.NullTime `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
 }
 
 type Post struct {
-	ID        uuid.UUID     `json:"id"`
-	Content   string        `json:"content"`
-	AuthorID  uuid.NullUUID `json:"author_id"`
-	ClassID   uuid.NullUUID `json:"class_id"`
-	CreatedAt sql.NullTime  `json:"created_at"`
-	UpdatedAt sql.NullTime  `json:"updated_at"`
+	ID        uuid.UUID    `json:"id"`
+	Content   string       `json:"content"`
+	AuthorID  uuid.UUID    `json:"author_id"`
+	ClassID   uuid.UUID    `json:"class_id"`
+	CreatedAt sql.NullTime `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
 }
 
 type PostLike struct {
-	ID        uuid.UUID     `json:"id"`
-	PostID    uuid.NullUUID `json:"post_id"`
-	UserID    uuid.NullUUID `json:"user_id"`
-	CreatedAt sql.NullTime  `json:"created_at"`
-	UpdatedAt sql.NullTime  `json:"updated_at"`
+	ID        uuid.UUID    `json:"id"`
+	PostID    uuid.UUID    `json:"post_id"`
+	UserID    uuid.UUID    `json:"user_id"`
+	CreatedAt sql.NullTime `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
 }
 
 type User struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"username"`
-	// json:"-"
-	Password   string       `json:"password"`
+	ID         uuid.UUID    `json:"id"`
+	Username   string       `json:"username"`
+	Password   string       `json:"-"`
 	Email      string       `json:"email"`
 	UserRole   Role         `json:"user_role"`
 	Visibility Visibility   `json:"visibility"`
@@ -120,9 +119,9 @@ type User struct {
 }
 
 type UserFollow struct {
-	ID        uuid.UUID     `json:"id"`
-	Follower  uuid.NullUUID `json:"follower"`
-	Following uuid.NullUUID `json:"following"`
-	CreatedAt sql.NullTime  `json:"created_at"`
-	UpdatedAt sql.NullTime  `json:"updated_at"`
+	ID        uuid.UUID    `json:"id"`
+	Follower  uuid.UUID    `json:"follower"`
+	Following uuid.UUID    `json:"following"`
+	CreatedAt sql.NullTime `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
 }

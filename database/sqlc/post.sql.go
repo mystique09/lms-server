@@ -11,36 +11,42 @@ import (
 	"github.com/google/uuid"
 )
 
-const deleteCommentFromPost = `-- name: DeleteCommentFromPost :exec
+const deleteCommentFromPost = `-- name: DeleteCommentFromPost :one
 DELETE FROM "comment"
 WHERE id = $1 AND author_id = $2 AND post_id = $3
+RETURNING (id, content, author_id)
 `
 
 type DeleteCommentFromPostParams struct {
-	ID       uuid.UUID     `json:"id"`
-	AuthorID uuid.NullUUID `json:"author_id"`
-	PostID   uuid.NullUUID `json:"post_id"`
+	ID       uuid.UUID `json:"id"`
+	AuthorID uuid.UUID `json:"author_id"`
+	PostID   uuid.UUID `json:"post_id"`
 }
 
-func (q *Queries) DeleteCommentFromPost(ctx context.Context, arg DeleteCommentFromPostParams) error {
-	_, err := q.exec(ctx, q.deleteCommentFromPostStmt, deleteCommentFromPost, arg.ID, arg.AuthorID, arg.PostID)
-	return err
+func (q *Queries) DeleteCommentFromPost(ctx context.Context, arg DeleteCommentFromPostParams) (interface{}, error) {
+	row := q.queryRow(ctx, q.deleteCommentFromPostStmt, deleteCommentFromPost, arg.ID, arg.AuthorID, arg.PostID)
+	var column_1 interface{}
+	err := row.Scan(&column_1)
+	return column_1, err
 }
 
-const deletePostFromClass = `-- name: DeletePostFromClass :exec
+const deletePostFromClass = `-- name: DeletePostFromClass :one
 DELETE FROM "post"
 WHERE id = $1 AND author_id = $2 AND class_id = $3
+RETURNING (id, content, author_id)
 `
 
 type DeletePostFromClassParams struct {
-	ID       uuid.UUID     `json:"id"`
-	AuthorID uuid.NullUUID `json:"author_id"`
-	ClassID  uuid.NullUUID `json:"class_id"`
+	ID       uuid.UUID `json:"id"`
+	AuthorID uuid.UUID `json:"author_id"`
+	ClassID  uuid.UUID `json:"class_id"`
 }
 
-func (q *Queries) DeletePostFromClass(ctx context.Context, arg DeletePostFromClassParams) error {
-	_, err := q.exec(ctx, q.deletePostFromClassStmt, deletePostFromClass, arg.ID, arg.AuthorID, arg.ClassID)
-	return err
+func (q *Queries) DeletePostFromClass(ctx context.Context, arg DeletePostFromClassParams) (interface{}, error) {
+	row := q.queryRow(ctx, q.deletePostFromClassStmt, deletePostFromClass, arg.ID, arg.AuthorID, arg.ClassID)
+	var column_1 interface{}
+	err := row.Scan(&column_1)
+	return column_1, err
 }
 
 const getAllCommentsFromPost = `-- name: GetAllCommentsFromPost :many
@@ -51,7 +57,7 @@ ORDER BY created_at
 ASC
 `
 
-func (q *Queries) GetAllCommentsFromPost(ctx context.Context, postID uuid.NullUUID) ([]Comment, error) {
+func (q *Queries) GetAllCommentsFromPost(ctx context.Context, postID uuid.UUID) ([]Comment, error) {
 	rows, err := q.query(ctx, q.getAllCommentsFromPostStmt, getAllCommentsFromPost, postID)
 	if err != nil {
 		return nil, err
@@ -85,11 +91,12 @@ const getOnePost = `-- name: GetOnePost :one
 SELECT id, content, author_id, class_id, created_at, updated_at
 FROM "post"
 WHERE id = $1 AND class_id = $2
+LIMIT 1
 `
 
 type GetOnePostParams struct {
-	ID      uuid.UUID     `json:"id"`
-	ClassID uuid.NullUUID `json:"class_id"`
+	ID      uuid.UUID `json:"id"`
+	ClassID uuid.UUID `json:"class_id"`
 }
 
 func (q *Queries) GetOnePost(ctx context.Context, arg GetOnePostParams) (Post, error) {
@@ -115,10 +122,10 @@ INSERT INTO "comment" (
 `
 
 type InsertNewCommentInPostParams struct {
-	ID       uuid.UUID     `json:"id"`
-	Content  string        `json:"content"`
-	AuthorID uuid.NullUUID `json:"author_id"`
-	PostID   uuid.NullUUID `json:"post_id"`
+	ID       uuid.UUID `json:"id"`
+	Content  string    `json:"content"`
+	AuthorID uuid.UUID `json:"author_id"`
+	PostID   uuid.UUID `json:"post_id"`
 }
 
 func (q *Queries) InsertNewCommentInPost(ctx context.Context, arg InsertNewCommentInPostParams) (Comment, error) {
@@ -148,10 +155,10 @@ RETURNING id, content, author_id, class_id, created_at, updated_at
 `
 
 type InsertNewPostParams struct {
-	ID       uuid.UUID     `json:"id"`
-	Content  string        `json:"content"`
-	AuthorID uuid.NullUUID `json:"author_id"`
-	ClassID  uuid.NullUUID `json:"class_id"`
+	ID       uuid.UUID `json:"id"`
+	Content  string    `json:"content"`
+	AuthorID uuid.UUID `json:"author_id"`
+	ClassID  uuid.UUID `json:"class_id"`
 }
 
 func (q *Queries) InsertNewPost(ctx context.Context, arg InsertNewPostParams) (Post, error) {
@@ -182,8 +189,8 @@ ASC
 `
 
 type ListAllPostsByUserParams struct {
-	AuthorID uuid.NullUUID `json:"author_id"`
-	ClassID  uuid.NullUUID `json:"class_id"`
+	AuthorID uuid.UUID `json:"author_id"`
+	ClassID  uuid.UUID `json:"class_id"`
 }
 
 func (q *Queries) ListAllPostsByUser(ctx context.Context, arg ListAllPostsByUserParams) ([]Post, error) {
@@ -224,7 +231,7 @@ ORDER BY created_at
 ASC
 `
 
-func (q *Queries) ListAllPostsFromClass(ctx context.Context, classID uuid.NullUUID) ([]Post, error) {
+func (q *Queries) ListAllPostsFromClass(ctx context.Context, classID uuid.UUID) ([]Post, error) {
 	rows, err := q.query(ctx, q.listAllPostsFromClassStmt, listAllPostsFromClass, classID)
 	if err != nil {
 		return nil, err
@@ -254,48 +261,54 @@ func (q *Queries) ListAllPostsFromClass(ctx context.Context, classID uuid.NullUU
 	return items, nil
 }
 
-const updateCommentContentInPost = `-- name: UpdateCommentContentInPost :exec
+const updateCommentContentInPost = `-- name: UpdateCommentContentInPost :one
 UPDATE "comment"
 SET content = $1
 WHERE id = $2 AND author_id = $3 AND post_id = $4
+RETURNING (id, content, author_id)
 `
 
 type UpdateCommentContentInPostParams struct {
-	Content  string        `json:"content"`
-	ID       uuid.UUID     `json:"id"`
-	AuthorID uuid.NullUUID `json:"author_id"`
-	PostID   uuid.NullUUID `json:"post_id"`
+	Content  string    `json:"content"`
+	ID       uuid.UUID `json:"id"`
+	AuthorID uuid.UUID `json:"author_id"`
+	PostID   uuid.UUID `json:"post_id"`
 }
 
-func (q *Queries) UpdateCommentContentInPost(ctx context.Context, arg UpdateCommentContentInPostParams) error {
-	_, err := q.exec(ctx, q.updateCommentContentInPostStmt, updateCommentContentInPost,
+func (q *Queries) UpdateCommentContentInPost(ctx context.Context, arg UpdateCommentContentInPostParams) (interface{}, error) {
+	row := q.queryRow(ctx, q.updateCommentContentInPostStmt, updateCommentContentInPost,
 		arg.Content,
 		arg.ID,
 		arg.AuthorID,
 		arg.PostID,
 	)
-	return err
+	var column_1 interface{}
+	err := row.Scan(&column_1)
+	return column_1, err
 }
 
-const updatePostContent = `-- name: UpdatePostContent :exec
+const updatePostContent = `-- name: UpdatePostContent :one
 UPDATE "post"
 SET content = $1
 WHERE id = $2 AND author_id = $3 AND class_id = $4
+RETURNING (id, content, author_id)
 `
 
 type UpdatePostContentParams struct {
-	Content  string        `json:"content"`
-	ID       uuid.UUID     `json:"id"`
-	AuthorID uuid.NullUUID `json:"author_id"`
-	ClassID  uuid.NullUUID `json:"class_id"`
+	Content  string    `json:"content"`
+	ID       uuid.UUID `json:"id"`
+	AuthorID uuid.UUID `json:"author_id"`
+	ClassID  uuid.UUID `json:"class_id"`
 }
 
-func (q *Queries) UpdatePostContent(ctx context.Context, arg UpdatePostContentParams) error {
-	_, err := q.exec(ctx, q.updatePostContentStmt, updatePostContent,
+func (q *Queries) UpdatePostContent(ctx context.Context, arg UpdatePostContentParams) (interface{}, error) {
+	row := q.queryRow(ctx, q.updatePostContentStmt, updatePostContent,
 		arg.Content,
 		arg.ID,
 		arg.AuthorID,
 		arg.ClassID,
 	)
-	return err
+	var column_1 interface{}
+	err := row.Scan(&column_1)
+	return column_1, err
 }

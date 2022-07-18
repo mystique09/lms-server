@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml-lang.org)
 -- Database: PostgreSQL
--- Generated at: 2022-07-18T03:04:14.614Z
+-- Generated at: 2022-07-18T13:53:32.951Z
 
 CREATE TYPE "role" AS ENUM (
   'STUDENT',
@@ -18,28 +18,28 @@ CREATE TABLE "user" (
   "password" varchar NOT NULL,
   "email" varchar UNIQUE NOT NULL,
   "user_role" role,
-  "visibility" visibility DEFAULT (PUBLIC),
+  "visibility" visibility,
   "created_at" timestamptz DEFAULT (now()),
   "updated_at" timestamptz DEFAULT (now())
 );
 
 CREATE TABLE "user_follow" (
   "id" uuid UNIQUE PRIMARY KEY,
-  "follower" uuid,
-  "following" uuid,
+  "follower" uuid NOT NULL,
+  "following" uuid NOT NULL,
   "created_at" timestamptz DEFAULT (now()),
   "updated_at" timestamptz DEFAULT (now())
 );
 
 CREATE TABLE "class" (
   "id" uuid UNIQUE PRIMARY KEY,
-  "admin_id" uuid,
+  "admin_id" uuid NOT NULL,
   "name" varchar NOT NULL,
-  "description" varchar,
-  "section" varchar,
-  "room" varchar,
-  "subject" varchar,
-  "invite_code" uuid,
+  "description" varchar NOT NULL,
+  "section" varchar NOT NULL,
+  "room" varchar NOT NULL,
+  "subject" varchar NOT NULL,
+  "invite_code" uuid NOT NULL,
   "visibility" visibility,
   "created_at" timestamptz DEFAULT (now()),
   "updated_at" timestamptz DEFAULT (now())
@@ -48,8 +48,8 @@ CREATE TABLE "class" (
 CREATE TABLE "class_work" (
   "id" uuid UNIQUE PRIMARY KEY,
   "name" varchar NOT NULL,
-  "user_id" uuid,
-  "class_id" uuid,
+  "user_id" uuid NOT NULL,
+  "class_id" uuid NOT NULL,
   "mark" int DEFAULT (0),
   "created_at" timestamptz DEFAULT (now()),
   "updated_at" timestamptz DEFAULT (now())
@@ -57,8 +57,8 @@ CREATE TABLE "class_work" (
 
 CREATE TABLE "class_member" (
   "id" uuid UNIQUE PRIMARY KEY,
-  "class_id" uuid,
-  "user_id" uuid,
+  "class_id" uuid NOT NULL,
+  "user_id" uuid NOT NULL,
   "created_at" timestamptz DEFAULT (now()),
   "updated_at" timestamptz DEFAULT (now())
 );
@@ -66,16 +66,16 @@ CREATE TABLE "class_member" (
 CREATE TABLE "post" (
   "id" uuid UNIQUE PRIMARY KEY,
   "content" varchar NOT NULL,
-  "author_id" uuid,
-  "class_id" uuid,
+  "author_id" uuid NOT NULL,
+  "class_id" uuid NOT NULL,
   "created_at" timestamptz DEFAULT (now()),
   "updated_at" timestamptz DEFAULT (now())
 );
 
 CREATE TABLE "post_like" (
   "id" uuid UNIQUE PRIMARY KEY,
-  "post_id" uuid,
-  "user_id" uuid,
+  "post_id" uuid NOT NULL,
+  "user_id" uuid NOT NULL,
   "created_at" timestamptz DEFAULT (now()),
   "updated_at" timestamptz DEFAULT (now())
 );
@@ -83,13 +83,11 @@ CREATE TABLE "post_like" (
 CREATE TABLE "comment" (
   "id" uuid PRIMARY KEY,
   "content" varchar NOT NULL,
-  "author_id" uuid,
-  "post_id" uuid,
+  "author_id" uuid NOT NULL,
+  "post_id" uuid NOT NULL,
   "created_at" timestamptz DEFAULT (now()),
   "updated_at" timestamptz DEFAULT (now())
 );
-
-COMMENT ON COLUMN "user"."password" IS 'json:"-"';
 
 ALTER TABLE "user_follow" ADD FOREIGN KEY ("follower") REFERENCES "user" ("id");
 

@@ -7,26 +7,26 @@ package database
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO "user"(
-  id, username, password, email, user_role
+  id, username, password, email, user_role, visibility
 ) VALUES (
-  $1, $2, $3, $4, $5
+  $1, $2, $3, $4, $5, $6
 )
 RETURNING id, username, password, email, user_role, visibility, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"username"`
-	Password string    `json:"password"`
-	Email    string    `json:"email"`
-	UserRole Role      `json:"user_role"`
+	ID         uuid.UUID  `json:"id"`
+	Username   string     `json:"username"`
+	Password   string     `json:"password"`
+	Email      string     `json:"email"`
+	UserRole   Role       `json:"user_role"`
+	Visibility Visibility `json:"visibility"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -36,6 +36,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.Password,
 		arg.Email,
 		arg.UserRole,
+		arg.Visibility,
 	)
 	var i User
 	err := row.Scan(
@@ -119,58 +120,14 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	return i, err
 }
 
-const getUserWithPosts = `-- name: GetUserWithPosts :one
-SELECT "user".id, username, password, email, user_role, visibility, "user".created_at, "user".updated_at, post.id, content, author_id, class_id, post.created_at, post.updated_at
-FROM "user"
-LEFT JOIN "post" ON "user".id = "post".author_id
-`
-
-type GetUserWithPostsRow struct {
-	ID          uuid.UUID      `json:"id"`
-	Username    string         `json:"username"`
-	Password    string         `json:"password"`
-	Email       string         `json:"email"`
-	UserRole    Role           `json:"user_role"`
-	Visibility  Visibility     `json:"visibility"`
-	CreatedAt   sql.NullTime   `json:"created_at"`
-	UpdatedAt   sql.NullTime   `json:"updated_at"`
-	ID_2        uuid.NullUUID  `json:"id_2"`
-	Content     sql.NullString `json:"content"`
-	AuthorID    uuid.NullUUID  `json:"author_id"`
-	ClassID     uuid.NullUUID  `json:"class_id"`
-	CreatedAt_2 sql.NullTime   `json:"created_at_2"`
-	UpdatedAt_2 sql.NullTime   `json:"updated_at_2"`
-}
-
-func (q *Queries) GetUserWithPosts(ctx context.Context) (GetUserWithPostsRow, error) {
-	row := q.queryRow(ctx, q.getUserWithPostsStmt, getUserWithPosts)
-	var i GetUserWithPostsRow
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.Password,
-		&i.Email,
-		&i.UserRole,
-		&i.Visibility,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.ID_2,
-		&i.Content,
-		&i.AuthorID,
-		&i.ClassID,
-		&i.CreatedAt_2,
-		&i.UpdatedAt_2,
-	)
-	return i, err
-}
-
 const getUsers = `-- name: GetUsers :many
 SELECT id, username, password, email, user_role, visibility, created_at, updated_at
 FROM "user"
 ORDER BY created_at
-DESC
+ASC
 `
 
+//description: Get all user by page and offset
 func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 	rows, err := q.query(ctx, q.getUsersStmt, getUsers)
 	if err != nil {

@@ -18,12 +18,12 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	//description: Delete a class
 	//parameters: id
-	DeleteClass(ctx context.Context, id uuid.UUID) error
+	DeleteClass(ctx context.Context, id uuid.UUID) (Class, error)
 	DeleteClassworkFromClass(ctx context.Context, arg DeleteClassworkFromClassParams) error
-	DeleteCommentFromPost(ctx context.Context, arg DeleteCommentFromPostParams) error
-	DeletePostFromClass(ctx context.Context, arg DeletePostFromClassParams) error
+	DeleteCommentFromPost(ctx context.Context, arg DeleteCommentFromPostParams) (interface{}, error)
+	DeletePostFromClass(ctx context.Context, arg DeletePostFromClassParams) (interface{}, error)
 	DeleteUser(ctx context.Context, id uuid.UUID) (User, error)
-	GetAllCommentsFromPost(ctx context.Context, postID uuid.NullUUID) ([]Comment, error)
+	GetAllCommentsFromPost(ctx context.Context, postID uuid.UUID) ([]Comment, error)
 	//description: Get a class by id
 	//parameters: id
 	//returns: class
@@ -35,13 +35,13 @@ type Querier interface {
 	GetOnePost(ctx context.Context, arg GetOnePostParams) (Post, error)
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
-	GetUserWithPosts(ctx context.Context) (GetUserWithPostsRow, error)
+	//description: Get all user by page and offset
 	GetUsers(ctx context.Context) ([]User, error)
 	InsertNewClasswork(ctx context.Context, arg InsertNewClassworkParams) (ClassWork, error)
 	InsertNewCommentInPost(ctx context.Context, arg InsertNewCommentInPostParams) (Comment, error)
 	InsertNewPost(ctx context.Context, arg InsertNewPostParams) (Post, error)
 	ListAllPostsByUser(ctx context.Context, arg ListAllPostsByUserParams) ([]Post, error)
-	ListAllPostsFromClass(ctx context.Context, classID uuid.NullUUID) ([]Post, error)
+	ListAllPostsFromClass(ctx context.Context, classID uuid.UUID) ([]Post, error)
 	//description: List all classes
 	//parameters: none
 	//returns: classes
@@ -49,7 +49,7 @@ type Querier interface {
 	//description: List all class works
 	//parameters: none
 	//returns: class_work
-	ListClassworkAdmin(ctx context.Context, classID uuid.NullUUID) ([]ClassWork, error)
+	ListClassworkAdmin(ctx context.Context, classID uuid.UUID) ([]ClassWork, error)
 	//description: List all submitted classworks of a user
 	//parameters: user_id, class_id
 	//returns: class_work
@@ -57,9 +57,9 @@ type Querier interface {
 	UpdateAClassworkMark(ctx context.Context, arg UpdateAClassworkMarkParams) error
 	//description: Update a class
 	//parameters: name, description, section, room, subject, invite_code, updated_at
-	UpdateClass(ctx context.Context, arg UpdateClassParams) error
-	UpdateCommentContentInPost(ctx context.Context, arg UpdateCommentContentInPostParams) error
-	UpdatePostContent(ctx context.Context, arg UpdatePostContentParams) error
+	UpdateClass(ctx context.Context, arg UpdateClassParams) (Class, error)
+	UpdateCommentContentInPost(ctx context.Context, arg UpdateCommentContentInPostParams) (interface{}, error)
+	UpdatePostContent(ctx context.Context, arg UpdatePostContentParams) (interface{}, error)
 	UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) (User, error)
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
 	UpdateUsername(ctx context.Context, arg UpdateUsernameParams) (User, error)
