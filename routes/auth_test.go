@@ -1,12 +1,14 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"server/utils"
 	"strings"
 	"testing"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,9 +19,12 @@ type Payload struct {
 	Message string
 }
 
+var authTestUserId string
+var authTestToken string
+
 func TestLoginWithOneAccount(t *testing.T) {
 	var payload string = `{"username":"mystique07","password":"testpassword"}`
-	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(payload))
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/login", strings.NewReader(payload))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
@@ -32,6 +37,28 @@ func TestLoginWithOneAccount(t *testing.T) {
 
 		assert.Equal(t, 404, rec.Code)
 		assert.Equal(t, "User doesn't exist.", res.Error)
+	}
+}
+
+func TestSignupRoute(t *testing.T) {
+	var userRequestJson string = `{"username":"mystique008","password":"testpassword","email":"testemail2@gmail.com"}`
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/signup", strings.NewReader(userRequestJson))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+
+	if assert.NoError(t, testRoute.createUser(ctx)) {
+		res := utils.Response{}
+		if err := utils.GetJson(rec.Body, &res); err != nil {
+			t.Fail()
+		}
+		assert.Equal(t, http.StatusOK, rec.Code)
+		user := res.Data.(map[string]interface{})
+		assert.Equal(t, "STUDENT", user["user_role"])
+		assert.Equal(t, "PUBLIC", user["visibility"])
+		assert.Empty(t, user["password"])
+		assert.Equal(t, "testemail2@gmail.com", user["email"])
+		authTestUserId = user["id"].(string)
 	}
 }
 
@@ -67,7 +94,7 @@ func TestLoginWithManyInvalidAccounts(t *testing.T) {
 
 	// loop through each payload and Test
 	for _, p := range payloads {
-		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(p.Data))
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/signup", strings.NewReader(p.Data))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		ctx := e.NewContext(req, rec)
@@ -84,9 +111,9 @@ func TestLoginWithManyInvalidAccounts(t *testing.T) {
 	}
 }
 
-func TestLoginSucfessful(t *testing.T) {
-	var payload string = `{"username":"mystique007","password":"testpassword"}`
-	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(payload))
+func TestLoginSuccessful(t *testing.T) {
+	var payload string = `{"username":"mystique008","password":"testpassword"}`
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/login", strings.NewReader(payload))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
@@ -101,5 +128,41 @@ func TestLoginSucfessful(t *testing.T) {
 		assert.Equal(t, success_resp["message"], "Logged in.")
 		assert.NotEmpty(t, success_resp["access_token"])
 		assert.NotEmpty(t, success_resp["refresh_token"])
+		authTestToken = success_resp["access_token"].(string)
+	}
+}
+
+func keyFunc(secret_key []byte) jwt.Keyfunc {
+	return func(t *jwt.Token) (interface{}, error) {
+		if t.Method.Alg() != "HS256" {
+			return nil, fmt.Errorf("Unexpected signing method=%v", t.Header["alg"])
+		}
+		return secret_key, nil
+	}
+}
+
+func TestDeleteUserAfterSignup(t *testing.T) {
+	req := httptest.NewRequest(http.MethodDelete, "/", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	parsed_token, err := jwt.Parse(authTestToken, keyFunc(testRoute.Cfg.JWT_SECRET_KEY))
+	if err != nil {
+		t.Fail()
+	}
+
+	ctx.SetPath("/api/v1/users/:id")
+	ctx.Set("user", parsed_token)
+	ctx.SetParamNames("id")
+	ctx.SetParamValues(authTestUserId)
+	ctx.Echo().Use(JwtAuthMiddleware(rt.Cfg))
+
+	if assert.NoError(t, testRoute.deleteUser(ctx)) {
+		res := utils.Response{}
+		if err := utils.GetJson(rec.Body, &res); err != nil {
+			t.Fail()
+		}
+		deleted_user := res.Data.(map[string]interface{})
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, authTestUserId, deleted_user["id"])
 	}
 }
