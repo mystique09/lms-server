@@ -3,12 +3,26 @@ Enum role {
     TEACHER
 }
 
+Enum visibility {
+    PUBLIC
+    PRIVATE
+}
+
 Table user {
   id uuid [pk]
   username varchar [not null, unique]
-  password varchar [not null]
+  password varchar [not null, note: 'json:"-"']
   email varchar [not null, unique]
   user_role role
+  visibility visibility [default: `PUBLIC`]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table user_follow {
+  id uuid [pk, unique]
+  follower uuid [ref: > user.id]
+  following uuid [ref: > user.id]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
@@ -22,9 +36,9 @@ Table class {
   room varchar
   subject varchar
   invite_code uuid
+  visibility visibility
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
-
 }
 
 Table class_work {
@@ -37,11 +51,27 @@ Table class_work {
   updated_at timestamptz [default: `now()`]
 }
 
+Table class_member {
+  id uuid [pk, unique]
+  class_id uuid [ref: > class.id]
+  user_id uuid [ref: > user.id]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
 Table post {
   id uuid [pk, unique]
   content varchar [not null]
   author_id uuid [ref: > user.id]
-  class_id uuid
+  class_id uuid [ref: > class.id]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table post_like {
+  id uuid [pk, unique]
+  post_id uuid [ref: > post.id]
+  user_id uuid [ref: > user.id]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
