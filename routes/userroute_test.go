@@ -151,13 +151,10 @@ func TestRefreshTokenAfterUpdateUsername(t *testing.T) {
 		if err := utils.GetJson(rec.Body, &res); err != nil {
 			t.Fail()
 		}
-		t.Log(res)
-		t.Log(res.Error)
 		assert.Equal(t, 200, rec.Code)
 		data := res.Data.(map[string]interface{})
 		token = data["access_token"].(string)
 		assert.NotEmpty(t, token)
-		t.Log(token)
 	}
 }
 
