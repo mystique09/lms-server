@@ -1,7 +1,6 @@
 package routes
 
 import (
-	//	"context"
 	"log"
 	"net/http"
 	database "server/database/sqlc"
@@ -92,11 +91,12 @@ func (rt *Route) createUser(c echo.Context) error {
 	}
 
 	var new_user_param database.CreateUserParams = database.CreateUserParams{
-		ID:       uuid.New(),
-		Username: user_data.Username,
-		Email:    user_data.Email,
-		Password: hashed_password,
-		UserRole: database.RoleSTUDENT,
+		ID:         uuid.New(),
+		Username:   user_data.Username,
+		Email:      user_data.Email,
+		Password:   hashed_password,
+		UserRole:   database.RoleSTUDENT,
+		Visibility: database.VisibilityPUBLIC,
 	}
 
 	user, err := rt.DB.CreateUser(c.Request().Context(), new_user_param)
@@ -216,8 +216,8 @@ func (rt *Route) deleteUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide an ID."))
 	}
 
-	token := c.Get("user").(*jwt.Token)
-	var payload utils.JwtUserPayload = utils.GetPayloadFromJwt(token)
+	jwt_token := c.Get("user").(*jwt.Token)
+	var payload utils.JwtUserPayload = utils.GetPayloadFromJwt(jwt_token)
 
 	check_user, err := rt.DB.GetUser(c.Request().Context(), uid)
 
