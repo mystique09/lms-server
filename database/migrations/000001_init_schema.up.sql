@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml-lang.org)
 -- Database: PostgreSQL
--- Generated at: 2022-06-27T01:43:16.910Z
+-- Generated at: 2022-07-18T02:22:38.879Z
 
 CREATE TYPE "role" AS ENUM (
   'STUDENT',
@@ -43,7 +43,7 @@ CREATE TABLE "class_work" (
 CREATE TABLE "post" (
   "id" uuid UNIQUE PRIMARY KEY,
   "content" varchar NOT NULL,
-  "author_id" uuid UNIQUE,
+  "author_id" uuid,
   "class_id" uuid,
   "created_at" timestamptz DEFAULT (now()),
   "updated_at" timestamptz DEFAULT (now())
@@ -62,10 +62,10 @@ ALTER TABLE "class" ADD FOREIGN KEY ("admin_id") REFERENCES "user" ("id");
 
 ALTER TABLE "class_work" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
 
-ALTER TABLE "post" ADD FOREIGN KEY ("author_id") REFERENCES "user" ("id");
-
 ALTER TABLE "class_work" ADD FOREIGN KEY ("class_id") REFERENCES "class" ("id");
 
-ALTER TABLE "comment" ADD FOREIGN KEY ("post_id") REFERENCES "post" ("id");
+ALTER TABLE "post" ADD FOREIGN KEY ("author_id") REFERENCES "user" ("id");
 
 ALTER TABLE "comment" ADD FOREIGN KEY ("author_id") REFERENCES "user" ("id");
+
+ALTER TABLE "comment" ADD FOREIGN KEY ("post_id") REFERENCES "post" ("id");

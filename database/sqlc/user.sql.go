@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
@@ -115,22 +116,53 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 }
 
 const getUserWithPosts = `-- name: GetUserWithPosts :one
-SELECT (id, username, email, user_role)
+SELECT "user".id, username, password, email, user_role, "user".created_at, "user".updated_at, post.id, content, author_id, class_id, post.created_at, post.updated_at
 FROM "user"
-LEFT JOIN "post" ON "user".id = "post".user_id
+LEFT JOIN "post" ON "user".id = "post".author_id
 `
 
-func (q *Queries) GetUserWithPosts(ctx context.Context) (interface{}, error) {
+type GetUserWithPostsRow struct {
+	ID          uuid.UUID      `json:"id"`
+	Username    string         `json:"username"`
+	Password    string         `json:"password"`
+	Email       string         `json:"email"`
+	UserRole    Role           `json:"user_role"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
+	ID_2        uuid.NullUUID  `json:"id_2"`
+	Content     sql.NullString `json:"content"`
+	AuthorID    uuid.NullUUID  `json:"author_id"`
+	ClassID     uuid.NullUUID  `json:"class_id"`
+	CreatedAt_2 sql.NullTime   `json:"created_at_2"`
+	UpdatedAt_2 sql.NullTime   `json:"updated_at_2"`
+}
+
+func (q *Queries) GetUserWithPosts(ctx context.Context) (GetUserWithPostsRow, error) {
 	row := q.queryRow(ctx, q.getUserWithPostsStmt, getUserWithPosts)
-	var column_1 interface{}
-	err := row.Scan(&column_1)
-	return column_1, err
+	var i GetUserWithPostsRow
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Email,
+		&i.UserRole,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.ID_2,
+		&i.Content,
+		&i.AuthorID,
+		&i.ClassID,
+		&i.CreatedAt_2,
+		&i.UpdatedAt_2,
+	)
+	return i, err
 }
 
 const getUsers = `-- name: GetUsers :many
 SELECT id, username, password, email, user_role, created_at, updated_at
 FROM "user"
-ORDER BY created_at DESC
+ORDER BY created_at
+DESC
 `
 
 func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {

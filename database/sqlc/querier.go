@@ -35,7 +35,7 @@ type Querier interface {
 	GetOnePost(ctx context.Context, arg GetOnePostParams) (Post, error)
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
-	GetUserWithPosts(ctx context.Context) (interface{}, error)
+	GetUserWithPosts(ctx context.Context) (GetUserWithPostsRow, error)
 	GetUsers(ctx context.Context) ([]User, error)
 	InsertNewClasswork(ctx context.Context, arg InsertNewClassworkParams) (ClassWork, error)
 	InsertNewCommentInPost(ctx context.Context, arg InsertNewCommentInPostParams) (Comment, error)

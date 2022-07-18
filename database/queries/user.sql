@@ -7,7 +7,8 @@ LIMIT 1;
 -- name: GetUsers :many
 SELECT *
 FROM "user"
-ORDER BY created_at DESC;
+ORDER BY created_at
+DESC;
 
 -- name: GetUserByUsername :one
 SELECT *
@@ -16,9 +17,9 @@ WHERE username = $1
 LIMIT 1;
 
 -- name: GetUserWithPosts :one
-SELECT (id, username, email, user_role)
+SELECT *
 FROM "user"
-LEFT JOIN "post" ON "user".id = "post".user_id;
+LEFT JOIN "post" ON "user".id = "post".author_id;
 
 -- name: CreateUser :one
 INSERT INTO "user"(
