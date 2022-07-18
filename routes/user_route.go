@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"log"
 	"net/http"
 	database "server/database/sqlc"
 	"server/utils"
@@ -31,7 +30,6 @@ func (rt *Route) getUsers(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
 	}
-	log.Printf("%v", users)
 	return c.JSON(http.StatusOK, utils.NewResponse(&users, ""))
 }
 

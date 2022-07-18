@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 	"server/utils"
 
@@ -57,7 +56,6 @@ func (rt *Route) refreshToken(c echo.Context) error {
 	token := c.Get("refresh").(*jwt.Token)
 	user := utils.GetPayloadFromJwt(token)
 	updated_user, err := rt.DB.GetUser(c.Request().Context(), user.ID)
-	fmt.Print(updated_user)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
