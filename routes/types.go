@@ -3,6 +3,8 @@ package routes
 import (
 	"server/config"
 	database "server/database/sqlc"
+
+	"github.com/labstack/echo/v4"
 )
 
 type (
@@ -28,5 +30,11 @@ type (
 
 	RefreshToken struct {
 		Token string `json:"refresh_token"`
+	}
+
+	Handler struct {
+		Path        string
+		Action      string
+		HandlerFunc echo.HandlerFunc
 	}
 )
