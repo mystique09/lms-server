@@ -30,7 +30,7 @@ func Setup() Route {
 	}
 }
 
-func addNewGroup(g *echo.Group, handlers []Handler) {
+func addNewHandlerToGroup(g *echo.Group, handlers []Handler) {
 	for _, handler := range handlers {
 		if handler.Action == "GET" {
 			g.GET(handler.Path, handler.HandlerFunc)
