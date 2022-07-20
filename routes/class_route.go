@@ -37,6 +37,10 @@ func (s *Server) getClassrooms(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(classes, ""))
 }
 
+func (s *Server) getAllClassrooms(c echo.Context) error {
+	return c.String(200, "TODO")
+}
+
 func (s *Server) getClassroom(c echo.Context) error {
 	uid := c.Param("id")
 	uuid, err := uuid.Parse(uid)
