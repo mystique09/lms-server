@@ -11,7 +11,7 @@ type (
 	/*
 	   The Route struct to hold the route information.
 	*/
-	Route struct {
+	Server struct {
 		DB  *database.Queries
 		Cfg config.Config
 	}
