@@ -30,6 +30,22 @@ func Setup() Route {
 	}
 }
 
+func addNewGroup(g *echo.Group, handlers []Handler) {
+	for _, handler := range handlers {
+		if handler.Action == "GET" {
+			g.GET(handler.Path, handler.HandlerFunc)
+		} else if handler.Action == "POST" {
+			g.POST(handler.Path, handler.HandlerFunc)
+		} else if handler.Action == "UPDATE" {
+			g.PUT(handler.Path, handler.HandlerFunc)
+		} else if handler.Action == "PATCH" {
+			g.PATCH(handler.Path, handler.HandlerFunc)
+		} else {
+			g.DELETE(handler.Path, handler.HandlerFunc)
+		}
+	}
+}
+
 func Launch() {
 	rt = Setup()
 
