@@ -27,8 +27,8 @@ type UpdateClassroomDTO struct {
 	InviteCode  uuid.UUID `json:"invite_code"`
 }
 
-func (rt *Route) getClassrooms(c echo.Context) error {
-	classes, err := rt.DB.ListClass(c.Request().Context())
+func (s *Server) getClassrooms(c echo.Context) error {
+	classes, err := s.DB.ListClass(c.Request().Context())
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
@@ -37,7 +37,7 @@ func (rt *Route) getClassrooms(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(classes, ""))
 }
 
-func (rt *Route) getClassroom(c echo.Context) error {
+func (s *Server) getClassroom(c echo.Context) error {
 	uid := c.Param("id")
 	uuid, err := uuid.Parse(uid)
 
@@ -45,7 +45,7 @@ func (rt *Route) getClassroom(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	class, err := rt.DB.GetClass(c.Request().Context(), uuid)
+	class, err := s.DB.GetClass(c.Request().Context(), uuid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
@@ -54,7 +54,7 @@ func (rt *Route) getClassroom(c echo.Context) error {
 	return c.JSON(http.StatusBadRequest, utils.NewResponse(class, ""))
 }
 
-func (rt *Route) createNewClassroom(c echo.Context) error {
+func (s *Server) createNewClassroom(c echo.Context) error {
 	var payload CreateClassroomDTO
 	if err := (&echo.DefaultBinder{}).BindBody(c, &payload); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
@@ -75,7 +75,7 @@ func (rt *Route) createNewClassroom(c echo.Context) error {
 		Visibility:  database.VisibilityPUBLIC,
 	}
 
-	new_classroom, err := rt.DB.CreateClass(c.Request().Context(), class_param)
+	new_classroom, err := s.DB.CreateClass(c.Request().Context(), class_param)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
@@ -84,7 +84,7 @@ func (rt *Route) createNewClassroom(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(new_classroom, ""))
 }
 
-func (rt *Route) updateClassroom(c echo.Context) error {
+func (s *Server) updateClassroom(c echo.Context) error {
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
@@ -97,7 +97,7 @@ func (rt *Route) updateClassroom(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	classroom, err := rt.DB.GetClass(c.Request().Context(), uid)
+	classroom, err := s.DB.GetClass(c.Request().Context(), uid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Classroom not found."))
@@ -119,7 +119,7 @@ func (rt *Route) updateClassroom(c echo.Context) error {
 		InviteCode:  payload.InviteCode,
 	}
 
-	updated_classroom, err := rt.DB.UpdateClass(c.Request().Context(), update_class_param)
+	updated_classroom, err := s.DB.UpdateClass(c.Request().Context(), update_class_param)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
@@ -127,7 +127,7 @@ func (rt *Route) updateClassroom(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(updated_classroom, ""))
 }
 
-func (rt *Route) deleteClassroom(c echo.Context) error {
+func (s *Server) deleteClassroom(c echo.Context) error {
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
@@ -138,7 +138,7 @@ func (rt *Route) deleteClassroom(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
 	jwt_payload := utils.GetPayloadFromJwt(token)
 
-	classroom, err := rt.DB.GetClass(c.Request().Context(), uid)
+	classroom, err := s.DB.GetClass(c.Request().Context(), uid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
@@ -148,11 +148,19 @@ func (rt *Route) deleteClassroom(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, utils.NewResponse(nil, "You are not authorized to perform this action."))
 	}
 
-	deleted_classroom, err := rt.DB.DeleteClass(c.Request().Context(), uid)
+	deleted_classroom, err := s.DB.DeleteClass(c.Request().Context(), uid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
 	return c.JSON(http.StatusOK, utils.NewResponse(deleted_classroom, ""))
+}
+
+func (s *Server) getClassroomUsers(c echo.Context) error {
+	return c.String(200, "TODO")
+}
+
+func (s *Server) getClassroomPosts(c echo.Context) error {
+	return c.String(200, "TODO")
 }

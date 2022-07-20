@@ -24,7 +24,7 @@ func TestCreateUserRoute(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	if assert.NoError(t, testRoute.createUser(ctx)) {
+	if assert.NoError(t, testServer.createUser(ctx)) {
 		res := utils.Response{}
 		if err := utils.GetJson(rec.Body, &res); err != nil {
 			t.Fail()
@@ -44,9 +44,9 @@ func TestLoginMystique09(t *testing.T) {
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.Echo().Use(JwtAuthMiddleware(rt.Cfg))
+	ctx.Echo().Use(JwtAuthMiddleware(server.Cfg))
 
-	if assert.NoError(t, testRoute.loginRoute(ctx)) {
+	if assert.NoError(t, testServer.loginHandler(ctx)) {
 		res := utils.Response{}
 		if err := utils.GetJson(rec.Body, &res); err != nil {
 			t.Fail()
@@ -66,9 +66,9 @@ func TestGetUsersRoute(t *testing.T) {
 	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.Echo().Use(JwtAuthMiddleware(rt.Cfg))
+	ctx.Echo().Use(JwtAuthMiddleware(server.Cfg))
 
-	if assert.NoError(t, testRoute.getUsers(ctx)) {
+	if assert.NoError(t, testServer.getUsers(ctx)) {
 		res := utils.Response{}
 		if err := utils.GetJson(rec.Body, &res); err != nil {
 			t.Fail()
@@ -86,9 +86,9 @@ func TestGetUserById(t *testing.T) {
 	ctx.SetPath("/api/v1/users/:id")
 	ctx.SetParamNames("id")
 	ctx.SetParamValues(testUserId)
-	ctx.Echo().Use(JwtAuthMiddleware(rt.Cfg))
+	ctx.Echo().Use(JwtAuthMiddleware(server.Cfg))
 
-	if assert.NoError(t, testRoute.getUser(ctx)) {
+	if assert.NoError(t, testServer.getUser(ctx)) {
 		res := utils.Response{}
 		if err := utils.GetJson(rec.Body, &res); err != nil {
 			t.Fail()
@@ -112,14 +112,14 @@ func TestUpdateUsernameById(t *testing.T) {
 	ctx.SetPath("/api/v1/users/:id")
 	ctx.SetParamNames("id")
 	ctx.SetParamValues(testUserId)
-	ctx.Echo().Use(JwtAuthMiddleware(rt.Cfg))
-	parsed_token, err := jwt.Parse(token, keyFunc(testRoute.Cfg.JWT_SECRET_KEY))
+	ctx.Echo().Use(JwtAuthMiddleware(server.Cfg))
+	parsed_token, err := jwt.Parse(token, keyFunc(testServer.Cfg.JWT_SECRET_KEY))
 	if err != nil {
 		t.Fail()
 	}
 
 	ctx.Set("user", parsed_token)
-	if assert.NoError(t, testRoute.updateUser(ctx)) {
+	if assert.NoError(t, testServer.updateUser(ctx)) {
 		res := utils.Response{}
 		if err := utils.GetJson(rec.Body, &res); err != nil {
 			t.Fail()
@@ -135,15 +135,15 @@ func TestRefreshTokenAfterUpdateUsername(t *testing.T) {
 	//req.Header.Set(echo.HeaderAuthorization, "Bearer "+refreshToken)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	parsed_token, err := jwt.Parse(refreshToken, keyFunc(testRoute.Cfg.JWT_REFRESH_SECRET_KEY))
+	parsed_token, err := jwt.Parse(refreshToken, keyFunc(testServer.Cfg.JWT_REFRESH_SECRET_KEY))
 	if err != nil {
 		t.Fail()
 	}
 
 	ctx.Set("refresh", parsed_token)
-	ctx.Echo().Use(RefreshTokenAuthMiddleware(testRoute.Cfg))
+	ctx.Echo().Use(RefreshTokenAuthMiddleware(testServer.Cfg))
 
-	if assert.NoError(t, testRoute.refreshToken(ctx)) {
+	if assert.NoError(t, testServer.refreshToken(ctx)) {
 		res := utils.Response{}
 		if err := utils.GetJson(rec.Body, &res); err != nil {
 			t.Fail()
@@ -163,14 +163,14 @@ func TestDeleteUserById(t *testing.T) {
 	ctx.SetPath("/api/v1/users/:id")
 	ctx.SetParamNames("id")
 	ctx.SetParamValues(testUserId)
-	ctx.Echo().Use(JwtAuthMiddleware(rt.Cfg))
-	parsed_token, err := jwt.Parse(token, keyFunc(testRoute.Cfg.JWT_SECRET_KEY))
+	ctx.Echo().Use(JwtAuthMiddleware(server.Cfg))
+	parsed_token, err := jwt.Parse(token, keyFunc(testServer.Cfg.JWT_SECRET_KEY))
 	if err != nil {
 		t.Fail()
 	}
 
 	ctx.Set("user", parsed_token)
-	if assert.NoError(t, testRoute.deleteUser(ctx)) {
+	if assert.NoError(t, testServer.deleteUser(ctx)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 	}
 }

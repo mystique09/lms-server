@@ -29,7 +29,7 @@ func TestLoginWithOneAccount(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	if assert.NoError(t, testRoute.loginRoute(ctx)) {
+	if assert.NoError(t, testServer.loginHandler(ctx)) {
 		res := utils.Response{}
 		if err := utils.GetJson(rec.Body, &res); err != nil {
 			t.Fail()
@@ -47,12 +47,12 @@ func TestSignupRoute(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	if assert.NoError(t, testRoute.createUser(ctx)) {
+	if assert.NoError(t, testServer.createUser(ctx)) {
 		res := utils.Response{}
 		if err := utils.GetJson(rec.Body, &res); err != nil {
 			t.Fail()
 		}
-		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, 200, rec.Code)
 		user := res.Data.(map[string]interface{})
 		assert.Equal(t, "STUDENT", user["user_role"])
 		assert.Equal(t, "PUBLIC", user["visibility"])
@@ -99,7 +99,7 @@ func TestLoginWithManyInvalidAccounts(t *testing.T) {
 		rec := httptest.NewRecorder()
 		ctx := e.NewContext(req, rec)
 
-		if assert.NoError(t, testRoute.loginRoute(ctx)) {
+		if assert.NoError(t, testServer.loginHandler(ctx)) {
 			res := utils.Response{}
 			if err := utils.GetJson(rec.Body, &res); err != nil {
 				t.Fail()
@@ -118,7 +118,7 @@ func TestLoginSuccessful(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	if assert.NoError(t, testRoute.loginRoute(ctx)) {
+	if assert.NoError(t, testServer.loginHandler(ctx)) {
 		assert.Equal(t, 200, rec.Code)
 		res := utils.Response{}
 		if err := utils.GetJson(rec.Body, &res); err != nil {
@@ -145,7 +145,7 @@ func TestDeleteUserAfterSignup(t *testing.T) {
 	req := httptest.NewRequest(http.MethodDelete, "/", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	parsed_token, err := jwt.Parse(authTestToken, keyFunc(testRoute.Cfg.JWT_SECRET_KEY))
+	parsed_token, err := jwt.Parse(authTestToken, keyFunc(testServer.Cfg.JWT_SECRET_KEY))
 	if err != nil {
 		t.Fail()
 	}
@@ -154,9 +154,9 @@ func TestDeleteUserAfterSignup(t *testing.T) {
 	ctx.Set("user", parsed_token)
 	ctx.SetParamNames("id")
 	ctx.SetParamValues(authTestUserId)
-	ctx.Echo().Use(JwtAuthMiddleware(rt.Cfg))
+	ctx.Echo().Use(JwtAuthMiddleware(server.Cfg))
 
-	if assert.NoError(t, testRoute.deleteUser(ctx)) {
+	if assert.NoError(t, testServer.deleteUser(ctx)) {
 		res := utils.Response{}
 		if err := utils.GetJson(rec.Body, &res); err != nil {
 			t.Fail()

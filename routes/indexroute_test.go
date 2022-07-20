@@ -16,7 +16,7 @@ func TestIndexRoute(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	if assert.NoError(t, testRoute.indexRoute(ctx)) {
+	if assert.NoError(t, testServer.indexRoute(ctx)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.Equal(t, "Welcome! This is my backend API for my Class Management System personal project.", rec.Body.String())
 	}

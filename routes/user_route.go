@@ -24,8 +24,8 @@ type (
 	}
 )
 
-func (rt *Route) getUsers(c echo.Context) error {
-	users, err := rt.DB.GetUsers(c.Request().Context())
+func (s *Server) getUsers(c echo.Context) error {
+	users, err := s.DB.GetUsers(c.Request().Context())
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
@@ -33,7 +33,7 @@ func (rt *Route) getUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(&users, ""))
 }
 
-func (rt *Route) getUser(c echo.Context) error {
+func (s *Server) getUser(c echo.Context) error {
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
@@ -45,7 +45,7 @@ func (rt *Route) getUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide an ID."))
 	}
 
-	user, err := rt.DB.GetUser(c.Request().Context(), uid)
+	user, err := s.DB.GetUser(c.Request().Context(), uid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
@@ -54,7 +54,7 @@ func (rt *Route) getUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(user, ""))
 }
 
-func (rt *Route) createUser(c echo.Context) error {
+func (s *Server) createUser(c echo.Context) error {
 	user_data := new(UserCreateDTO)
 	if err := c.Bind(user_data); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
@@ -76,7 +76,7 @@ func (rt *Route) createUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide a valid email."))
 	}
 
-	check_user, err := rt.DB.GetUserByUsername(c.Request().Context(), user_data.Username)
+	check_user, err := s.DB.GetUserByUsername(c.Request().Context(), user_data.Username)
 
 	if check_user.ID != uuid.Nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "User already exist."))
@@ -97,7 +97,7 @@ func (rt *Route) createUser(c echo.Context) error {
 		Visibility: database.VisibilityPUBLIC,
 	}
 
-	user, err := rt.DB.CreateUser(c.Request().Context(), new_user_param)
+	user, err := s.DB.CreateUser(c.Request().Context(), new_user_param)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
@@ -106,7 +106,7 @@ func (rt *Route) createUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.NewResponse(user, ""))
 }
 
-func (rt *Route) updateUser(c echo.Context) error {
+func (s *Server) updateUser(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide an ID."))
@@ -133,7 +133,7 @@ func (rt *Route) updateUser(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
 	var payload utils.JwtUserPayload = utils.GetPayloadFromJwt(token)
 
-	check_user, err := rt.DB.GetUser(c.Request().Context(), uid)
+	check_user, err := s.DB.GetUser(c.Request().Context(), uid)
 
 	if err != nil || check_user.ID == uuid.Nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "User not found."))
@@ -153,7 +153,7 @@ func (rt *Route) updateUser(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Empty required field."))
 		}
 
-		new_user, err := rt.DB.UpdateUsername(c.Request().Context(), payload)
+		new_user, err := s.DB.UpdateUsername(c.Request().Context(), payload)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
@@ -169,7 +169,7 @@ func (rt *Route) updateUser(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Empty required field."))
 		}
 
-		new_user, err := rt.DB.UpdateUserEmail(c.Request().Context(), payload)
+		new_user, err := s.DB.UpdateUserEmail(c.Request().Context(), payload)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
@@ -191,7 +191,7 @@ func (rt *Route) updateUser(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Empty required field."))
 		}
 
-		new_user, err := rt.DB.UpdateUserPassword(c.Request().Context(), payload)
+		new_user, err := s.DB.UpdateUserPassword(c.Request().Context(), payload)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
@@ -202,7 +202,7 @@ func (rt *Route) updateUser(c echo.Context) error {
 	return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Invalid query field, idk what to update."))
 }
 
-func (rt *Route) deleteUser(c echo.Context) error {
+func (s *Server) deleteUser(c echo.Context) error {
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
@@ -217,7 +217,7 @@ func (rt *Route) deleteUser(c echo.Context) error {
 	jwt_token := c.Get("user").(*jwt.Token)
 	var payload utils.JwtUserPayload = utils.GetPayloadFromJwt(jwt_token)
 
-	check_user, err := rt.DB.GetUser(c.Request().Context(), uid)
+	check_user, err := s.DB.GetUser(c.Request().Context(), uid)
 
 	if err != nil || check_user.ID == uuid.Nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "User not found."))
@@ -227,7 +227,7 @@ func (rt *Route) deleteUser(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, "You don't have the permission to delete this user.")
 	}
 
-	deleted_user, err := rt.DB.DeleteUser(c.Request().Context(), uid)
+	deleted_user, err := s.DB.DeleteUser(c.Request().Context(), uid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
