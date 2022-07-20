@@ -10,84 +10,55 @@ Tech used:
 - DB diagram
 
 ## API Endpoints
-| REQUEST METHOD    | Response Type    | Endpoint    |
-|---------------- | --------------- | --------------- |
-| GET    | []User    | /api/v1/users    |
-| POST    | String    | /api/v1/users    |
-| GET   | User   | /api/v1/users/:id   |
-| UPDATE    | User    | /api/v1/users/:id    |
-| DELETE    | ID   | /api/v1/users/:id    |
-| GET    | []Class    | /api/v1/classrooms    |
-| POST    | String    | /api/v1/classrooms    |
-| GET   | Class   | /api/v1/classrooms/:id   |
-| UPDATE    | Class    | /api/v1/classrooms/:id    |
-| DELETE    | ID   | /api/v1/classrooms/:id    |
-| GET    | []Post    | /api/v1/classrooms/:class_id/posts    |
-| POST    | String    | /api/v1/classrooms/:class_id/posts   |
-| GET   | Post   | /api/v1/classrooms/:class_id/posts/:post_id   |
-| UPDATE    | Post    | /api/v1/classrooms/:class_id/posts/:post_id    |
-| DELETE    | ID   | /api/v1/classrooms/:class_id/posts/:post_id    |
-| GET    | []Comment    | /api/v1/classrooms/:class_id/posts/:post_id/comments    |
-| POST    | String    | /api/v1/classrooms/:class_id/posts/:post_id/comments   |
-| GET   | Comment   | /api/v1/classrooms/:class_id/posts/:post_id/comments/:comment_id   |
-| UPDATE    | Comment    | /api/v1/classrooms/:class_id/posts/:post_id/comments/:comment_id    |
-| DELETE    | ID   | /api/v1/classrooms/:class_id/posts/:post_id/comments/:comment_id    |
 
+```diff
+// Auth
+POST /api/v1/login
+POST /api/v1/signup
 
-## Response Types
-```go
-type (
-  User struct { 
-    username,
-    email,
-    role,
-    created_at,
-    updated_at
-  }
+// User
+GET /api/v1/users
+GET /api/v1/users/:id
+UPDATE /api/v1/users/:id
+DELETE /api/v1/users/:id
+GET /api/v1/users/:id/classrooms
+GET /api/v1/users/:id/followers
+GET /api/v1/users/:id/following
 
-  Class struct {
-    id,
-    admin_id,
-    name,
-    description,
-    section,
-    room,
-    subject,
-    invite_code,
-    created_at,
-    updated_at
-  }
+// Clasroom
+POST /api/v1/classrooms
+GET /api/v1/classrooms/:id
+UPDATE /api/v1/classrooms/:id
+DELETE /api/v1/classrooms/:id
+GET /api/v1/classrooms/:id/users
+GET /api/v1/classrooms/:id/posts
 
-  ClassWork struct {
-    id,
-    name,
-    user_id,
-    class_id,
-    mark,
-    created_at,
-    updated_at
-  }
+// Post
+POST /api/v1/posts
+GET  /api/v1/posts/:id
+UPDATE /api/v1/posts/:id
+DELETE /api/v1/posts/:id
+GET  /api/v1/posts/:id/likes
+GET /api/v1/posts/:id/comments
 
-  Post struct { 
-    id,
-    author_id,
-    class_id,
-    content,
-    created_at,
-    updated_at 
-  }
+// Comments
+POST /api/v1/comments
+GET /api/v1/comments/:id
+UPDATE /api/v1/comments/:id
+DELETE /api/v1/comments/:id
+GET  /api/v1/comments/:id/likes
 
-  Comment struct { 
-    id,
-    author_id,
-    post_id,
-    content,
-    created_at,
-    updated_at
-  }
-)
+// Likes
+POST /api/v1/likes
+DELETE /api/v1/likes/:id
 
-ID = UUID
+// Followers
+POST /api/v1/followers
+DELETE /api/v1/followers/:id
+
+// Following
+POST /api/v1/following
+DELETE /api/v1/following/:id
 ```
 
 ## TODO
