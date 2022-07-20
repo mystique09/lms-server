@@ -24,6 +24,8 @@ DELETE /api/v1/users/:id
 GET /api/v1/users/:id/classrooms
 GET /api/v1/users/:id/followers
 GET /api/v1/users/:id/following
+POST /api/v1/users/:id/following
+DELETE /api/v1/users/:id/following/:id
 
 // Clasroom
 POST /api/v1/classrooms
@@ -40,6 +42,8 @@ UPDATE /api/v1/posts/:id
 DELETE /api/v1/posts/:id
 GET  /api/v1/posts/:id/likes
 GET /api/v1/posts/:id/comments
+POST /api/v1/posts/:id/likes
+DELETE /api/v1/posts/:id/likes
 
 // Comments
 POST /api/v1/comments
@@ -47,18 +51,8 @@ GET /api/v1/comments/:id
 UPDATE /api/v1/comments/:id
 DELETE /api/v1/comments/:id
 GET  /api/v1/comments/:id/likes
-
-// Likes
-POST /api/v1/likes
-DELETE /api/v1/likes/:id
-
-// Followers
-POST /api/v1/followers
-DELETE /api/v1/followers/:id
-
-// Following
-POST /api/v1/following
-DELETE /api/v1/following/:id
+POST /api/v1/comments/:id/likes
+DELETE /api/v1/comments/:id/likes
 ```
 
 ## TODO
