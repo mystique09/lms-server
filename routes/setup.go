@@ -59,21 +59,27 @@ func Launch() {
 	e.POST("/api/v1/login", rt.loginRoute)
 	e.POST("/api/v1/refresh", rt.refreshToken, RefreshTokenAuthMiddleware(rt.Cfg))
 
-	user_route := e.Group("/api/v1/users", JwtAuthMiddleware(rt.Cfg))
+	user_group := e.Group("/api/v1/users", JwtAuthMiddleware(rt.Cfg))
 	{
-		user_route.GET("", rt.getUsers)
-		user_route.GET("/:id", rt.getUser)
-		user_route.PUT("/:id", rt.updateUser)
-		user_route.DELETE("/:id", rt.deleteUser)
+		user_group.GET("", rt.getUsers)
+		user_group.GET("/:id", rt.getUser)
+		user_group.PUT("/:id", rt.updateUser)
+		user_group.DELETE("/:id", rt.deleteUser)
+		user_group.GET("/:id/classrooms", rt.getClassrooms)
+		user_group.GET("/:id/classrooms", rt.getFollowers)
+		user_group.GET("/:id/classrooms", rt.getFollowing)
+		user_group.POST("/:id/following", rt.createNewFollowing)
+		user_group.DELETE("/:id/following/:id", rt.removeFollowing)
 	}
 
-	class_route := e.Group("/api/v1/classrooms", JwtAuthMiddleware(rt.Cfg))
+	class_group := e.Group("/api/v1/classrooms", JwtAuthMiddleware(rt.Cfg))
 	{
-		class_route.GET("", rt.getClassrooms)
-		class_route.GET("/:id", rt.getClassroom)
-		class_route.POST("", rt.createNewClassroom)
-		class_route.PUT("/:id", rt.updateClassroom)
-		class_route.DELETE("/:id", rt.deleteClassroom)
+		class_group.GET("/:id", rt.getClassroom)
+		class_group.POST("", rt.createNewClassroom)
+		class_group.PUT("/:id", rt.updateClassroom)
+		class_group.DELETE("/:id", rt.deleteClassroom)
+		class_group.GET("/:id/users", rt.getClassroomUsers)
+		class_group.GET("/:id/posts", rt.getClassroomPosts)
 	}
 
 	e.Logger.Fatal(e.Start(rt.Cfg.PORT))
