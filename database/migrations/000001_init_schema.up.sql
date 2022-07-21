@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml-lang.org)
 -- Database: PostgreSQL
--- Generated at: 2022-07-18T13:53:32.951Z
+-- Generated at: 2022-07-21T07:28:29.060Z
 
 CREATE TYPE "role" AS ENUM (
   'STUDENT',
@@ -89,28 +89,28 @@ CREATE TABLE "comment" (
   "updated_at" timestamptz DEFAULT (now())
 );
 
-ALTER TABLE "user_follow" ADD FOREIGN KEY ("follower") REFERENCES "user" ("id");
+ALTER TABLE "user_follow" ADD FOREIGN KEY ("follower") REFERENCES "user" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "user_follow" ADD FOREIGN KEY ("following") REFERENCES "user" ("id");
+ALTER TABLE "user_follow" ADD FOREIGN KEY ("following") REFERENCES "user" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "class" ADD FOREIGN KEY ("admin_id") REFERENCES "user" ("id");
+ALTER TABLE "class" ADD FOREIGN KEY ("admin_id") REFERENCES "user" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "class_work" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "class_work" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "class_work" ADD FOREIGN KEY ("class_id") REFERENCES "class" ("id");
+ALTER TABLE "class_work" ADD FOREIGN KEY ("class_id") REFERENCES "class" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "class_member" ADD FOREIGN KEY ("class_id") REFERENCES "class" ("id");
+ALTER TABLE "class_member" ADD FOREIGN KEY ("class_id") REFERENCES "class" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "class_member" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "class_member" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "post" ADD FOREIGN KEY ("author_id") REFERENCES "user" ("id");
+ALTER TABLE "post" ADD FOREIGN KEY ("author_id") REFERENCES "user" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "post" ADD FOREIGN KEY ("class_id") REFERENCES "class" ("id");
+ALTER TABLE "post" ADD FOREIGN KEY ("class_id") REFERENCES "class" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "post_like" ADD FOREIGN KEY ("post_id") REFERENCES "post" ("id");
+ALTER TABLE "post_like" ADD FOREIGN KEY ("post_id") REFERENCES "post" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "post_like" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "post_like" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "comment" ADD FOREIGN KEY ("author_id") REFERENCES "user" ("id");
+ALTER TABLE "comment" ADD FOREIGN KEY ("author_id") REFERENCES "user" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "comment" ADD FOREIGN KEY ("post_id") REFERENCES "post" ("id");
+ALTER TABLE "comment" ADD FOREIGN KEY ("post_id") REFERENCES "post" ("id") ON DELETE CASCADE;
