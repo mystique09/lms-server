@@ -13,7 +13,7 @@ import (
 )
 
 const deleteClassworkFromClass = `-- name: DeleteClassworkFromClass :exec
-DELETE FROM "class_work"
+DELETE FROM class_works
 WHERE id = $1 AND user_id = $2 AND class_id = $3
 `
 
@@ -30,8 +30,9 @@ func (q *Queries) DeleteClassworkFromClass(ctx context.Context, arg DeleteClassw
 
 const getClassWork = `-- name: GetClassWork :one
 SELECT id, name, user_id, class_id, mark, created_at, updated_at 
-FROM "class_work" 
+FROM class_works 
 WHERE id = $1 AND user_id = $2 AND class_id = $3
+LIMIT 1
 `
 
 type GetClassWorkParams struct {
@@ -40,9 +41,6 @@ type GetClassWorkParams struct {
 	ClassID uuid.UUID `json:"class_id"`
 }
 
-//description: Get a class work by id
-//parameters: id
-//returns: class_work
 func (q *Queries) GetClassWork(ctx context.Context, arg GetClassWorkParams) (ClassWork, error) {
 	row := q.queryRow(ctx, q.getClassWorkStmt, getClassWork, arg.ID, arg.UserID, arg.ClassID)
 	var i ClassWork
@@ -59,7 +57,7 @@ func (q *Queries) GetClassWork(ctx context.Context, arg GetClassWorkParams) (Cla
 }
 
 const insertNewClasswork = `-- name: InsertNewClasswork :one
-INSERT INTO "class_work" (
+INSERT INTO class_works (
   id, name, user_id, class_id
 ) VALUES (
   $1, $2, $3, $4
@@ -95,17 +93,20 @@ func (q *Queries) InsertNewClasswork(ctx context.Context, arg InsertNewClasswork
 
 const listClassworkAdmin = `-- name: ListClassworkAdmin :many
 SELECT id, name, user_id, class_id, mark, created_at, updated_at
-FROM "class_work"
+FROM class_works
 WHERE class_id = $1
 ORDER BY created_at
-DESC
+LIMIT 10
+OFFSET $2
 `
 
-//description: List all class works
-//parameters: none
-//returns: class_work
-func (q *Queries) ListClassworkAdmin(ctx context.Context, classID uuid.UUID) ([]ClassWork, error) {
-	rows, err := q.query(ctx, q.listClassworkAdminStmt, listClassworkAdmin, classID)
+type ListClassworkAdminParams struct {
+	ClassID uuid.UUID `json:"class_id"`
+	Offset  int32     `json:"offset"`
+}
+
+func (q *Queries) ListClassworkAdmin(ctx context.Context, arg ListClassworkAdminParams) ([]ClassWork, error) {
+	rows, err := q.query(ctx, q.listClassworkAdminStmt, listClassworkAdmin, arg.ClassID, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -137,22 +138,20 @@ func (q *Queries) ListClassworkAdmin(ctx context.Context, classID uuid.UUID) ([]
 
 const listSubmittedClassworks = `-- name: ListSubmittedClassworks :many
 SELECT id, name, user_id, class_id, mark, created_at, updated_at
-FROM "class_work"
-WHERE class_id = $1 AND user_id = $2
+FROM class_works
+WHERE user_id = $1
 ORDER BY created_at
-DESC
+LIMIT 10
+OFFSET $2
 `
 
 type ListSubmittedClassworksParams struct {
-	ClassID uuid.UUID `json:"class_id"`
-	UserID  uuid.UUID `json:"user_id"`
+	UserID uuid.UUID `json:"user_id"`
+	Offset int32     `json:"offset"`
 }
 
-//description: List all submitted classworks of a user
-//parameters: user_id, class_id
-//returns: class_work
 func (q *Queries) ListSubmittedClassworks(ctx context.Context, arg ListSubmittedClassworksParams) ([]ClassWork, error) {
-	rows, err := q.query(ctx, q.listSubmittedClassworksStmt, listSubmittedClassworks, arg.ClassID, arg.UserID)
+	rows, err := q.query(ctx, q.listSubmittedClassworksStmt, listSubmittedClassworks, arg.UserID, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +182,7 @@ func (q *Queries) ListSubmittedClassworks(ctx context.Context, arg ListSubmitted
 }
 
 const updateAClassworkMark = `-- name: UpdateAClassworkMark :exec
-UPDATE "class_work"
+UPDATE class_works
 SET mark = $1
 WHERE id = $2 AND user_id = $3 AND class_id = $4
 `

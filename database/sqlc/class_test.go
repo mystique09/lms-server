@@ -13,15 +13,7 @@ var class_id uuid.UUID
 var class_invcode uuid.UUID
 
 func TestCreateOneNewClassroom(t *testing.T) {
-	uid := uuid.New()
-	user, err := testQueries.CreateUser(context.Background(), CreateUserParams{
-		ID:         uid,
-		Username:   "mystique08",
-		Password:   "testpassword",
-		Email:      "testemail233@gmail.com",
-		UserRole:   RoleSTUDENT,
-		Visibility: VisibilityPUBLIC,
-	})
+	user, err := precreateUser("mystique09", "testpassword", "testemail@gmail.com")
 
 	if err != nil {
 		t.Fail()
@@ -41,7 +33,7 @@ func TestCreateOneNewClassroom(t *testing.T) {
 	classroom, err := testQueries.CreateClass(context.Background(), args)
 
 	if assert.NoError(t, err) {
-		assert.Equal(t, uid, classroom.AdminID)
+		assert.Equal(t, user.ID, classroom.AdminID)
 		assert.Len(t, classroom.Description, 20)
 		assert.Len(t, classroom.Room, 20)
 		assert.Len(t, classroom.Section, 20)
@@ -50,7 +42,7 @@ func TestCreateOneNewClassroom(t *testing.T) {
 		assert.Equal(t, classroom.Visibility, VisibilityPUBLIC)
 	}
 
-	user_id = uid
+	user_id = user.ID
 	class_id = classroom.ID
 	class_invcode = classroom.InviteCode
 }
@@ -103,7 +95,6 @@ func TestCreateNewMoreClassrooms(t *testing.T) {
 
 		}
 	}
-	//testQueries.DeleteUser(context.Background(), user_id)
 }
 
 func TestUpdateOneClassroom(t *testing.T) {
@@ -125,11 +116,21 @@ func TestUpdateOneClassroom(t *testing.T) {
 		assert.Len(t, updated.Section, 8)
 		assert.Len(t, updated.Room, 5)
 	}
-	//testQueries.DeleteUser(context.Background(), user_id)
+}
+
+func TestGetAllClassroomsFromUser(t *testing.T) {
+	param := GetAllClassFromUserParams{
+		AdminID: user_id,
+	}
+	class, err := testQueries.GetAllClassFromUser(context.Background(), param)
+
+	if assert.NoError(t, err) {
+		assert.NotEmpty(t, class)
+	}
 }
 
 func TestDeleteClassroom(t *testing.T) {
-	deleted, err := testQueries.DeleteClass(context.Background(), class_id)
+	deleted, err := postDeleteClassroom(class_id)
 
 	if assert.NoError(t, err) {
 		assert.Equal(t, deleted.ID, class_id)
@@ -141,5 +142,5 @@ func TestDeleteClassroom(t *testing.T) {
 		assert.Equal(t, class.ID, uuid.Nil)
 	}
 
-	testQueries.DeleteUser(context.Background(), user_id)
+	postDeleteUser(user_id)
 }

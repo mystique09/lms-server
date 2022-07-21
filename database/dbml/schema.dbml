@@ -104,3 +104,16 @@ Table comment {
 
 Ref: comment.author_id > user.id [delete: cascade]
 Ref: comment.post_id > post.id [delete: cascade]
+
+Table comment_like {
+  id uuid [pk, unique]
+  comment_id uuid [not null]
+  user_id uuid [not null]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: comment_like.comment_id > comment.id [delete: cascade]
+Ref: comment_like.user_id > user.id [delete: cascade]
+
+
