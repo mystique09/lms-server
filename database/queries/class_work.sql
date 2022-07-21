@@ -1,43 +1,37 @@
 -- name: GetClassWork :one
---description: Get a class work by id
---parameters: id
---returns: class_work
 SELECT * 
-FROM "class_work" 
-WHERE id = $1 AND user_id = $2 AND class_id = $3;
+FROM class_works 
+WHERE id = $1 AND user_id = $2 AND class_id = $3
+LIMIT 1;
 
 -- name: ListClassworkAdmin :many
---description: List all class works
---parameters: none
---returns: class_work
 SELECT *
-FROM "class_work"
+FROM class_works
 WHERE class_id = $1
 ORDER BY created_at
-DESC;
+LIMIT 10
+OFFSET $2;
 
 -- name: ListSubmittedClassworks :many
---description: List all submitted classworks of a user
---parameters: user_id, class_id
---returns: class_work
 SELECT *
-FROM "class_work"
-WHERE class_id = $1 AND user_id = $2
+FROM class_works
+WHERE user_id = $1
 ORDER BY created_at
-DESC;
+LIMIT 10
+OFFSET $2;
 
 -- name: InsertNewClasswork :one
-INSERT INTO "class_work" (
+INSERT INTO class_works (
   id, name, user_id, class_id
 ) VALUES (
   $1, $2, $3, $4
 ) RETURNING *;
 
 -- name: UpdateAClassworkMark :exec
-UPDATE "class_work"
+UPDATE class_works
 SET mark = $1
 WHERE id = $2 AND user_id = $3 AND class_id = $4;
 
 -- name: DeleteClassworkFromClass :exec
-DELETE FROM "class_work"
+DELETE FROM class_works
 WHERE id = $1 AND user_id = $2 AND class_id = $3;

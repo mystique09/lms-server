@@ -1,24 +1,25 @@
 -- name: GetUser :one
 SELECT *
-FROM "user"
+FROM users
 WHERE id = $1
 LIMIT 1;
 
 -- name: GetUsers :many
---description: Get all user by page and offset
 SELECT *
-FROM "user"
+FROM users
 ORDER BY created_at
-ASC;
+ASC
+LIMIT 10
+OFFSET $1;
 
 -- name: GetUserByUsername :one
 SELECT *
-FROM "user"
+FROM users
 WHERE username = $1
 LIMIT 1;
 
 -- name: CreateUser :one
-INSERT INTO "user"(
+INSERT INTO users(
   id, username, password, email, user_role, visibility
 ) VALUES (
   $1, $2, $3, $4, $5, $6
@@ -26,24 +27,24 @@ INSERT INTO "user"(
 RETURNING *;
 
 -- name: UpdateUsername :one
-UPDATE "user"
+UPDATE users
 SET username = $1
 WHERE id =  $2
 RETURNING *;
 
 -- name: UpdateUserEmail :one
-UPDATE "user"
+UPDATE users
 SET email = $1
 WHERE id =  $2
 RETURNING *;
 
 -- name: UpdateUserPassword :one
-UPDATE "user"
+UPDATE users
 SET password = $1
 WHERE id =  $2
 RETURNING *;
 
 -- name: DeleteUser :one
-DELETE FROM "user"
+DELETE FROM users
 WHERE id = $1
 RETURNING *;
