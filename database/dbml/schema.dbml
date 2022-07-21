@@ -21,15 +21,18 @@ Table user {
 
 Table user_follow {
   id uuid [pk, unique]
-  follower uuid [not null, ref: > user.id]
-  following uuid [not null, ref: > user.id]
+  follower uuid [not null]
+  following uuid [not null]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
 
+Ref: user_follow.follower > user.id [delete: cascade]
+Ref: user_follow.following > user.id [delete: cascade]
+
 Table class {
   id uuid [pk, unique]
-  admin_id uuid [not null, ref: > user.id]
+  admin_id uuid [not null]
   name varchar [not null]
   description varchar [not null]
   section varchar [not null]
@@ -41,46 +44,63 @@ Table class {
   updated_at timestamptz [default: `now()`]
 }
 
+Ref: class.admin_id > user.id [delete: cascade]
+
 Table class_work {
   id uuid [pk, unique]
   name varchar [not null]
-  user_id uuid [not null, ref: > user.id]
-  class_id uuid [not null, ref: > class.id]
+  user_id uuid [not null]
+  class_id uuid [not null]
   mark int [default: `0`]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
 
+Ref: class_work.user_id > user.id [delete: cascade]
+Ref: class_work.class_id > class.id [delete: cascade]
+
 Table class_member {
   id uuid [pk, unique]
-  class_id uuid [not null, ref: > class.id]
-  user_id uuid [not null, ref: > user.id]
+  class_id uuid [not null]
+  user_id uuid [not null]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
+
+Ref: class_member.class_id > class.id [delete: cascade]
+Ref: class_member.user_id > user.id [delete: cascade]
 
 Table post {
   id uuid [pk, unique]
   content varchar [not null]
-  author_id uuid [not null, ref: > user.id]
-  class_id uuid [not null, ref: > class.id]
+  author_id uuid [not null]
+  class_id uuid [not null]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
 
+Ref: post.author_id > user.id [delete: cascade]
+Ref: post.class_id > class.id [delete: cascade]
+
 Table post_like {
   id uuid [pk, unique]
-  post_id uuid [not null, ref: > post.id]
-  user_id uuid [not null, ref: > user.id]
+  post_id uuid [not null]
+  user_id uuid [not null]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
+
+Ref: post_like.post_id > post.id [delete: cascade]
+Ref: post_like.user_id > user.id [delete: cascade]
 
 Table comment {
   id uuid [pk]
   content varchar [not null]
-  author_id uuid [not null, ref: > user.id]
-  post_id uuid [not null, ref: > post.id]
+  author_id uuid [not null]
+  post_id uuid [not null]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
+
+Ref: comment.author_id > user.id [delete: cascade]
+Ref: comment.post_id > post.id [delete: cascade]
