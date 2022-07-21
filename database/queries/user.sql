@@ -5,9 +5,11 @@ WHERE id = $1
 LIMIT 1;
 
 -- name: GetUsers :many
+--description: Get all user by page and offset
 SELECT *
 FROM "user"
-ORDER BY created_at DESC;
+ORDER BY created_at
+ASC;
 
 -- name: GetUserByUsername :one
 SELECT *
@@ -15,16 +17,11 @@ FROM "user"
 WHERE username = $1
 LIMIT 1;
 
--- name: GetUserWithPosts :one
-SELECT (id, username, email, user_role)
-FROM "user"
-LEFT JOIN "post" ON "user".id = "post".user_id;
-
 -- name: CreateUser :one
 INSERT INTO "user"(
-  id, username, password, email, user_role
+  id, username, password, email, user_role, visibility
 ) VALUES (
-  $1, $2, $3, $4, $5
+  $1, $2, $3, $4, $5, $6
 )
 RETURNING *;
 

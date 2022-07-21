@@ -7,28 +7,26 @@ package database
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/google/uuid"
 )
 
 const createClass = `-- name: CreateClass :one
-INSERT INTO "class" (id, admin_id, name, description, section, room, subject, invite_code, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-RETURNING id, admin_id, name, description, section, room, subject, invite_code, created_at, updated_at
+INSERT INTO "class" (id, admin_id, name, description, section, room, subject, invite_code, visibility)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
 `
 
 type CreateClassParams struct {
-	ID          uuid.UUID      `json:"id"`
-	AdminID     uuid.NullUUID  `json:"admin_id"`
-	Name        string         `json:"name"`
-	Description sql.NullString `json:"description"`
-	Section     sql.NullString `json:"section"`
-	Room        sql.NullString `json:"room"`
-	Subject     sql.NullString `json:"subject"`
-	InviteCode  uuid.NullUUID  `json:"invite_code"`
-	CreatedAt   sql.NullTime   `json:"created_at"`
-	UpdatedAt   sql.NullTime   `json:"updated_at"`
+	ID          uuid.UUID  `json:"id"`
+	AdminID     uuid.UUID  `json:"admin_id"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Section     string     `json:"section"`
+	Room        string     `json:"room"`
+	Subject     string     `json:"subject"`
+	InviteCode  uuid.UUID  `json:"invite_code"`
+	Visibility  Visibility `json:"visibility"`
 }
 
 //description: Create a class
@@ -44,8 +42,7 @@ func (q *Queries) CreateClass(ctx context.Context, arg CreateClassParams) (Class
 		arg.Room,
 		arg.Subject,
 		arg.InviteCode,
-		arg.CreatedAt,
-		arg.UpdatedAt,
+		arg.Visibility,
 	)
 	var i Class
 	err := row.Scan(
@@ -57,28 +54,45 @@ func (q *Queries) CreateClass(ctx context.Context, arg CreateClassParams) (Class
 		&i.Room,
 		&i.Subject,
 		&i.InviteCode,
+		&i.Visibility,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
-const deleteClass = `-- name: DeleteClass :exec
+const deleteClass = `-- name: DeleteClass :one
 DELETE FROM "class"
 WHERE id = $1
+RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
 `
 
 //description: Delete a class
 //parameters: id
-func (q *Queries) DeleteClass(ctx context.Context, id uuid.UUID) error {
-	_, err := q.exec(ctx, q.deleteClassStmt, deleteClass, id)
-	return err
+func (q *Queries) DeleteClass(ctx context.Context, id uuid.UUID) (Class, error) {
+	row := q.queryRow(ctx, q.deleteClassStmt, deleteClass, id)
+	var i Class
+	err := row.Scan(
+		&i.ID,
+		&i.AdminID,
+		&i.Name,
+		&i.Description,
+		&i.Section,
+		&i.Room,
+		&i.Subject,
+		&i.InviteCode,
+		&i.Visibility,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const getClass = `-- name: GetClass :one
-SELECT id, admin_id, name, description, section, room, subject, invite_code, created_at, updated_at
+SELECT id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
 FROM "class"
 WHERE id = $1
+LIMIT 1
 `
 
 //description: Get a class by id
@@ -96,6 +110,7 @@ func (q *Queries) GetClass(ctx context.Context, id uuid.UUID) (Class, error) {
 		&i.Room,
 		&i.Subject,
 		&i.InviteCode,
+		&i.Visibility,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -103,8 +118,9 @@ func (q *Queries) GetClass(ctx context.Context, id uuid.UUID) (Class, error) {
 }
 
 const listClass = `-- name: ListClass :many
-SELECT id, admin_id, name, description, section, room, subject, invite_code, created_at, updated_at
+SELECT id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
 FROM "class"
+ORDER BY created_at
 `
 
 //description: List all classes
@@ -128,6 +144,7 @@ func (q *Queries) ListClass(ctx context.Context) ([]Class, error) {
 			&i.Room,
 			&i.Subject,
 			&i.InviteCode,
+			&i.Visibility,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -144,35 +161,48 @@ func (q *Queries) ListClass(ctx context.Context) ([]Class, error) {
 	return items, nil
 }
 
-const updateClass = `-- name: UpdateClass :exec
+const updateClass = `-- name: UpdateClass :one
 UPDATE "class"
-SET name = $1, description = $2, section = $3, room = $4, subject = $5, invite_code = $6, updated_at = $7
-WHERE id = $8
+SET name = $1, description = $2, section = $3, room = $4, subject = $5, invite_code = $6
+WHERE id = $7
+RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
 `
 
 type UpdateClassParams struct {
-	Name        string         `json:"name"`
-	Description sql.NullString `json:"description"`
-	Section     sql.NullString `json:"section"`
-	Room        sql.NullString `json:"room"`
-	Subject     sql.NullString `json:"subject"`
-	InviteCode  uuid.NullUUID  `json:"invite_code"`
-	UpdatedAt   sql.NullTime   `json:"updated_at"`
-	ID          uuid.UUID      `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Section     string    `json:"section"`
+	Room        string    `json:"room"`
+	Subject     string    `json:"subject"`
+	InviteCode  uuid.UUID `json:"invite_code"`
+	ID          uuid.UUID `json:"id"`
 }
 
 //description: Update a class
 //parameters: name, description, section, room, subject, invite_code, updated_at
-func (q *Queries) UpdateClass(ctx context.Context, arg UpdateClassParams) error {
-	_, err := q.exec(ctx, q.updateClassStmt, updateClass,
+func (q *Queries) UpdateClass(ctx context.Context, arg UpdateClassParams) (Class, error) {
+	row := q.queryRow(ctx, q.updateClassStmt, updateClass,
 		arg.Name,
 		arg.Description,
 		arg.Section,
 		arg.Room,
 		arg.Subject,
 		arg.InviteCode,
-		arg.UpdatedAt,
 		arg.ID,
 	)
-	return err
+	var i Class
+	err := row.Scan(
+		&i.ID,
+		&i.AdminID,
+		&i.Name,
+		&i.Description,
+		&i.Section,
+		&i.Room,
+		&i.Subject,
+		&i.InviteCode,
+		&i.Visibility,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

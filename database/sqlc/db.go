@@ -63,9 +63,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getUserByUsernameStmt, err = db.PrepareContext(ctx, getUserByUsername); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserByUsername: %w", err)
 	}
-	if q.getUserWithPostsStmt, err = db.PrepareContext(ctx, getUserWithPosts); err != nil {
-		return nil, fmt.Errorf("error preparing query GetUserWithPosts: %w", err)
-	}
 	if q.getUsersStmt, err = db.PrepareContext(ctx, getUsers); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUsers: %w", err)
 	}
@@ -182,11 +179,6 @@ func (q *Queries) Close() error {
 	if q.getUserByUsernameStmt != nil {
 		if cerr := q.getUserByUsernameStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getUserByUsernameStmt: %w", cerr)
-		}
-	}
-	if q.getUserWithPostsStmt != nil {
-		if cerr := q.getUserWithPostsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getUserWithPostsStmt: %w", cerr)
 		}
 	}
 	if q.getUsersStmt != nil {
@@ -321,7 +313,6 @@ type Queries struct {
 	getOnePostStmt                 *sql.Stmt
 	getUserStmt                    *sql.Stmt
 	getUserByUsernameStmt          *sql.Stmt
-	getUserWithPostsStmt           *sql.Stmt
 	getUsersStmt                   *sql.Stmt
 	insertNewClassworkStmt         *sql.Stmt
 	insertNewCommentInPostStmt     *sql.Stmt
@@ -357,7 +348,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getOnePostStmt:                 q.getOnePostStmt,
 		getUserStmt:                    q.getUserStmt,
 		getUserByUsernameStmt:          q.getUserByUsernameStmt,
-		getUserWithPostsStmt:           q.getUserWithPostsStmt,
 		getUsersStmt:                   q.getUsersStmt,
 		insertNewClassworkStmt:         q.insertNewClassworkStmt,
 		insertNewCommentInPostStmt:     q.insertNewCommentInPostStmt,

@@ -18,9 +18,9 @@ WHERE id = $1 AND user_id = $2 AND class_id = $3
 `
 
 type DeleteClassworkFromClassParams struct {
-	ID      uuid.UUID     `json:"id"`
-	UserID  uuid.NullUUID `json:"user_id"`
-	ClassID uuid.NullUUID `json:"class_id"`
+	ID      uuid.UUID `json:"id"`
+	UserID  uuid.UUID `json:"user_id"`
+	ClassID uuid.UUID `json:"class_id"`
 }
 
 func (q *Queries) DeleteClassworkFromClass(ctx context.Context, arg DeleteClassworkFromClassParams) error {
@@ -35,9 +35,9 @@ WHERE id = $1 AND user_id = $2 AND class_id = $3
 `
 
 type GetClassWorkParams struct {
-	ID      uuid.UUID     `json:"id"`
-	UserID  uuid.NullUUID `json:"user_id"`
-	ClassID uuid.NullUUID `json:"class_id"`
+	ID      uuid.UUID `json:"id"`
+	UserID  uuid.UUID `json:"user_id"`
+	ClassID uuid.UUID `json:"class_id"`
 }
 
 //description: Get a class work by id
@@ -67,10 +67,10 @@ INSERT INTO "class_work" (
 `
 
 type InsertNewClassworkParams struct {
-	ID      uuid.UUID     `json:"id"`
-	Name    string        `json:"name"`
-	UserID  uuid.NullUUID `json:"user_id"`
-	ClassID uuid.NullUUID `json:"class_id"`
+	ID      uuid.UUID `json:"id"`
+	Name    string    `json:"name"`
+	UserID  uuid.UUID `json:"user_id"`
+	ClassID uuid.UUID `json:"class_id"`
 }
 
 func (q *Queries) InsertNewClasswork(ctx context.Context, arg InsertNewClassworkParams) (ClassWork, error) {
@@ -104,7 +104,7 @@ DESC
 //description: List all class works
 //parameters: none
 //returns: class_work
-func (q *Queries) ListClassworkAdmin(ctx context.Context, classID uuid.NullUUID) ([]ClassWork, error) {
+func (q *Queries) ListClassworkAdmin(ctx context.Context, classID uuid.UUID) ([]ClassWork, error) {
 	rows, err := q.query(ctx, q.listClassworkAdminStmt, listClassworkAdmin, classID)
 	if err != nil {
 		return nil, err
@@ -144,8 +144,8 @@ DESC
 `
 
 type ListSubmittedClassworksParams struct {
-	ClassID uuid.NullUUID `json:"class_id"`
-	UserID  uuid.NullUUID `json:"user_id"`
+	ClassID uuid.UUID `json:"class_id"`
+	UserID  uuid.UUID `json:"user_id"`
 }
 
 //description: List all submitted classworks of a user
@@ -191,8 +191,8 @@ WHERE id = $2 AND user_id = $3 AND class_id = $4
 type UpdateAClassworkMarkParams struct {
 	Mark    sql.NullInt32 `json:"mark"`
 	ID      uuid.UUID     `json:"id"`
-	UserID  uuid.NullUUID `json:"user_id"`
-	ClassID uuid.NullUUID `json:"class_id"`
+	UserID  uuid.UUID     `json:"user_id"`
+	ClassID uuid.UUID     `json:"class_id"`
 }
 
 func (q *Queries) UpdateAClassworkMark(ctx context.Context, arg UpdateAClassworkMarkParams) error {

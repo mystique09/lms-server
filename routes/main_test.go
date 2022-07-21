@@ -12,7 +12,7 @@ import (
 )
 
 var mockDB *database.Queries
-var testRoute Route
+var testServer Server
 var e *echo.Echo
 
 func TestMain(m *testing.M) {
@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 	mockDB = database.New(db)
 	e = echo.New()
 
-	testRoute = Route{
+	testServer = Server{
 		DB:  mockDB,
 		Cfg: cfg,
 	}

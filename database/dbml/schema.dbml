@@ -3,36 +3,58 @@ Enum role {
     TEACHER
 }
 
+Enum visibility {
+    PUBLIC
+    PRIVATE
+}
+
 Table user {
   id uuid [pk]
   username varchar [not null, unique]
   password varchar [not null]
   email varchar [not null, unique]
   user_role role
+  visibility visibility 
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table user_follow {
+  id uuid [pk, unique]
+  follower uuid [not null, ref: > user.id]
+  following uuid [not null, ref: > user.id]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
 
 Table class {
   id uuid [pk, unique]
-  admin_id uuid
+  admin_id uuid [not null, ref: > user.id]
   name varchar [not null]
-  description varchar
-  section varchar
-  room varchar
-  subject varchar
-  invite_code uuid
+  description varchar [not null]
+  section varchar [not null]
+  room varchar [not null]
+  subject varchar [not null]
+  invite_code uuid [not null]
+  visibility visibility
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
-
 }
 
 Table class_work {
   id uuid [pk, unique]
   name varchar [not null]
-  user_id uuid
-  class_id uuid
+  user_id uuid [not null, ref: > user.id]
+  class_id uuid [not null, ref: > class.id]
   mark int [default: `0`]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table class_member {
+  id uuid [pk, unique]
+  class_id uuid [not null, ref: > class.id]
+  user_id uuid [not null, ref: > user.id]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
@@ -40,8 +62,16 @@ Table class_work {
 Table post {
   id uuid [pk, unique]
   content varchar [not null]
-  author_id uuid [unique]
-  class_id uuid
+  author_id uuid [not null, ref: > user.id]
+  class_id uuid [not null, ref: > class.id]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table post_like {
+  id uuid [pk, unique]
+  post_id uuid [not null, ref: > post.id]
+  user_id uuid [not null, ref: > user.id]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
@@ -49,15 +79,8 @@ Table post {
 Table comment {
   id uuid [pk]
   content varchar [not null]
-  author_id uuid
-  post_id uuid
+  author_id uuid [not null, ref: > user.id]
+  post_id uuid [not null, ref: > post.id]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
-
-Ref: user.id - post.author_id
-Ref: class.admin_id > user.id
-Ref: class_work.user_id > user.id
-Ref: class_work.class_id > class.id
-Ref: comment.post_id > post.id
-Ref: comment.author_id > user.id

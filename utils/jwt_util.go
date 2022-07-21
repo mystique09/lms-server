@@ -6,25 +6,29 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 )
 
 type (
 	JwtClaims struct {
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Role     string `json:"role"`
+		ID       uuid.UUID `json:"id"`
+		Username string    `json:"username"`
+		Email    string    `json:"email"`
+		Role     string    `json:"role"`
 		jwt.StandardClaims
 	}
 
 	JwtUserPayload struct {
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Role     string `json:"role"`
+		ID       uuid.UUID `json:"id"`
+		Username string    `json:"username"`
+		Email    string    `json:"email"`
+		Role     string    `json:"role"`
 	}
 )
 
-func NewJwtPayload(username, email, role string) JwtUserPayload {
+func NewJwtPayload(id uuid.UUID, username string, email string, role string) JwtUserPayload {
 	return JwtUserPayload{
+		ID:       id,
 		Username: username,
 		Email:    email,
 		Role:     role,
@@ -33,6 +37,7 @@ func NewJwtPayload(username, email, role string) JwtUserPayload {
 
 func NewJwtClaims(payload JwtUserPayload, duration time.Duration) JwtClaims {
 	return JwtClaims{
+		ID:       payload.ID,
 		Username: payload.Username,
 		Email:    payload.Email,
 		Role:     payload.Role,
@@ -55,7 +60,10 @@ func ExtractTokenFromHeader(header http.Header) string {
 
 func GetPayloadFromJwt(token *jwt.Token) JwtUserPayload {
 	var claims jwt.MapClaims = token.Claims.(jwt.MapClaims)
+	parsed, _ := uuid.Parse(claims["id"].(string))
+
 	return JwtUserPayload{
+		ID:       parsed,
 		Username: claims["username"].(string),
 		Email:    claims["email"].(string),
 		Role:     claims["role"].(string),
