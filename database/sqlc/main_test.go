@@ -12,6 +12,7 @@ import (
 )
 
 var testQueries *Queries
+var charsets string = "abcdefghijklmnopqrstuvwxyz"
 
 func TestMain(m *testing.M) {
 	godotenv.Load("./.development.env")
