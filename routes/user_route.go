@@ -4,6 +4,7 @@ import (
 	"net/http"
 	database "server/database/sqlc"
 	"server/utils"
+	"strconv"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
@@ -25,7 +26,18 @@ type (
 )
 
 func (s *Server) getUsers(c echo.Context) error {
-	users, err := s.DB.GetUsers(c.Request().Context())
+	page := c.QueryParam("page")
+
+	if page == "" {
+		page = "0"
+	}
+
+	offset, err := strconv.Atoi(page)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
+	}
+
+	users, err := s.DB.GetUsers(c.Request().Context(), int32(offset*10))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))

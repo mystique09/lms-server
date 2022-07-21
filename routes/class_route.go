@@ -4,6 +4,7 @@ import (
 	"net/http"
 	database "server/database/sqlc"
 	"server/utils"
+	"strconv"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
@@ -28,7 +29,30 @@ type UpdateClassroomDTO struct {
 }
 
 func (s *Server) getClassrooms(c echo.Context) error {
-	classes, err := s.DB.ListClass(c.Request().Context())
+	id := c.Param("id")
+	uid, err := uuid.Parse(id)
+
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+	page := c.QueryParam("page")
+
+	if page == "" {
+		page = "0"
+	}
+
+	offset, err := strconv.Atoi(page)
+
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
+	param := database.GetAllClassFromUserParams{
+		AdminID: uid,
+		Offset:  int32(offset) * 10,
+	}
+
+	classes, err := s.DB.GetAllClassFromUser(c.Request().Context(), param)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
@@ -38,7 +62,25 @@ func (s *Server) getClassrooms(c echo.Context) error {
 }
 
 func (s *Server) getAllClassrooms(c echo.Context) error {
-	return c.String(200, "TODO")
+	page := c.QueryParam("page")
+
+	if page == "" {
+		page = "0"
+	}
+
+	offset, err := strconv.Atoi(page)
+
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
+	public_classrooms, err := s.DB.ListAllPublicClass(c.Request().Context(), int32(offset*10))
+
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
+	return c.JSON(400, utils.NewResponse(public_classrooms, ""))
 }
 
 func (s *Server) getClassroom(c echo.Context) error {
