@@ -25,7 +25,7 @@ type (
 	}
 )
 
-type UserResponse struct {
+type UserClassrooms struct {
 	*database.User
 	Rooms []database.Classroom `json:"classrooms"`
 }
@@ -58,17 +58,17 @@ func (s *Server) getUsers(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
 	}
 
-	var users_wclassrooms []UserResponse = []UserResponse{}
+	var users_wclassrooms []UserClassrooms = []UserClassrooms{}
 
-	for i, _ := range users {
-		user_resp := UserResponse{
+	for i := range users {
+		user_resp := UserClassrooms{
 			User:  &users[i],
 			Rooms: []database.Classroom{},
 		}
 
-		classrooms, err := s.DB.GetAllClassFromUser(c.Request().Context(), database.GetAllClassFromUserParams{
-			AdminID: users[i].ID,
-			Offset:  int32(comment_offset * 10),
+		classrooms, err := s.DB.GetAllJoinedClassrooms(c.Request().Context(), database.GetAllJoinedClassroomsParams{
+			UserID: users[i].ID,
+			Offset: int32(comment_offset * 10),
 		})
 
 		if err != nil {
@@ -83,6 +83,18 @@ func (s *Server) getUsers(c echo.Context) error {
 
 func (s *Server) getUser(c echo.Context) error {
 	id := c.Param("id")
+	page := c.QueryParam("page")
+
+	if page == "" {
+		page = "0"
+	}
+
+	offset, err := strconv.Atoi(page)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+	}
+
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
@@ -99,7 +111,21 @@ func (s *Server) getUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(user, ""))
+	classrooms, err := s.DB.GetAllJoinedClassrooms(c.Request().Context(), database.GetAllJoinedClassroomsParams{
+		UserID: uid,
+		Offset: int32(offset * 10),
+	})
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+	}
+
+	user_wclassrooms := UserClassrooms{
+		User:  &user,
+		Rooms: classrooms,
+	}
+
+	return c.JSON(http.StatusOK, utils.NewResponse(user_wclassrooms, ""))
 }
 
 func (s *Server) createUser(c echo.Context) error {
