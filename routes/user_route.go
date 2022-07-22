@@ -25,14 +25,29 @@ type (
 	}
 )
 
+type UserResponse struct {
+	*database.User
+	Rooms []database.Classroom `json:"classrooms"`
+}
+
 func (s *Server) getUsers(c echo.Context) error {
 	page := c.QueryParam("page")
+	comment := c.QueryParam("comment_page")
 
 	if page == "" {
 		page = "0"
 	}
 
+	if comment == "" {
+		comment = "0"
+	}
+
 	offset, err := strconv.Atoi(page)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
+	}
+
+	comment_offset, err := strconv.Atoi(comment)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
 	}
@@ -42,7 +57,28 @@ func (s *Server) getUsers(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
 	}
-	return c.JSON(http.StatusOK, utils.NewResponse(&users, ""))
+
+	var users_wclassrooms []UserResponse = []UserResponse{}
+
+	for i, _ := range users {
+		user_resp := UserResponse{
+			User:  &users[i],
+			Rooms: []database.Classroom{},
+		}
+
+		classrooms, err := s.DB.GetAllClassFromUser(c.Request().Context(), database.GetAllClassFromUserParams{
+			AdminID: users[i].ID,
+			Offset:  int32(comment_offset * 10),
+		})
+
+		if err != nil {
+			user_resp.Rooms = []database.Classroom{}
+		}
+		user_resp.Rooms = append(user_resp.Rooms, classrooms...)
+		users_wclassrooms = append(users_wclassrooms, user_resp)
+	}
+
+	return c.JSON(http.StatusOK, utils.NewResponse(&users_wclassrooms, ""))
 }
 
 func (s *Server) getUser(c echo.Context) error {
