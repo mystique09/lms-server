@@ -9,6 +9,9 @@ setup:
 	# install package dependencies
 	go install
 
+dev:
+	cd web && pnpm dev & air && fg
+
 create:
 	migrate create -ext sql -dir ./database/migrations/ -seq $(name)
 
