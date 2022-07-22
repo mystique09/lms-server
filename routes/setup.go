@@ -67,10 +67,12 @@ func Launch() {
 		user_group.DELETE("/:id", server.deleteUser)
 		// relationships
 		user_group.GET("/:id/classrooms", server.getClassrooms)
+		user_group.POST("/:id/classrooms", server.joinClassroom)
+		user_group.DELETE("/:id/classrooms/:class_id", server.leaveClassroom)
 		user_group.GET("/:id/followers", server.getFollowers)
-		user_group.GET("/:id/following", server.getFollowings)
-		user_group.POST("/:id/following", server.addNewFollowing)
-		user_group.DELETE("/:id/following/:id", server.removeFollowing)
+		user_group.GET("/:id/followings", server.getFollowings)
+		user_group.POST("/:id/followings", server.addNewFollower)
+		user_group.DELETE("/:id/followings/:following_id", server.removeFollowing)
 	}
 
 	class_group := e.Group("/api/v1/classrooms", JwtAuthMiddleware(server.Cfg))
