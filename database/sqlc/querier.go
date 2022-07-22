@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	AddNewClassroomMember(ctx context.Context, arg AddNewClassroomMemberParams) (ClassroomMember, error)
 	CreateClass(ctx context.Context, arg CreateClassParams) (Classroom, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteClass(ctx context.Context, id uuid.UUID) (Classroom, error)
@@ -18,12 +19,18 @@ type Querier interface {
 	DeleteCommentFromPost(ctx context.Context, arg DeleteCommentFromPostParams) (interface{}, error)
 	DeletePostFromClass(ctx context.Context, arg DeletePostFromClassParams) (interface{}, error)
 	DeleteUser(ctx context.Context, id uuid.UUID) (User, error)
+	FollowUser(ctx context.Context, arg FollowUserParams) (UserFollow, error)
 	GetAllClassFromUser(ctx context.Context, arg GetAllClassFromUserParams) ([]Classroom, error)
+	GetAllClassroomMembers(ctx context.Context, arg GetAllClassroomMembersParams) ([]GetAllClassroomMembersRow, error)
 	GetAllCommentsFromPost(ctx context.Context, arg GetAllCommentsFromPostParams) ([]Comment, error)
-	GetAllFollowers(ctx context.Context, arg GetAllFollowersParams) ([]UserFollow, error)
-	GetAllFollowing(ctx context.Context, arg GetAllFollowingParams) ([]UserFollow, error)
+	GetAllFollowers(ctx context.Context, arg GetAllFollowersParams) ([]GetAllFollowersRow, error)
+	GetAllFollowing(ctx context.Context, arg GetAllFollowingParams) ([]GetAllFollowingRow, error)
+	GetAllJoinedClassrooms(ctx context.Context, arg GetAllJoinedClassroomsParams) ([]Classroom, error)
 	GetClass(ctx context.Context, id uuid.UUID) (Classroom, error)
 	GetClassWork(ctx context.Context, arg GetClassWorkParams) (ClassWork, error)
+	GetClassroomWithInviteCode(ctx context.Context, inviteCode uuid.UUID) (uuid.UUID, error)
+	GetFollowerById(ctx context.Context, id uuid.UUID) (GetFollowerByIdRow, error)
+	GetOneFollower(ctx context.Context, arg GetOneFollowerParams) (UserFollow, error)
 	GetOnePost(ctx context.Context, arg GetOnePostParams) (Post, error)
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
@@ -31,11 +38,9 @@ type Querier interface {
 	InsertNewClasswork(ctx context.Context, arg InsertNewClassworkParams) (ClassWork, error)
 	InsertNewCommentInPost(ctx context.Context, arg InsertNewCommentInPostParams) (Comment, error)
 	InsertNewPost(ctx context.Context, arg InsertNewPostParams) (Post, error)
+	LeaveClassroom(ctx context.Context, arg LeaveClassroomParams) (ClassroomMember, error)
 	ListAllPostsByUser(ctx context.Context, arg ListAllPostsByUserParams) ([]Post, error)
 	ListAllPostsFromClass(ctx context.Context, arg ListAllPostsFromClassParams) ([]Post, error)
-	//description: List all classes
-	//parameters: none
-	//returns: classes
 	ListAllPublicClass(ctx context.Context, offset int32) ([]Classroom, error)
 	ListClassworkAdmin(ctx context.Context, arg ListClassworkAdminParams) ([]ClassWork, error)
 	ListSubmittedClassworks(ctx context.Context, arg ListSubmittedClassworksParams) ([]ClassWork, error)

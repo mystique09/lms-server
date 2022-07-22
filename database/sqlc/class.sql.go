@@ -12,8 +12,12 @@ import (
 )
 
 const createClass = `-- name: CreateClass :one
-INSERT INTO classrooms (id, admin_id, name, description, section, room, subject, invite_code, visibility)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+INSERT INTO classrooms(
+  id, admin_id, name, description, section, room, subject, invite_code, visibility
+)
+VALUES(
+  $1, $2, $3, $4, $5, $6, $7, $8, $9
+)
 RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
 `
 
@@ -158,6 +162,20 @@ func (q *Queries) GetClass(ctx context.Context, id uuid.UUID) (Classroom, error)
 	return i, err
 }
 
+const getClassroomWithInviteCode = `-- name: GetClassroomWithInviteCode :one
+SELECT id
+FROM classrooms
+WHERE invite_code = $1
+LIMIT 1
+`
+
+func (q *Queries) GetClassroomWithInviteCode(ctx context.Context, inviteCode uuid.UUID) (uuid.UUID, error) {
+	row := q.queryRow(ctx, q.getClassroomWithInviteCodeStmt, getClassroomWithInviteCode, inviteCode)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
 const listAllPublicClass = `-- name: ListAllPublicClass :many
 SELECT id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
 FROM classrooms
@@ -167,9 +185,6 @@ LIMIT 10
 OFFSET $1
 `
 
-//description: List all classes
-//parameters: none
-//returns: classes
 func (q *Queries) ListAllPublicClass(ctx context.Context, offset int32) ([]Classroom, error) {
 	rows, err := q.query(ctx, q.listAllPublicClassStmt, listAllPublicClass, offset)
 	if err != nil {
