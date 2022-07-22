@@ -15,15 +15,15 @@ password VARCHAR NOT NULL,
 email VARCHAR NOT NULL UNIQUE,
 user_role role NOT NULL DEFAULT 'STUDENT',
 visibility visibility NOT NULL DEFAULT 'PUBLIC',
-created_at TIMESTAMPTZ,
-updated_at TIMESTAMPTZ);
+created_at DATE NOT NULL DEFAULT now(),
+updated_at DATE NOT NULL DEFAULT now());
 
 CREATE TABLE user_follows (
 id UUID PRIMARY KEY UNIQUE,
 follower UUID NOT NULL,
 following UUID NOT NULL,
-created_at TIMESTAMPTZ,
-updated_at TIMESTAMPTZ);
+created_at DATE NOT NULL DEFAULT now(),
+updated_at DATE NOT NULL DEFAULT now());
 
 CREATE TABLE classrooms (
 id UUID PRIMARY KEY UNIQUE,
@@ -35,8 +35,8 @@ room VARCHAR NOT NULL,
 subject VARCHAR NOT NULL,
 invite_code UUID NOT NULL,
 visibility visibility NOT NULL,
-created_at TIMESTAMPTZ,
-updated_at TIMESTAMPTZ);
+created_at DATE NOT NULL DEFAULT now(),
+updated_at DATE NOT NULL DEFAULT now());
 
 CREATE TABLE class_works (
 id UUID PRIMARY KEY UNIQUE,
@@ -51,38 +51,38 @@ CREATE TABLE classroom_members (
 id UUID PRIMARY KEY UNIQUE,
 class_id UUID NOT NULL,
 user_id UUID NOT NULL,
-created_at TIMESTAMPTZ,
-updated_at TIMESTAMPTZ);
+created_at DATE NOT NULL DEFAULT now(),
+updated_at DATE NOT NULL DEFAULT now());
 
 CREATE TABLE posts (
 id UUID PRIMARY KEY UNIQUE,
 content VARCHAR NOT NULL,
 author_id UUID NOT NULL,
 class_id UUID NOT NULL,
-created_at TIMESTAMPTZ,
-updated_at TIMESTAMPTZ);
+created_at DATE NOT NULL DEFAULT now(),
+updated_at DATE NOT NULL DEFAULT now());
 
 CREATE TABLE post_likes (
 id UUID PRIMARY KEY UNIQUE,
 post_id UUID NOT NULL,
 user_id UUID NOT NULL,
-created_at TIMESTAMPTZ,
-updated_at TIMESTAMPTZ);
+created_at DATE NOT NULL DEFAULT now(),
+updated_at DATE NOT NULL DEFAULT now());
 
 CREATE TABLE comments (
 id UUID PRIMARY KEY,
 content VARCHAR NOT NULL,
 author_id UUID NOT NULL,
 post_id UUID NOT NULL,
-created_at TIMESTAMPTZ,
-updated_at TIMESTAMPTZ);
+created_at DATE NOT NULL DEFAULT now(),
+updated_at DATE NOT NULL DEFAULT now());
 
 CREATE TABLE comment_likes (
 id UUID PRIMARY KEY UNIQUE,
 comment_id UUID NOT NULL,
 user_id UUID NOT NULL,
-created_at TIMESTAMPTZ,
-updated_at TIMESTAMPTZ);
+created_at DATE NOT NULL DEFAULT now(),
+updated_at DATE DEFAULT now());
 
 ALTER TABLE user_follows ADD CONSTRAINT user_follows_follower_users_id FOREIGN KEY (follower) REFERENCES users(id) ON DELETE CASCADE ON UPDATE NO ACTION;
 ALTER TABLE user_follows ADD CONSTRAINT user_follows_following_users_id FOREIGN KEY (following) REFERENCES users(id) ON DELETE CASCADE ON UPDATE NO ACTION;
