@@ -5,9 +5,6 @@ WHERE id = $1
 LIMIT 1;
 
 -- name: ListAllPublicClass :many
---description: List all classes
---parameters: none
---returns: classes
 SELECT *
 FROM classrooms
 WHERE visibility = 'PUBLIC'
@@ -24,9 +21,19 @@ LIMIT 10
 OFFSET $2;
 
 -- name: CreateClass :one
-INSERT INTO classrooms (id, admin_id, name, description, section, room, subject, invite_code, visibility)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+INSERT INTO classrooms(
+  id, admin_id, name, description, section, room, subject, invite_code, visibility
+)
+VALUES(
+  $1, $2, $3, $4, $5, $6, $7, $8, $9
+)
 RETURNING *;
+
+-- name: GetClassroomWithInviteCode :one
+SELECT id
+FROM classrooms
+WHERE invite_code = $1
+LIMIT 1;
 
 -- name: UpdateClass :one
 UPDATE classrooms
