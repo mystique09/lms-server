@@ -61,16 +61,39 @@ DELETE /api/v1/comments/:id/likes
 - [x] Create new user
 - [x] Update a user
 - [x] Delete a user
-- [ ] Get all classroom
-- [ ] Get one classroom
-- [ ] Create new classroom
-- [ ] Update a classroom
-- [ ] Delete a classroom
+- [x] Get all public classroom
+- [x] Get all classrooms joined/owned by a user
+- [x] Leave a classroom
+- [x] Follow fellow user
+- [x] Unfollow fellow user
+- [x] Get all followers
+- [x] Get all users you've followed(followings)
+- [x] Get one classroom
+- [x] Create new classroom
+- [x] Update a classroom
+- [x] Delete a classroom
 - [x] Implement JWT
 - [x] Implement Bcrypt
 - [x] Implement Logger
 - [x] Implement Rate Limit
 - [x] Implement CORS
+- [ ] Create the initial routers of posts
+- [ ] Create the initial routers of comments
+- [ ] Create the initial routers of class_works/assignments
+- [ ] Create a post inside a classroom
+- [ ] Udpate a post
+- [ ] Delete a post
+- [ ] Get all posts
+- [ ] Get one posts
+- [ ] Like a post
+- [ ] Unlike a post
+- [ ] Get all likes of a post
+- [ ] Get all comments of a post inside a classroom
+- [ ] Get one comment of a post
+- [ ] Like a comment of a post
+- [ ] Unlike a comment of a post
+- [ ] Delete a comment
+- [ ] Update a comment
 - [ ] Integrate storage provider for file uploads 
 - [ ] Implement file upload for class works
 - [ ] Implement charts for teachers
