@@ -11,27 +11,20 @@ import (
 var user_id uuid.UUID
 
 func TestCreateUser(t *testing.T) {
-	args := CreateUserParams{
-		ID:         uuid.New(),
-		Username:   "mystique09",
-		Password:   "testpassword",
-		Email:      "testemail@gmail.com",
-		UserRole:   RoleSTUDENT,
-		Visibility: VisibilityPUBLIC,
-	}
-
-	user, err := testQueries.CreateUser(context.Background(), args)
+	username := "mystique09"
+	password := "testpassword"
+	email := "testemail@gmail.com"
+	user, err := precreateUser(username, password, email)
 
 	if assert.NoError(t, err) {
-		assert.Equal(t, args.Username, user.Username)
-		assert.Equal(t, args.Password, user.Password)
-		assert.Equal(t, args.Email, user.Email)
-		assert.Equal(t, args.UserRole, user.UserRole)
+		assert.Equal(t, username, user.Username)
+		assert.Equal(t, password, user.Password)
+		assert.Equal(t, email, user.Email)
+		assert.Equal(t, RoleSTUDENT, user.UserRole)
 		assert.NotZero(t, user.CreatedAt)
 		assert.NotZero(t, user.UpdatedAt)
 		user_id = user.ID
 	}
-	//testQueries.DeleteUser(context.Background(), user.ID)
 }
 
 func TestGetUser(t *testing.T) {
@@ -89,9 +82,11 @@ func TestUpdateUserName(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	deleted, err := testQueries.DeleteUser(context.Background(), user_id)
+	postDeleteUser(user_id)
 
-	if assert.NoError(t, err) {
-		assert.Equal(t, user_id, deleted.ID)
+	user, err := testQueries.GetUser(context.Background(), user_id)
+
+	if assert.Error(t, err) {
+		assert.Equal(t, uuid.Nil, user.ID)
 	}
 }

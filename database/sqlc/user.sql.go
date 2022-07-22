@@ -12,7 +12,7 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO "user"(
+INSERT INTO users(
   id, username, password, email, user_role, visibility
 ) VALUES (
   $1, $2, $3, $4, $5, $6
@@ -53,7 +53,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const deleteUser = `-- name: DeleteUser :one
-DELETE FROM "user"
+DELETE FROM users
 WHERE id = $1
 RETURNING id, username, password, email, user_role, visibility, created_at, updated_at
 `
@@ -76,7 +76,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) (User, error) {
 
 const getUser = `-- name: GetUser :one
 SELECT id, username, password, email, user_role, visibility, created_at, updated_at
-FROM "user"
+FROM users
 WHERE id = $1
 LIMIT 1
 `
@@ -99,7 +99,7 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 
 const getUserByUsername = `-- name: GetUserByUsername :one
 SELECT id, username, password, email, user_role, visibility, created_at, updated_at
-FROM "user"
+FROM users
 WHERE username = $1
 LIMIT 1
 `
@@ -122,14 +122,15 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 
 const getUsers = `-- name: GetUsers :many
 SELECT id, username, password, email, user_role, visibility, created_at, updated_at
-FROM "user"
+FROM users
 ORDER BY created_at
 ASC
+LIMIT 10
+OFFSET $1
 `
 
-//description: Get all user by page and offset
-func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.query(ctx, q.getUsersStmt, getUsers)
+func (q *Queries) GetUsers(ctx context.Context, offset int32) ([]User, error) {
+	rows, err := q.query(ctx, q.getUsersStmt, getUsers, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +162,7 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 }
 
 const updateUserEmail = `-- name: UpdateUserEmail :one
-UPDATE "user"
+UPDATE users
 SET email = $1
 WHERE id =  $2
 RETURNING id, username, password, email, user_role, visibility, created_at, updated_at
@@ -189,7 +190,7 @@ func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams
 }
 
 const updateUserPassword = `-- name: UpdateUserPassword :one
-UPDATE "user"
+UPDATE users
 SET password = $1
 WHERE id =  $2
 RETURNING id, username, password, email, user_role, visibility, created_at, updated_at
@@ -217,7 +218,7 @@ func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPassword
 }
 
 const updateUsername = `-- name: UpdateUsername :one
-UPDATE "user"
+UPDATE users
 SET username = $1
 WHERE id =  $2
 RETURNING id, username, password, email, user_role, visibility, created_at, updated_at

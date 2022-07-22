@@ -12,8 +12,12 @@ import (
 )
 
 const createClass = `-- name: CreateClass :one
-INSERT INTO "class" (id, admin_id, name, description, section, room, subject, invite_code, visibility)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+INSERT INTO classrooms(
+  id, admin_id, name, description, section, room, subject, invite_code, visibility
+)
+VALUES(
+  $1, $2, $3, $4, $5, $6, $7, $8, $9
+)
 RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
 `
 
@@ -29,10 +33,7 @@ type CreateClassParams struct {
 	Visibility  Visibility `json:"visibility"`
 }
 
-//description: Create a class
-//parameters: id(uuid), admin_id, name, description, section, room, subject, invite_code, created_at, updated_at
-//returns: class
-func (q *Queries) CreateClass(ctx context.Context, arg CreateClassParams) (Class, error) {
+func (q *Queries) CreateClass(ctx context.Context, arg CreateClassParams) (Classroom, error) {
 	row := q.queryRow(ctx, q.createClassStmt, createClass,
 		arg.ID,
 		arg.AdminID,
@@ -44,7 +45,7 @@ func (q *Queries) CreateClass(ctx context.Context, arg CreateClassParams) (Class
 		arg.InviteCode,
 		arg.Visibility,
 	)
-	var i Class
+	var i Classroom
 	err := row.Scan(
 		&i.ID,
 		&i.AdminID,
@@ -62,16 +63,14 @@ func (q *Queries) CreateClass(ctx context.Context, arg CreateClassParams) (Class
 }
 
 const deleteClass = `-- name: DeleteClass :one
-DELETE FROM "class"
+DELETE FROM classrooms
 WHERE id = $1
 RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
 `
 
-//description: Delete a class
-//parameters: id
-func (q *Queries) DeleteClass(ctx context.Context, id uuid.UUID) (Class, error) {
+func (q *Queries) DeleteClass(ctx context.Context, id uuid.UUID) (Classroom, error) {
 	row := q.queryRow(ctx, q.deleteClassStmt, deleteClass, id)
-	var i Class
+	var i Classroom
 	err := row.Scan(
 		&i.ID,
 		&i.AdminID,
@@ -88,53 +87,113 @@ func (q *Queries) DeleteClass(ctx context.Context, id uuid.UUID) (Class, error) 
 	return i, err
 }
 
-const getClass = `-- name: GetClass :one
+const getAllClassFromUser = `-- name: GetAllClassFromUser :many
 SELECT id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
-FROM "class"
-WHERE id = $1
-LIMIT 1
-`
-
-//description: Get a class by id
-//parameters: id
-//returns: class
-func (q *Queries) GetClass(ctx context.Context, id uuid.UUID) (Class, error) {
-	row := q.queryRow(ctx, q.getClassStmt, getClass, id)
-	var i Class
-	err := row.Scan(
-		&i.ID,
-		&i.AdminID,
-		&i.Name,
-		&i.Description,
-		&i.Section,
-		&i.Room,
-		&i.Subject,
-		&i.InviteCode,
-		&i.Visibility,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const listClass = `-- name: ListClass :many
-SELECT id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
-FROM "class"
+FROM classrooms
+WHERE admin_id = $1
 ORDER BY created_at
+LIMIT 10
+OFFSET $2
 `
 
-//description: List all classes
-//parameters: none
-//returns: classes
-func (q *Queries) ListClass(ctx context.Context) ([]Class, error) {
-	rows, err := q.query(ctx, q.listClassStmt, listClass)
+type GetAllClassFromUserParams struct {
+	AdminID uuid.UUID `json:"admin_id"`
+	Offset  int32     `json:"offset"`
+}
+
+func (q *Queries) GetAllClassFromUser(ctx context.Context, arg GetAllClassFromUserParams) ([]Classroom, error) {
+	rows, err := q.query(ctx, q.getAllClassFromUserStmt, getAllClassFromUser, arg.AdminID, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Class
+	var items []Classroom
 	for rows.Next() {
-		var i Class
+		var i Classroom
+		if err := rows.Scan(
+			&i.ID,
+			&i.AdminID,
+			&i.Name,
+			&i.Description,
+			&i.Section,
+			&i.Room,
+			&i.Subject,
+			&i.InviteCode,
+			&i.Visibility,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getClass = `-- name: GetClass :one
+SELECT id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
+FROM classrooms
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetClass(ctx context.Context, id uuid.UUID) (Classroom, error) {
+	row := q.queryRow(ctx, q.getClassStmt, getClass, id)
+	var i Classroom
+	err := row.Scan(
+		&i.ID,
+		&i.AdminID,
+		&i.Name,
+		&i.Description,
+		&i.Section,
+		&i.Room,
+		&i.Subject,
+		&i.InviteCode,
+		&i.Visibility,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getClassroomWithInviteCode = `-- name: GetClassroomWithInviteCode :one
+SELECT id
+FROM classrooms
+WHERE invite_code = $1
+LIMIT 1
+`
+
+func (q *Queries) GetClassroomWithInviteCode(ctx context.Context, inviteCode uuid.UUID) (uuid.UUID, error) {
+	row := q.queryRow(ctx, q.getClassroomWithInviteCodeStmt, getClassroomWithInviteCode, inviteCode)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
+const listAllPublicClass = `-- name: ListAllPublicClass :many
+SELECT id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
+FROM classrooms
+WHERE visibility = 'PUBLIC'
+ORDER BY created_at
+LIMIT 10
+OFFSET $1
+`
+
+func (q *Queries) ListAllPublicClass(ctx context.Context, offset int32) ([]Classroom, error) {
+	rows, err := q.query(ctx, q.listAllPublicClassStmt, listAllPublicClass, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Classroom
+	for rows.Next() {
+		var i Classroom
 		if err := rows.Scan(
 			&i.ID,
 			&i.AdminID,
@@ -162,7 +221,7 @@ func (q *Queries) ListClass(ctx context.Context) ([]Class, error) {
 }
 
 const updateClass = `-- name: UpdateClass :one
-UPDATE "class"
+UPDATE classrooms
 SET name = $1, description = $2, section = $3, room = $4, subject = $5, invite_code = $6
 WHERE id = $7
 RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
@@ -178,9 +237,7 @@ type UpdateClassParams struct {
 	ID          uuid.UUID `json:"id"`
 }
 
-//description: Update a class
-//parameters: name, description, section, room, subject, invite_code, updated_at
-func (q *Queries) UpdateClass(ctx context.Context, arg UpdateClassParams) (Class, error) {
+func (q *Queries) UpdateClass(ctx context.Context, arg UpdateClassParams) (Classroom, error) {
 	row := q.queryRow(ctx, q.updateClassStmt, updateClass,
 		arg.Name,
 		arg.Description,
@@ -190,7 +247,7 @@ func (q *Queries) UpdateClass(ctx context.Context, arg UpdateClassParams) (Class
 		arg.InviteCode,
 		arg.ID,
 	)
-	var i Class
+	var i Classroom
 	err := row.Scan(
 		&i.ID,
 		&i.AdminID,

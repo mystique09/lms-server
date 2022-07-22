@@ -11,53 +11,42 @@ import (
 )
 
 type Querier interface {
-	//description: Create a class
-	//parameters: id(uuid), admin_id, name, description, section, room, subject, invite_code, created_at, updated_at
-	//returns: class
-	CreateClass(ctx context.Context, arg CreateClassParams) (Class, error)
+	AddNewClassroomMember(ctx context.Context, arg AddNewClassroomMemberParams) (ClassroomMember, error)
+	CreateClass(ctx context.Context, arg CreateClassParams) (Classroom, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
-	//description: Delete a class
-	//parameters: id
-	DeleteClass(ctx context.Context, id uuid.UUID) (Class, error)
+	DeleteClass(ctx context.Context, id uuid.UUID) (Classroom, error)
 	DeleteClassworkFromClass(ctx context.Context, arg DeleteClassworkFromClassParams) error
 	DeleteCommentFromPost(ctx context.Context, arg DeleteCommentFromPostParams) (interface{}, error)
 	DeletePostFromClass(ctx context.Context, arg DeletePostFromClassParams) (interface{}, error)
 	DeleteUser(ctx context.Context, id uuid.UUID) (User, error)
-	GetAllCommentsFromPost(ctx context.Context, postID uuid.UUID) ([]Comment, error)
-	//description: Get a class by id
-	//parameters: id
-	//returns: class
-	GetClass(ctx context.Context, id uuid.UUID) (Class, error)
-	//description: Get a class work by id
-	//parameters: id
-	//returns: class_work
+	FollowUser(ctx context.Context, arg FollowUserParams) (UserFollow, error)
+	GetAllClassFromUser(ctx context.Context, arg GetAllClassFromUserParams) ([]Classroom, error)
+	GetAllClassroomMembers(ctx context.Context, arg GetAllClassroomMembersParams) ([]GetAllClassroomMembersRow, error)
+	GetAllCommentsFromPost(ctx context.Context, arg GetAllCommentsFromPostParams) ([]Comment, error)
+	GetAllFollowers(ctx context.Context, arg GetAllFollowersParams) ([]GetAllFollowersRow, error)
+	GetAllFollowing(ctx context.Context, arg GetAllFollowingParams) ([]GetAllFollowingRow, error)
+	GetAllJoinedClassrooms(ctx context.Context, arg GetAllJoinedClassroomsParams) ([]Classroom, error)
+	GetClass(ctx context.Context, id uuid.UUID) (Classroom, error)
 	GetClassWork(ctx context.Context, arg GetClassWorkParams) (ClassWork, error)
+	GetClassroomWithInviteCode(ctx context.Context, inviteCode uuid.UUID) (uuid.UUID, error)
+	GetFollowerById(ctx context.Context, id uuid.UUID) (GetFollowerByIdRow, error)
+	GetOneFollower(ctx context.Context, arg GetOneFollowerParams) (UserFollow, error)
 	GetOnePost(ctx context.Context, arg GetOnePostParams) (Post, error)
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
-	//description: Get all user by page and offset
-	GetUsers(ctx context.Context) ([]User, error)
+	GetUsers(ctx context.Context, offset int32) ([]User, error)
 	InsertNewClasswork(ctx context.Context, arg InsertNewClassworkParams) (ClassWork, error)
 	InsertNewCommentInPost(ctx context.Context, arg InsertNewCommentInPostParams) (Comment, error)
 	InsertNewPost(ctx context.Context, arg InsertNewPostParams) (Post, error)
+	LeaveClassroom(ctx context.Context, arg LeaveClassroomParams) (ClassroomMember, error)
 	ListAllPostsByUser(ctx context.Context, arg ListAllPostsByUserParams) ([]Post, error)
-	ListAllPostsFromClass(ctx context.Context, classID uuid.UUID) ([]Post, error)
-	//description: List all classes
-	//parameters: none
-	//returns: classes
-	ListClass(ctx context.Context) ([]Class, error)
-	//description: List all class works
-	//parameters: none
-	//returns: class_work
-	ListClassworkAdmin(ctx context.Context, classID uuid.UUID) ([]ClassWork, error)
-	//description: List all submitted classworks of a user
-	//parameters: user_id, class_id
-	//returns: class_work
+	ListAllPostsFromClass(ctx context.Context, arg ListAllPostsFromClassParams) ([]Post, error)
+	ListAllPublicClass(ctx context.Context, offset int32) ([]Classroom, error)
+	ListClassworkAdmin(ctx context.Context, arg ListClassworkAdminParams) ([]ClassWork, error)
 	ListSubmittedClassworks(ctx context.Context, arg ListSubmittedClassworksParams) ([]ClassWork, error)
+	UnfollowUser(ctx context.Context, id uuid.UUID) (UserFollow, error)
 	UpdateAClassworkMark(ctx context.Context, arg UpdateAClassworkMarkParams) error
-	//description: Update a class
-	//parameters: name, description, section, room, subject, invite_code, updated_at
-	UpdateClass(ctx context.Context, arg UpdateClassParams) (Class, error)
+	UpdateClass(ctx context.Context, arg UpdateClassParams) (Classroom, error)
 	UpdateCommentContentInPost(ctx context.Context, arg UpdateCommentContentInPostParams) (interface{}, error)
 	UpdatePostContent(ctx context.Context, arg UpdatePostContentParams) (interface{}, error)
 	UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) (User, error)
