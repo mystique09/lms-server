@@ -2,11 +2,12 @@ package routes
 
 import (
 	"log"
+
 	//	"net/http"
 	"server/config"
 	database "server/database/sqlc"
+	"server/frontend"
 	"server/utils"
-	"server/web"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -57,10 +58,10 @@ func Launch() {
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(server.Cfg))
 	// remove this if building
-	e.StaticFS("web/dist", web.BuildWebFS())
+	e.StaticFS("frontend/build", frontend.BuildHTTPFS())
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
-		//Filesystem: http.FS(web.BuildWebFS()),
-		Root:  "web/dist",
+		//Filesystem: http.FS(frontend.BuildHTTPFS()),
+		Root:  "frontend/build",
 		HTML5: true,
 	}))
 

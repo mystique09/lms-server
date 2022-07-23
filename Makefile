@@ -10,10 +10,10 @@ setup:
 	go install
 
 dev:
-	cd web && pnpm watch & go run cmd/main.go && fg
+	cd frontend && pnpm watch & go run cmd/main.go && fg
 
 watch:
-	cd web && pnpm dev & air && fg
+	cd frontend && pnpm build & air && fg
 
 create:
 	migrate create -ext sql -dir ./database/migrations/ -seq $(name)
