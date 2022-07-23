@@ -2,7 +2,7 @@ package routes
 
 import (
 	"log"
-	"net/http"
+	//	"net/http"
 	"server/config"
 	database "server/database/sqlc"
 	"server/utils"
@@ -57,10 +57,10 @@ func Launch() {
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(server.Cfg))
 	// remove this if building
-	//e.StaticFS("web/dist", web.BuildWebFS())
+	e.StaticFS("web/dist", web.BuildWebFS())
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
-		Filesystem: http.FS(web.BuildWebFS()),
-		//Root:  "web/dist",
+		//Filesystem: http.FS(web.BuildWebFS()),
+		Root:  "web/dist",
 		HTML5: true,
 	}))
 

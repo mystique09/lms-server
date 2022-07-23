@@ -10,6 +10,9 @@ setup:
 	go install
 
 dev:
+	cd web && pnpm watch & go run cmd/main.go && fg
+
+watch:
 	cd web && pnpm dev & air && fg
 
 create:

@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-//go:embed all:dist/*
+//go:embed all:dist
 var BuildFs embed.FS
 
 func BuildWebFS() fs.FS {
