@@ -10,8 +10,8 @@ require (
 	github.com/labstack/gommon v0.3.1
 	github.com/lib/pq v1.10.6
 	github.com/stretchr/testify v1.8.0
-	golang.org/x/crypto v0.0.0-20220721555717-63638458a5aa
-	golang.org/x/time v0.0.0-20222727155322-55dcc9ccccb9
+	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
+	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9
 )
 
 require (
@@ -19,11 +19,10 @@ require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/objx v0.4.0 // indirect
-	github.com/valyala/bytebufferpool v1.0.0 // indiret
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
-	golang.org/x/net v0.0.0-20215725255277-8158d281115b // indirect
-	golang.org/x/sys v0.0.0-2022271215522-8c9fc9f76a5f // indirect
-	golang.org/x/text v0.3.7 // indirec
-	opkg.in/yaml.v3 v3.0.1 // indirect
+	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
+	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
+	golang.org/x/text v0.3.7 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
