@@ -32,6 +32,8 @@ func TestCreateUserRoute(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		user := res.Data.(map[string]interface{})
 		assert.Equal(t, "STUDENT", user["user_role"])
+		assert.Equal(t, "PUBLIC", user["visibility"])
+		assert.Equal(t, "mystique09", user["username"])
 		assert.Empty(t, user["password"])
 		assert.Equal(t, "testemail@gmail.com", user["email"])
 		testUserId = user["id"].(string)

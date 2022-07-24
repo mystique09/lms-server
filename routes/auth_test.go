@@ -52,7 +52,7 @@ func TestSignupRoute(t *testing.T) {
 		if err := utils.GetJson(rec.Body, &res); err != nil {
 			t.Fail()
 		}
-		assert.Equal(t, 400, rec.Code)
+		assert.Equal(t, 200, rec.Code)
 		user := res.Data.(map[string]interface{})
 		assert.Equal(t, "STUDENT", user["user_role"])
 		assert.Equal(t, "PUBLIC", user["visibility"])

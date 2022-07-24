@@ -1,5 +1,20 @@
 DB_NAME=class-manager
 
+setup:
+	go install github.com/cosmtrek/air@latest \
+	# install sqlc
+	go get github.com/cosmtrek/sqlc@latest \
+	# install golang-migrate
+	go get github.com/golang-migrate/migrate@latest \
+	# install package dependencies
+	go install
+
+dev:
+	cd frontend && pnpm watch & go run cmd/main.go && fg
+
+watch:
+	cd frontend && pnpm build & air && fg
+
 create:
 	migrate create -ext sql -dir ./database/migrations/ -seq $(name)
 
@@ -12,4 +27,4 @@ drop:
 force:
 	migrate -path ./database/migrations/ -database "postgresql://mystique09:mystique09@localhost/${DB_NAME}?sslmode=disable" -verbose force 1
 
-.PHONY: create migrateup drop force
+.PHONY: create migrateup drop force setup
