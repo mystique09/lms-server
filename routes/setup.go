@@ -2,18 +2,15 @@ package routes
 
 import (
 	"log"
-	"net/http"
-	"time"
-
-	//	"net/http"
+	//"net/http"
 	"server/config"
 	database "server/database/sqlc"
-	"server/frontend"
+	//"server/frontend"
 	"server/utils"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	//"github.com/labstack/echo/v4/middleware"
 )
 
 var server Server
@@ -59,22 +56,16 @@ func Launch() {
 	e.Use(LoggerMiddleware())
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(server.Cfg))
-	// remove this if building
-	e.StaticFS("frontend/build", frontend.BuildHTTPFS())
-	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
-		//Filesystem: http.FS(frontend.BuildHTTPFS()),
-		Root:  "frontend/build",
-		HTML5: true,
-	}))
+	/*
+		// remove this if deploy to production
+		e.StaticFS("frontend/build", frontend.BuildHTTPFS())
 
-	e.POST("/api/v1/test", func(c echo.Context) error {
-		cookie := new(http.Cookie)
-		cookie.Name = "session_token"
-		cookie.Value = "twstbakdjdie"
-		cookie.Expires = time.Now().Add(time.Minute * 10)
-		c.SetCookie(cookie)
-		return c.String(200, "test")
-	})
+		e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+			//Filesystem: http.FS(frontend.BuildHTTPFS()),
+			Root:  "frontend/build",
+			HTML5: true,
+		}))
+	*/
 	e.GET("/api/v1", server.indexRoute)
 	e.POST("/api/v1/signup", server.createUser)
 	e.POST("/api/v1/login", server.loginHandler)
