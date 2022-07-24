@@ -2,6 +2,8 @@ package routes
 
 import (
 	"log"
+	"net/http"
+	"time"
 
 	//	"net/http"
 	"server/config"
@@ -65,6 +67,14 @@ func Launch() {
 		HTML5: true,
 	}))
 
+	e.POST("/api/v1/test", func(c echo.Context) error {
+		cookie := new(http.Cookie)
+		cookie.Name = "session_token"
+		cookie.Value = "twstbakdjdie"
+		cookie.Expires = time.Now().Add(time.Minute * 10)
+		c.SetCookie(cookie)
+		return c.String(200, "test")
+	})
 	e.GET("/api/v1", server.indexRoute)
 	e.POST("/api/v1/signup", server.createUser)
 	e.POST("/api/v1/login", server.loginHandler)
