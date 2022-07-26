@@ -77,10 +77,16 @@ func Launch() {
 		user_group.GET("/:id", server.getUser)
 		user_group.PUT("/:id", server.updateUser)
 		user_group.DELETE("/:id", server.deleteUser)
-		// relationships
+		// classrokms relationships
 		user_group.GET("/:id/classrooms", server.getClassrooms)
 		user_group.POST("/:id/classrooms", server.joinClassroom)
 		user_group.DELETE("/:id/classrooms/:class_id", server.leaveClassroom)
+
+		// classworks relationships
+		user_group.GET("/:id/classworks", server.getAllUserClassworks)
+		user_group.GET("/:id/classworks/:classwork_id", server.getClassworkById)
+
+		// followers relationships
 		user_group.GET("/:id/followers", server.getFollowers)
 		user_group.GET("/:id/followings", server.getFollowings)
 		user_group.POST("/:id/followings", server.addNewFollower)
@@ -94,9 +100,16 @@ func Launch() {
 		class_group.GET("/:id", server.getClassroom)
 		class_group.PUT("/:id", server.updateClassroom)
 		class_group.DELETE("/:id", server.deleteClassroom)
-		// relationships
+		// classworks relationships
+		class_group.GET("/:id/classworks", server.getAllClassworks)
 		class_group.GET("/:id/users", server.getClassroomUsers)
 		class_group.GET("/:id/posts", server.getClassroomPosts)
+	}
+
+	classworks_group := e.Group("/api/v1/classworks", JwtAuthMiddleware(server.Cfg))
+	{
+		classworks_group.POST("", server.addNewClasswork)
+		classworks_group.DELETE("/:id", server.deleteClasswork)
 	}
 
 	post_group := e.Group("/api/v1/posts", JwtAuthMiddleware(server.Cfg))
