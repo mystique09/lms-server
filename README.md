@@ -77,9 +77,9 @@ DELETE /api/v1/comments/:id/likes
 - [x] Implement Logger
 - [x] Implement Rate Limit
 - [x] Implement CORS
-- [ ] Create the initial routers of posts
-- [ ] Create the initial routers of comments
-- [ ] Create the initial routers of class_works/assignments
+- [x] Create the initial routers of posts
+- [x] Create the initial routers of comments
+- [x] Create the initial routers of class_works/assignments
 - [ ] Create a post inside a classroom
 - [ ] Udpate a post
 - [ ] Delete a post
