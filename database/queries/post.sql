@@ -1,7 +1,7 @@
 -- name: GetOnePost :one
 SELECT *
 FROM posts
-WHERE id = $1 AND class_id = $2
+WHERE id = $1
 LIMIT 1;
 
 -- name: ListAllPostsFromClass :many

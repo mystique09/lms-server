@@ -75,6 +75,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getClassWorkStmt, err = db.PrepareContext(ctx, getClassWork); err != nil {
 		return nil, fmt.Errorf("error preparing query GetClassWork: %w", err)
 	}
+	if q.getClassroomMemberByIdStmt, err = db.PrepareContext(ctx, getClassroomMemberById); err != nil {
+		return nil, fmt.Errorf("error preparing query GetClassroomMemberById: %w", err)
+	}
 	if q.getClassroomWithInviteCodeStmt, err = db.PrepareContext(ctx, getClassroomWithInviteCode); err != nil {
 		return nil, fmt.Errorf("error preparing query GetClassroomWithInviteCode: %w", err)
 	}
@@ -235,6 +238,11 @@ func (q *Queries) Close() error {
 	if q.getClassWorkStmt != nil {
 		if cerr := q.getClassWorkStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getClassWorkStmt: %w", cerr)
+		}
+	}
+	if q.getClassroomMemberByIdStmt != nil {
+		if cerr := q.getClassroomMemberByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getClassroomMemberByIdStmt: %w", cerr)
 		}
 	}
 	if q.getClassroomWithInviteCodeStmt != nil {
@@ -413,6 +421,7 @@ type Queries struct {
 	getAllJoinedClassroomsStmt     *sql.Stmt
 	getClassStmt                   *sql.Stmt
 	getClassWorkStmt               *sql.Stmt
+	getClassroomMemberByIdStmt     *sql.Stmt
 	getClassroomWithInviteCodeStmt *sql.Stmt
 	getFollowerByIdStmt            *sql.Stmt
 	getOneFollowerStmt             *sql.Stmt
@@ -460,6 +469,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getAllJoinedClassroomsStmt:     q.getAllJoinedClassroomsStmt,
 		getClassStmt:                   q.getClassStmt,
 		getClassWorkStmt:               q.getClassWorkStmt,
+		getClassroomMemberByIdStmt:     q.getClassroomMemberByIdStmt,
 		getClassroomWithInviteCodeStmt: q.getClassroomWithInviteCodeStmt,
 		getFollowerByIdStmt:            q.getFollowerByIdStmt,
 		getOneFollowerStmt:             q.getOneFollowerStmt,
