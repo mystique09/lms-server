@@ -80,11 +80,11 @@ DELETE /api/v1/comments/:id/likes
 - [x] Create the initial routers of posts
 - [x] Create the initial routers of comments
 - [x] Create the initial routers of class_works/assignments
-- [ ] Create a post inside a classroom
+- [x] Create a post inside a classroom
 - [ ] Udpate a post
 - [ ] Delete a post
-- [ ] Get all posts
-- [ ] Get one posts
+- [x] Get all posts
+- [x] Get one posts
 - [ ] Like a post
 - [ ] Unlike a post
 - [ ] Get all likes of a post
