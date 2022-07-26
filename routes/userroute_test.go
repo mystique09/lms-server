@@ -68,7 +68,7 @@ func TestGetUsersRoute(t *testing.T) {
 	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.Echo().Use(JwtAuthMiddleware(server.Cfg))
+	ctx.Echo().Use(JwtAuthMiddleware(testServer.Cfg))
 
 	if assert.NoError(t, testServer.getUsers(ctx)) {
 		res := utils.Response{}
