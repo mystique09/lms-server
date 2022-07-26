@@ -1,7 +1,7 @@
 -- name: GetClassWork :one
 SELECT * 
 FROM class_works 
-WHERE id = $1 AND user_id = $2 AND class_id = $3
+WHERE id = $1 AND user_id = $2
 LIMIT 1;
 
 -- name: ListClassworkAdmin :many
@@ -22,7 +22,7 @@ OFFSET $2;
 
 -- name: InsertNewClasswork :one
 INSERT INTO class_works (
-  id, name, user_id, class_id
+  id, url, user_id, class_id
 ) VALUES (
   $1, $2, $3, $4
 ) RETURNING *;

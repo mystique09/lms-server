@@ -52,7 +52,7 @@ func (e *Visibility) Scan(src interface{}) error {
 
 type ClassWork struct {
 	ID        uuid.UUID     `json:"id"`
-	Name      string        `json:"name"`
+	Url       string        `json:"url"`
 	UserID    uuid.UUID     `json:"user_id"`
 	ClassID   uuid.UUID     `json:"class_id"`
 	Mark      sql.NullInt32 `json:"mark"`
