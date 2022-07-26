@@ -187,6 +187,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 	}
 
 	update_class_param := database.UpdateClassParams{
+		ID:          uid,
 		Name:        payload.Name,
 		Description: payload.Description,
 		Section:     payload.Section,
