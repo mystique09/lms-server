@@ -32,7 +32,7 @@ type UpdateClassroomDTO struct {
 
 type ClassroomResponse struct {
 	*database.Classroom
-	Members []database.ClassroomMember
+	Members []database.ClassroomMember `json:"members"`
 }
 
 type ClassroomJoinRequest struct {
@@ -124,8 +124,8 @@ func (s *Server) createNewClassroom(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	jwt_token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+	jwt_token := c.Get("user")
+	jwt_payload := utils.GetPayloadFromJwt(jwt_token.(*jwt.Token))
 
 	class_param := database.CreateClassParams{
 		ID:          uuid.New(),
@@ -187,6 +187,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 	}
 
 	update_class_param := database.UpdateClassParams{
+		ID:          uid,
 		Name:        payload.Name,
 		Description: payload.Description,
 		Section:     payload.Section,

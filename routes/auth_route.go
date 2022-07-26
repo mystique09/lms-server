@@ -49,6 +49,9 @@ func (s *Server) loginHandler(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
+
+	//cookie := utils.NewCookie("session", refresh_token, (60*60)*30)
+	//c.SetCookie(&cookie)
 	return c.JSON(http.StatusOK, utils.NewResponse(AuthSuccessResponse{Message: "Logged in.", Access: access_token, Refresh: refresh_token}, ""))
 }
 

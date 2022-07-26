@@ -2,12 +2,15 @@ package routes
 
 import (
 	"log"
+	//"net/http"
 	"server/config"
 	database "server/database/sqlc"
+	//"server/frontend"
 	"server/utils"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	//"github.com/labstack/echo/v4/middleware"
 )
 
 var server Server
@@ -53,7 +56,16 @@ func Launch() {
 	e.Use(LoggerMiddleware())
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(server.Cfg))
+	/*
+		// remove this if deploy to production
+		e.StaticFS("frontend/build", frontend.BuildHTTPFS())
 
+		e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+			//Filesystem: http.FS(frontend.BuildHTTPFS()),
+			Root:  "frontend/build",
+			HTML5: true,
+		}))
+	*/
 	e.GET("/api/v1", server.indexRoute)
 	e.POST("/api/v1/signup", server.createUser)
 	e.POST("/api/v1/login", server.loginHandler)

@@ -32,6 +32,8 @@ func TestCreateUserRoute(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		user := res.Data.(map[string]interface{})
 		assert.Equal(t, "STUDENT", user["user_role"])
+		assert.Equal(t, "PUBLIC", user["visibility"])
+		assert.Equal(t, "mystique09", user["username"])
 		assert.Empty(t, user["password"])
 		assert.Equal(t, "testemail@gmail.com", user["email"])
 		testUserId = user["id"].(string)
@@ -66,7 +68,7 @@ func TestGetUsersRoute(t *testing.T) {
 	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.Echo().Use(JwtAuthMiddleware(server.Cfg))
+	ctx.Echo().Use(JwtAuthMiddleware(testServer.Cfg))
 
 	if assert.NoError(t, testServer.getUsers(ctx)) {
 		res := utils.Response{}

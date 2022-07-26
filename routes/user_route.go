@@ -23,7 +23,25 @@ type (
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
+
+	UserResponse struct {
+		ID         uuid.UUID           `json:"id"`
+		Username   string              `json:"username"`
+		Email      string              `json:"email"`
+		UserRole   database.Role       `json:"user_role"`
+		Visibility database.Visibility `json:"visibility"`
+	}
 )
+
+func newUserResponse(user database.User) UserResponse {
+	return UserResponse{
+		ID:         user.ID,
+		Username:   user.Username,
+		Email:      user.Email,
+		UserRole:   user.UserRole,
+		Visibility: user.Visibility,
+	}
+}
 
 type UserClassrooms struct {
 	*database.User
@@ -32,22 +50,12 @@ type UserClassrooms struct {
 
 func (s *Server) getUsers(c echo.Context) error {
 	page := c.QueryParam("page")
-	comment := c.QueryParam("comment_page")
 
 	if page == "" {
 		page = "0"
 	}
 
-	if comment == "" {
-		comment = "0"
-	}
-
 	offset, err := strconv.Atoi(page)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
-	}
-
-	comment_offset, err := strconv.Atoi(comment)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
 	}
@@ -58,27 +66,7 @@ func (s *Server) getUsers(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
 	}
 
-	var users_wclassrooms []UserClassrooms = []UserClassrooms{}
-
-	for i := range users {
-		user_resp := UserClassrooms{
-			User:  &users[i],
-			Rooms: []database.Classroom{},
-		}
-
-		classrooms, err := s.DB.GetAllJoinedClassrooms(c.Request().Context(), database.GetAllJoinedClassroomsParams{
-			UserID: users[i].ID,
-			Offset: int32(comment_offset * 10),
-		})
-
-		if err != nil {
-			user_resp.Rooms = []database.Classroom{}
-		}
-		user_resp.Rooms = append(user_resp.Rooms, classrooms...)
-		users_wclassrooms = append(users_wclassrooms, user_resp)
-	}
-
-	return c.JSON(http.StatusOK, utils.NewResponse(&users_wclassrooms, ""))
+	return c.JSON(http.StatusOK, utils.NewResponse(users, ""))
 }
 
 func (s *Server) getUser(c echo.Context) error {
