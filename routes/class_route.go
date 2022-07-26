@@ -347,5 +347,33 @@ func (s *Server) leaveClassroom(c echo.Context) error {
 }
 
 func (s *Server) getClassroomPosts(c echo.Context) error {
-	return c.String(200, "TODO")
+	id := c.Param("id")
+	uid, err := uuid.Parse(id)
+
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
+	page := c.QueryParam("page")
+
+	if page == "" {
+		page = "0"
+	}
+
+	offset, err := strconv.Atoi(page)
+
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
+	if offset < 0 {
+		return c.JSON(400, utils.NewResponse(nil, "offset must not be a negativve number"))
+	}
+
+	posts, err := s.DB.ListAllPostsFromClass(c.Request().Context(), database.ListAllPostsFromClassParams{
+		ClassID: uid,
+		Offset:  int32(offset * 10),
+	})
+
+	return c.JSON(200, utils.NewResponse(posts, ""))
 }
