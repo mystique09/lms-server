@@ -124,7 +124,7 @@ func Launch() {
 		post_group.DELETE("/:id", server.unlikePost)
 	}
 
-	comment_group := e.Group("/api/v1/posts", JwtAuthMiddleware(server.Cfg))
+	comment_group := e.Group("/api/v1/comments", JwtAuthMiddleware(server.Cfg))
 	{
 		comment_group.POST("", server.createNewComment)
 		comment_group.GET("/:id", server.getOneComment)
