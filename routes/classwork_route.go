@@ -7,6 +7,7 @@ import (
 	"server/utils"
 	"strconv"
 
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -132,7 +133,58 @@ func (s *Server) getClassworkById(c echo.Context) error {
 }
 
 func (s *Server) addNewClasswork(c echo.Context) error {
-	return c.String(200, "TODO: cloud storage for file upload")
+	id := c.Param("id")
+	cid, err := uuid.Parse(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "unauthorized access"))
+	}
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
+	jwt_token := c.Get("user").(*jwt.Token)
+	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+
+	check_classrooms, err := s.DB.GetClass(c.Request().Context(), cid)
+	if err != nil || check_classrooms.ID == uuid.Nil {
+		return c.JSON(400, utils.NewResponse(nil, fmt.Sprintf("classroom with id [%v] doesn't exist", cid)))
+	}
+
+	check_member, err := s.DB.GetClassroomMemberById(c.Request().Context(), database.GetClassroomMemberByIdParams{
+		UserID:  jwt_payload.ID,
+		ClassID: cid,
+	})
+	if err != nil || check_member.UserID == uuid.Nil {
+		return c.JSON(404, utils.NewResponse(nil, fmt.Sprintf("user with id [%v] is not a member of classroom with id [%v]", jwt_payload.ID, cid)))
+	}
+
+	file_id := uuid.New()
+
+	src, err := file.Open()
+	if err != nil {
+		return c.JSON(401, utils.NewResponse(nil, err.Error()))
+	}
+	defer src.Close()
+
+	resp, err := s.Cld.Upload.Upload(c.Request().Context(), src, uploader.UploadParams{
+		PublicID:       fmt.Sprintf("class-management/classworks/%v", file_id.String()),
+		Transformation: "c_crop,g_center,/q_auto/f_auto",
+		Tags:           []string{"assignments", "classworks", file_id.String()},
+	})
+
+	new_classwork, err := s.DB.InsertNewClasswork(c.Request().Context(), database.InsertNewClassworkParams{
+		ID:      file_id,
+		ClassID: cid,
+		UserID:  jwt_payload.ID,
+		Url:     resp.SecureURL,
+	})
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "unauthorized access"))
+	}
+
+	return c.JSON(200, utils.NewResponse(new_classwork, ""))
 }
 
 func (s *Server) deleteClasswork(c echo.Context) error {

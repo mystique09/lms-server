@@ -5,9 +5,12 @@ import (
 	//"net/http"
 	"server/config"
 	database "server/database/sqlc"
+
 	//"server/frontend"
 	"server/utils"
 
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	//"github.com/labstack/echo/v4/middleware"
@@ -26,10 +29,12 @@ func Setup() Server {
 
 	conn := utils.SetupDB(config.DATABASE_URL)
 	db := database.New(conn)
+	cld, err := cloudinary.NewFromURL(config.CLD_URL)
 
 	return Server{
 		DB:  db,
 		Cfg: config,
+		Cld: cld,
 	}
 }
 
@@ -53,6 +58,8 @@ func Launch() {
 	server = Setup()
 
 	e := echo.New()
+	e.Validator = &CustomValidator{validator: validator.New()}
+
 	e.Use(LoggerMiddleware())
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(server.Cfg))
@@ -102,14 +109,12 @@ func Launch() {
 		class_group.DELETE("/:id", server.deleteClassroom)
 		// classworks relationships
 		class_group.GET("/:id/classworks", server.getAllClassworks)
+		class_group.POST("/:id/classworks", server.addNewClasswork)
+		class_group.DELETE("/:id/classworks/:id", server.deleteClasswork)
+		// users relationships
 		class_group.GET("/:id/users", server.getClassroomUsers)
+		// posts relationships
 		class_group.GET("/:id/posts", server.getClassroomPosts)
-	}
-
-	classworks_group := e.Group("/api/v1/classworks", JwtAuthMiddleware(server.Cfg))
-	{
-		classworks_group.POST("", server.addNewClasswork)
-		classworks_group.DELETE("/:id", server.deleteClasswork)
 	}
 
 	post_group := e.Group("/api/v1/posts", JwtAuthMiddleware(server.Cfg))
