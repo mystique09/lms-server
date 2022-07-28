@@ -213,5 +213,6 @@ func (s *Server) deleteClasswork(c echo.Context) error {
 	if err != nil {
 		return c.JSON(400, utils.NewResponse(nil, err.Error()))
 	}
+
 	return c.JSON(200, utils.NewResponse(delte_cw, ""))
 }
