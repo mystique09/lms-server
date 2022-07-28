@@ -110,7 +110,7 @@ func Launch() {
 		// classworks relationships
 		class_group.GET("/:id/classworks", server.getAllClassworks)
 		class_group.POST("/:id/classworks", server.addNewClasswork)
-		class_group.DELETE("/:id/classworks/:id", server.deleteClasswork)
+		class_group.DELETE("/:id/classworks/:classwork_id", server.deleteClasswork)
 		// users relationships
 		class_group.GET("/:id/users", server.getClassroomUsers)
 		// posts relationships
