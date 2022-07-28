@@ -15,7 +15,7 @@ type Querier interface {
 	CreateClass(ctx context.Context, arg CreateClassParams) (Classroom, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteClass(ctx context.Context, id uuid.UUID) (Classroom, error)
-	DeleteClassworkFromClass(ctx context.Context, arg DeleteClassworkFromClassParams) error
+	DeleteClassworkFromClass(ctx context.Context, arg DeleteClassworkFromClassParams) (ClassWork, error)
 	DeleteCommentFromPost(ctx context.Context, arg DeleteCommentFromPostParams) (interface{}, error)
 	DeletePostFromClass(ctx context.Context, arg DeletePostFromClassParams) (interface{}, error)
 	DeleteUser(ctx context.Context, id uuid.UUID) (User, error)

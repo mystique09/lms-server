@@ -12,9 +12,10 @@ import (
 	"github.com/google/uuid"
 )
 
-const deleteClassworkFromClass = `-- name: DeleteClassworkFromClass :exec
+const deleteClassworkFromClass = `-- name: DeleteClassworkFromClass :one
 DELETE FROM class_works
 WHERE id = $1 AND user_id = $2 AND class_id = $3
+RETURNING id, url, user_id, class_id, mark, created_at, updated_at
 `
 
 type DeleteClassworkFromClassParams struct {
@@ -23,9 +24,19 @@ type DeleteClassworkFromClassParams struct {
 	ClassID uuid.UUID `json:"class_id"`
 }
 
-func (q *Queries) DeleteClassworkFromClass(ctx context.Context, arg DeleteClassworkFromClassParams) error {
-	_, err := q.exec(ctx, q.deleteClassworkFromClassStmt, deleteClassworkFromClass, arg.ID, arg.UserID, arg.ClassID)
-	return err
+func (q *Queries) DeleteClassworkFromClass(ctx context.Context, arg DeleteClassworkFromClassParams) (ClassWork, error) {
+	row := q.queryRow(ctx, q.deleteClassworkFromClassStmt, deleteClassworkFromClass, arg.ID, arg.UserID, arg.ClassID)
+	var i ClassWork
+	err := row.Scan(
+		&i.ID,
+		&i.Url,
+		&i.UserID,
+		&i.ClassID,
+		&i.Mark,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const getClassWork = `-- name: GetClassWork :one

@@ -32,6 +32,7 @@ UPDATE class_works
 SET mark = $1
 WHERE id = $2 AND user_id = $3 AND class_id = $4;
 
--- name: DeleteClassworkFromClass :exec
+-- name: DeleteClassworkFromClass :one
 DELETE FROM class_works
-WHERE id = $1 AND user_id = $2 AND class_id = $3;
+WHERE id = $1 AND user_id = $2 AND class_id = $3
+RETURNING *;
