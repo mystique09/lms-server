@@ -15,6 +15,10 @@ type (
 		Content string `json:"content"`
 		ClassID string `json:"class_id"`
 	}
+
+	UpdatePostRequest struct {
+		Content string `json:"content"`
+	}
 )
 
 func (s *Server) getOnePost(c echo.Context) error {
@@ -86,11 +90,69 @@ func (s *Server) createNewPost(c echo.Context) error {
 }
 
 func (s *Server) updatePost(c echo.Context) error {
-	return c.String(200, "TODO")
+	postId := c.Param("id")
+	puid, err := uuid.Parse(postId)
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
+	var payload UpdatePostRequest
+	if err := (&echo.DefaultBinder{}).BindBody(c, &payload); err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
+	jwt_token := c.Get("user").(*jwt.Token)
+	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+
+	check_post, err := s.DB.GetOnePost(c.Request().Context(), puid)
+	if err != nil || check_post.ID == uuid.Nil {
+		return c.JSON(400, utils.NewResponse(nil, fmt.Sprintf("post with id [%v] doesn't exist", puid)))
+	}
+
+	if jwt_payload.ID != check_post.AuthorID {
+		return c.JSON(401, utils.NewResponse(nil, "you can't perform this action"))
+	}
+
+	updated_post, err := s.DB.UpdatePostContent(c.Request().Context(), database.UpdatePostContentParams{
+		Content: payload.Content,
+	})
+
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
+	return c.JSON(200, utils.NewResponse(updated_post, ""))
 }
 
 func (s *Server) deletePost(c echo.Context) error {
-	return c.String(200, "TODO")
+	post_id := c.Param("id")
+	puid, err := uuid.Parse(post_id)
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
+	jwt_token := c.Get("user").(*jwt.Token)
+	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+
+	check_post, err := s.DB.GetOnePost(c.Request().Context(), puid)
+	if err != nil || check_post.ID == uuid.Nil {
+		return c.JSON(400, utils.NewResponse(nil, fmt.Sprintf("post with id [%v] doesn't exist", puid)))
+	}
+
+	if jwt_payload.ID != check_post.AuthorID {
+		return c.JSON(401, utils.NewResponse(nil, "you can't perform this action"))
+	}
+
+	deleted_post, err := s.DB.DeletePostFromClass(c.Request().Context(), database.DeletePostFromClassParams{
+		ClassID:  check_post.ClassID,
+		AuthorID: check_post.AuthorID,
+		ID:       check_post.ID,
+	})
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
+	return c.JSON(200, utils.NewResponse(deleted_post, ""))
 }
 
 func (s *Server) getAllPostLikes(c echo.Context) error {
