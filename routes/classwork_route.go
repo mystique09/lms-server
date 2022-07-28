@@ -188,5 +188,30 @@ func (s *Server) addNewClasswork(c echo.Context) error {
 }
 
 func (s *Server) deleteClasswork(c echo.Context) error {
-	return c.String(200, "TODO")
+	class_id := c.Param("id")
+	classword_id := c.Param("classword_id")
+
+	class_uuid, err := uuid.Parse(class_id)
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
+	cw_uuid, err := uuid.Parse(classword_id)
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
+	jwt_token := c.Get("user").(*jwt.Token)
+	jwt_payoad := utils.GetPayloadFromJwt(jwt_token)
+
+	delte_cw, err := s.DB.DeleteClassworkFromClass(c.Request().Context(), database.DeleteClassworkFromClassParams{
+		ClassID: class_uuid,
+		ID:      cw_uuid,
+		UserID:  jwt_payoad.ID,
+	})
+
+	if err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+	return c.JSON(200, utils.NewResponse(delte_cw, ""))
 }
