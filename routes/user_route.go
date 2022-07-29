@@ -13,15 +13,15 @@ import (
 
 type (
 	UserCreateDTO struct {
-		Username string `json:"username" validate:"required"`
-		Email    string `json:"email" validate:"required, email"`
-		Password string `json:"password" validate:"required"`
+		Username string `json:"username" validate:"required,gt=6"`
+		Email    string `json:"email" validate:"required,email"`
+		Password string `json:"password" validate:"required,gt=6"`
 	}
 
 	UserUpdateDTO struct {
-		Username string `json:"username" validate:"required"`
+		Username string `json:"username" validate:"required,gt=6"`
 		Email    string `json:"email" validate:"required, email"`
-		Password string `json:"password" validate:"required"`
+		Password string `json:"password" validate:"required,gt-6"`
 	}
 
 	UserResponse struct {
@@ -122,20 +122,8 @@ func (s *Server) createUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	if user_data.Username == "" || user_data.Email == "" || user_data.Password == "" {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide all inputs."))
-	}
-
-	if len(user_data.Username) < 8 {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Username must be at least 8 characters."))
-	}
-
-	if len(user_data.Password) < 8 {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Password must be at least 8 characters."))
-	}
-
-	if !utils.IsEmail(user_data.Email) {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide a valid email."))
+	if err := c.Validate(user_data); err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
 	}
 
 	check_user, err := s.DB.GetUserByUsername(c.Request().Context(), user_data.Username)
@@ -188,6 +176,10 @@ func (s *Server) updateUser(c echo.Context) error {
 
 	var updateDto UserUpdateDTO
 	if err := (&echo.DefaultBinder{}).BindBody(c, &updateDto); err != nil {
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+	}
+
+	if err := c.Validate(updateDto); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
