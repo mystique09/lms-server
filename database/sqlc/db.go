@@ -75,6 +75,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getClassWorkStmt, err = db.PrepareContext(ctx, getClassWork); err != nil {
 		return nil, fmt.Errorf("error preparing query GetClassWork: %w", err)
 	}
+	if q.getClassroomMemberByIdStmt, err = db.PrepareContext(ctx, getClassroomMemberById); err != nil {
+		return nil, fmt.Errorf("error preparing query GetClassroomMemberById: %w", err)
+	}
 	if q.getClassroomWithInviteCodeStmt, err = db.PrepareContext(ctx, getClassroomWithInviteCode); err != nil {
 		return nil, fmt.Errorf("error preparing query GetClassroomWithInviteCode: %w", err)
 	}
@@ -129,8 +132,23 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updateAClassworkMarkStmt, err = db.PrepareContext(ctx, updateAClassworkMark); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateAClassworkMark: %w", err)
 	}
-	if q.updateClassStmt, err = db.PrepareContext(ctx, updateClass); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateClass: %w", err)
+	if q.updateClassroomDescriptionStmt, err = db.PrepareContext(ctx, updateClassroomDescription); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateClassroomDescription: %w", err)
+	}
+	if q.updateClassroomInviteCodeStmt, err = db.PrepareContext(ctx, updateClassroomInviteCode); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateClassroomInviteCode: %w", err)
+	}
+	if q.updateClassroomNameStmt, err = db.PrepareContext(ctx, updateClassroomName); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateClassroomName: %w", err)
+	}
+	if q.updateClassroomRoomStmt, err = db.PrepareContext(ctx, updateClassroomRoom); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateClassroomRoom: %w", err)
+	}
+	if q.updateClassroomSectionStmt, err = db.PrepareContext(ctx, updateClassroomSection); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateClassroomSection: %w", err)
+	}
+	if q.updateClassroomSubjectStmt, err = db.PrepareContext(ctx, updateClassroomSubject); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateClassroomSubject: %w", err)
 	}
 	if q.updateCommentContentInPostStmt, err = db.PrepareContext(ctx, updateCommentContentInPost); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateCommentContentInPost: %w", err)
@@ -237,6 +255,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getClassWorkStmt: %w", cerr)
 		}
 	}
+	if q.getClassroomMemberByIdStmt != nil {
+		if cerr := q.getClassroomMemberByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getClassroomMemberByIdStmt: %w", cerr)
+		}
+	}
 	if q.getClassroomWithInviteCodeStmt != nil {
 		if cerr := q.getClassroomWithInviteCodeStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getClassroomWithInviteCodeStmt: %w", cerr)
@@ -327,9 +350,34 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateAClassworkMarkStmt: %w", cerr)
 		}
 	}
-	if q.updateClassStmt != nil {
-		if cerr := q.updateClassStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateClassStmt: %w", cerr)
+	if q.updateClassroomDescriptionStmt != nil {
+		if cerr := q.updateClassroomDescriptionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateClassroomDescriptionStmt: %w", cerr)
+		}
+	}
+	if q.updateClassroomInviteCodeStmt != nil {
+		if cerr := q.updateClassroomInviteCodeStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateClassroomInviteCodeStmt: %w", cerr)
+		}
+	}
+	if q.updateClassroomNameStmt != nil {
+		if cerr := q.updateClassroomNameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateClassroomNameStmt: %w", cerr)
+		}
+	}
+	if q.updateClassroomRoomStmt != nil {
+		if cerr := q.updateClassroomRoomStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateClassroomRoomStmt: %w", cerr)
+		}
+	}
+	if q.updateClassroomSectionStmt != nil {
+		if cerr := q.updateClassroomSectionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateClassroomSectionStmt: %w", cerr)
+		}
+	}
+	if q.updateClassroomSubjectStmt != nil {
+		if cerr := q.updateClassroomSubjectStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateClassroomSubjectStmt: %w", cerr)
 		}
 	}
 	if q.updateCommentContentInPostStmt != nil {
@@ -413,6 +461,7 @@ type Queries struct {
 	getAllJoinedClassroomsStmt     *sql.Stmt
 	getClassStmt                   *sql.Stmt
 	getClassWorkStmt               *sql.Stmt
+	getClassroomMemberByIdStmt     *sql.Stmt
 	getClassroomWithInviteCodeStmt *sql.Stmt
 	getFollowerByIdStmt            *sql.Stmt
 	getOneFollowerStmt             *sql.Stmt
@@ -431,7 +480,12 @@ type Queries struct {
 	listSubmittedClassworksStmt    *sql.Stmt
 	unfollowUserStmt               *sql.Stmt
 	updateAClassworkMarkStmt       *sql.Stmt
-	updateClassStmt                *sql.Stmt
+	updateClassroomDescriptionStmt *sql.Stmt
+	updateClassroomInviteCodeStmt  *sql.Stmt
+	updateClassroomNameStmt        *sql.Stmt
+	updateClassroomRoomStmt        *sql.Stmt
+	updateClassroomSectionStmt     *sql.Stmt
+	updateClassroomSubjectStmt     *sql.Stmt
 	updateCommentContentInPostStmt *sql.Stmt
 	updatePostContentStmt          *sql.Stmt
 	updateUserEmailStmt            *sql.Stmt
@@ -460,6 +514,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getAllJoinedClassroomsStmt:     q.getAllJoinedClassroomsStmt,
 		getClassStmt:                   q.getClassStmt,
 		getClassWorkStmt:               q.getClassWorkStmt,
+		getClassroomMemberByIdStmt:     q.getClassroomMemberByIdStmt,
 		getClassroomWithInviteCodeStmt: q.getClassroomWithInviteCodeStmt,
 		getFollowerByIdStmt:            q.getFollowerByIdStmt,
 		getOneFollowerStmt:             q.getOneFollowerStmt,
@@ -478,7 +533,12 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		listSubmittedClassworksStmt:    q.listSubmittedClassworksStmt,
 		unfollowUserStmt:               q.unfollowUserStmt,
 		updateAClassworkMarkStmt:       q.updateAClassworkMarkStmt,
-		updateClassStmt:                q.updateClassStmt,
+		updateClassroomDescriptionStmt: q.updateClassroomDescriptionStmt,
+		updateClassroomInviteCodeStmt:  q.updateClassroomInviteCodeStmt,
+		updateClassroomNameStmt:        q.updateClassroomNameStmt,
+		updateClassroomRoomStmt:        q.updateClassroomRoomStmt,
+		updateClassroomSectionStmt:     q.updateClassroomSectionStmt,
+		updateClassroomSubjectStmt:     q.updateClassroomSubjectStmt,
 		updateCommentContentInPostStmt: q.updateCommentContentInPostStmt,
 		updatePostContentStmt:          q.updatePostContentStmt,
 		updateUserEmailStmt:            q.updateUserEmailStmt,

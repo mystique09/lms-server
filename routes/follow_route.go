@@ -22,7 +22,7 @@ type UserFollowing struct {
 }
 
 type FollowUserRequest struct {
-	UserId uuid.UUID `json:"user_id"`
+	UserId uuid.UUID `json:"user_id" validate:"required,uuid"`
 }
 
 func (s *Server) getFollowers(c echo.Context) error {
@@ -31,7 +31,7 @@ func (s *Server) getFollowers(c echo.Context) error {
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(400, err.Error())
+		return c.JSON(400, err)
 	}
 
 	if page == "" {
@@ -41,11 +41,11 @@ func (s *Server) getFollowers(c echo.Context) error {
 	offset, err := strconv.Atoi(page)
 
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
 	if offset < 0 {
-		return c.JSON(400, utils.NewResponse(nil, "offset must not be negative"))
+		return c.JSON(400, NEGATIVE_OFFSET)
 	}
 
 	followers, err := s.DB.GetAllFollowers(c.Request().Context(), database.GetAllFollowersParams{
@@ -54,7 +54,7 @@ func (s *Server) getFollowers(c echo.Context) error {
 	})
 
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
 	user_followers := UserFollowers{
@@ -62,7 +62,7 @@ func (s *Server) getFollowers(c echo.Context) error {
 		Followers: followers,
 	}
 
-	return c.JSON(200, utils.NewResponse(user_followers, ""))
+	return c.JSON(200, user_followers)
 }
 
 func (s *Server) getFollowings(c echo.Context) error {
@@ -71,7 +71,7 @@ func (s *Server) getFollowings(c echo.Context) error {
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(400, err.Error())
+		return c.JSON(400, err)
 	}
 
 	if page == "" {
@@ -81,11 +81,11 @@ func (s *Server) getFollowings(c echo.Context) error {
 	offset, err := strconv.Atoi(page)
 
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
 	if offset < 0 {
-		return c.JSON(400, utils.NewResponse(nil, "offset must not be negative"))
+		return c.JSON(400, NEGATIVE_OFFSET)
 	}
 
 	following, err := s.DB.GetAllFollowing(c.Request().Context(), database.GetAllFollowingParams{
@@ -94,7 +94,7 @@ func (s *Server) getFollowings(c echo.Context) error {
 	})
 
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
 	user_following := UserFollowing{
@@ -102,31 +102,30 @@ func (s *Server) getFollowings(c echo.Context) error {
 		Following: following,
 	}
 
-	return c.JSON(200, utils.NewResponse(user_following, ""))
+	return c.JSON(200, user_following)
 }
 
 func (s *Server) addNewFollower(c echo.Context) error {
 	id := c.Param("id")
 	uid, err := uuid.Parse(id)
 
-	fmt.Println(id, uid)
-
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
 	token := c.Get("user").(*jwt.Token)
 	user := utils.GetPayloadFromJwt(token)
 
 	var payload FollowUserRequest
-	if err := (&echo.DefaultBinder{}).BindBody(c, &payload); err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+
+	c.Bind(&payload)
+	if err := c.Validate(payload); err != nil {
+		return c.JSON(400, err)
 	}
 
 	check_userid, err := s.DB.GetUser(c.Request().Context(), payload.UserId)
-	fmt.Println(check_userid.ID)
-	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, fmt.Sprintf("user %v doesn't exist", payload.UserId)))
+	if err != nil || check_userid.ID == uuid.Nil {
+		return c.JSON(400, USER_NOTFOUND)
 	}
 
 	if payload.UserId == uid {
@@ -134,7 +133,7 @@ func (s *Server) addNewFollower(c echo.Context) error {
 	}
 
 	if user.ID != uid {
-		return c.JSON(400, utils.NewResponse(nil, "you are not authorized to perform this action"))
+		return c.JSON(400, UNAUTHORIZED)
 	}
 
 	check_follow, err := s.DB.GetOneFollower(c.Request().Context(), database.GetOneFollowerParams{
@@ -153,10 +152,10 @@ func (s *Server) addNewFollower(c echo.Context) error {
 	})
 
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
-	return c.JSON(200, utils.NewResponse(new_follower, ""))
+	return c.JSON(200, new_follower)
 }
 
 func (s *Server) removeFollowing(c echo.Context) error {
@@ -165,18 +164,18 @@ func (s *Server) removeFollowing(c echo.Context) error {
 
 	uid, err := uuid.Parse(id)
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
 	follow_id, err := uuid.Parse(following_id)
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
 	check_user, err := s.DB.GetUser(c.Request().Context(), uid)
 
 	if check_user.ID == uuid.Nil || err != nil {
-		return c.JSON(400, utils.NewResponse(nil, fmt.Sprintf("user [%v] doesn't exist.", uid)))
+		return c.JSON(400, USER_NOTFOUND)
 	}
 
 	check_following, err := s.DB.GetFollowerById(c.Request().Context(), follow_id)
@@ -193,14 +192,14 @@ func (s *Server) removeFollowing(c echo.Context) error {
 	user := utils.GetPayloadFromJwt(token)
 
 	if user.ID != uid {
-		return c.JSON(403, utils.NewResponse(nil, "you are not authorize to perform this action"))
+		return c.JSON(403, UNAUTHORIZED)
 	}
 
 	unfollowed, err := s.DB.UnfollowUser(c.Request().Context(), follow_id)
 
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
-	return c.JSON(200, utils.NewResponse(unfollowed, ""))
+	return c.JSON(200, unfollowed)
 }

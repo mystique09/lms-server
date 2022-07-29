@@ -40,7 +40,7 @@ updated_at DATE NOT NULL DEFAULT now());
 
 CREATE TABLE class_works (
 id UUID PRIMARY KEY UNIQUE,
-name VARCHAR NOT NULL,
+url VARCHAR NOT NULL,
 user_id UUID NOT NULL,
 class_id UUID NOT NULL,
 mark INTEGER,

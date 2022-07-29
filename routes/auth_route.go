@@ -5,17 +5,17 @@ import (
 	"server/utils"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"required,gt=6"`
+	Password string `json:"password" validate:"required,gt=6"`
 }
 
 type AuthSuccessResponse struct {
-	Message string `json:"message"`
 	Access  string `json:"access_token"`
 	Refresh string `json:"refresh_token"`
 }
@@ -23,36 +23,31 @@ type AuthSuccessResponse struct {
 func (s *Server) loginHandler(c echo.Context) error {
 	var payload AuthRequest
 
-	if err := c.Bind(&payload); err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse("", "One field might be missing, fill in the missing fields."))
-	}
-
-	if len(payload.Username) == 0 || len(payload.Password) == 0 {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse("", "One field might be missing, fill in the missing fields."))
+	c.Bind(&payload)
+	if err := c.Validate(payload); err != nil {
+		return c.JSON(400, err)
 	}
 
 	user, err := s.DB.GetUserByUsername(c.Request().Context(), payload.Username)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, utils.NewResponse(nil, "User doesn't exist."))
+	if err != nil || user.ID == uuid.Nil {
+		return c.JSON(http.StatusNotFound, USER_NOTFOUND)
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)) != nil {
-		return c.JSON(http.StatusForbidden, utils.NewResponse(nil, "Incorrect username or password."))
+		return c.JSON(http.StatusForbidden, LOGIN_FAILED)
 	}
 
 	access_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.ID, user.Username, user.Email, string(user.UserRole)), 5), s.Cfg.JWT_SECRET_KEY)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	refresh_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.ID, user.Username, user.Email, string(user.UserRole)), 60*60*7*31), s.Cfg.JWT_REFRESH_SECRET_KEY)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	//cookie := utils.NewCookie("session", refresh_token, (60*60)*30)
-	//c.SetCookie(&cookie)
-	return c.JSON(http.StatusOK, utils.NewResponse(AuthSuccessResponse{Message: "Logged in.", Access: access_token, Refresh: refresh_token}, ""))
+	return c.JSON(http.StatusOK, AuthSuccessResponse{Access: access_token, Refresh: refresh_token})
 }
 
 func (s *Server) refreshToken(c echo.Context) error {
@@ -61,17 +56,19 @@ func (s *Server) refreshToken(c echo.Context) error {
 	updated_user, err := s.DB.GetUser(c.Request().Context(), user.ID)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	new_access_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(updated_user.ID, updated_user.Username, updated_user.Email, string(updated_user.UserRole)), 5), s.Cfg.JWT_SECRET_KEY)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(AccessToken{Token: new_access_token}, ""))
+	return c.JSON(http.StatusOK, AccessToken{
+		Token: new_access_token,
+	})
 }

@@ -97,27 +97,6 @@ func TestCreateNewMoreClassrooms(t *testing.T) {
 	}
 }
 
-func TestUpdateOneClassroom(t *testing.T) {
-	args := UpdateClassParams{
-		ID:         class_id,
-		Name:       random.New().String(15, charsets),
-		Subject:    random.New().String(12, charsets),
-		Section:    random.New().String(8, charsets),
-		Room:       random.New().String(5, charsets),
-		InviteCode: uuid.New(),
-	}
-
-	updated, err := testQueries.UpdateClass(context.Background(), args)
-
-	if assert.NoError(t, err) {
-		assert.NotEqual(t, updated.InviteCode, class_invcode)
-		assert.Len(t, updated.Name, 15)
-		assert.Len(t, updated.Subject, 12)
-		assert.Len(t, updated.Section, 8)
-		assert.Len(t, updated.Room, 5)
-	}
-}
-
 func TestGetAllClassroomsFromUser(t *testing.T) {
 	param := GetAllClassFromUserParams{
 		AdminID: user_id,

@@ -12,6 +12,7 @@ type Config struct {
 	FRONTEND_URL           string
 	JWT_SECRET_KEY         []byte
 	JWT_REFRESH_SECRET_KEY []byte
+	CLD_URL                string
 }
 
 func Init() Config {
@@ -20,6 +21,7 @@ func Init() Config {
 	var FRONTEND_URL string = os.Getenv("FRONTEND_URL")
 	var JWT_SECRET_KEY string = os.Getenv("JWT_SECRET_KEY")
 	var JWT_REFRESH_SECRET_KEY string = os.Getenv("JWT_REFRESH_SECRET_KEY")
+	var CLD_URL string = os.Getenv("CLD_URL")
 
 	if PORT == "" {
 		PORT = "8080"
@@ -39,5 +41,6 @@ func Init() Config {
 		FRONTEND_URL:           FRONTEND_URL,
 		JWT_SECRET_KEY:         []byte(JWT_SECRET_KEY),
 		JWT_REFRESH_SECRET_KEY: []byte(JWT_REFRESH_SECRET_KEY),
+		CLD_URL:                CLD_URL,
 	}
 }

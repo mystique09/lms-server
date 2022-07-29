@@ -33,17 +33,12 @@ func (q *Queries) DeletePostFromClass(ctx context.Context, arg DeletePostFromCla
 const getOnePost = `-- name: GetOnePost :one
 SELECT id, content, author_id, class_id, created_at, updated_at
 FROM posts
-WHERE id = $1 AND class_id = $2
+WHERE id = $1
 LIMIT 1
 `
 
-type GetOnePostParams struct {
-	ID      uuid.UUID `json:"id"`
-	ClassID uuid.UUID `json:"class_id"`
-}
-
-func (q *Queries) GetOnePost(ctx context.Context, arg GetOnePostParams) (Post, error) {
-	row := q.queryRow(ctx, q.getOnePostStmt, getOnePost, arg.ID, arg.ClassID)
+func (q *Queries) GetOnePost(ctx context.Context, id uuid.UUID) (Post, error) {
+	row := q.queryRow(ctx, q.getOnePostStmt, getOnePost, id)
 	var i Post
 	err := row.Scan(
 		&i.ID,

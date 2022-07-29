@@ -5,9 +5,12 @@ import (
 	//"net/http"
 	"server/config"
 	database "server/database/sqlc"
+
 	//"server/frontend"
 	"server/utils"
 
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	//"github.com/labstack/echo/v4/middleware"
@@ -26,10 +29,12 @@ func Setup() Server {
 
 	conn := utils.SetupDB(config.DATABASE_URL)
 	db := database.New(conn)
+	cld, err := cloudinary.NewFromURL(config.CLD_URL)
 
 	return Server{
 		DB:  db,
 		Cfg: config,
+		Cld: cld,
 	}
 }
 
@@ -53,6 +58,8 @@ func Launch() {
 	server = Setup()
 
 	e := echo.New()
+	e.Validator = &CustomValidator{validator: validator.New()}
+
 	e.Use(LoggerMiddleware())
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(server.Cfg))
@@ -77,10 +84,16 @@ func Launch() {
 		user_group.GET("/:id", server.getUser)
 		user_group.PUT("/:id", server.updateUser)
 		user_group.DELETE("/:id", server.deleteUser)
-		// relationships
+		// classrokms relationships
 		user_group.GET("/:id/classrooms", server.getClassrooms)
 		user_group.POST("/:id/classrooms", server.joinClassroom)
 		user_group.DELETE("/:id/classrooms/:class_id", server.leaveClassroom)
+
+		// classworks relationships
+		user_group.GET("/:id/classworks", server.getAllUserClassworks)
+		user_group.GET("/:id/classworks/:classwork_id", server.getClassworkById)
+
+		// followers relationships
 		user_group.GET("/:id/followers", server.getFollowers)
 		user_group.GET("/:id/followings", server.getFollowings)
 		user_group.POST("/:id/followings", server.addNewFollower)
@@ -94,8 +107,13 @@ func Launch() {
 		class_group.GET("/:id", server.getClassroom)
 		class_group.PUT("/:id", server.updateClassroom)
 		class_group.DELETE("/:id", server.deleteClassroom)
-		// relationships
+		// classworks relationships
+		class_group.GET("/:id/classworks", server.getAllClassworks)
+		class_group.POST("/:id/classworks", server.addNewClasswork)
+		class_group.DELETE("/:id/classworks/:classwork_id", server.deleteClasswork)
+		// users relationships
 		class_group.GET("/:id/users", server.getClassroomUsers)
+		// posts relationships
 		class_group.GET("/:id/posts", server.getClassroomPosts)
 	}
 
@@ -111,7 +129,7 @@ func Launch() {
 		post_group.DELETE("/:id", server.unlikePost)
 	}
 
-	comment_group := e.Group("/api/v1/posts", JwtAuthMiddleware(server.Cfg))
+	comment_group := e.Group("/api/v1/comments", JwtAuthMiddleware(server.Cfg))
 	{
 		comment_group.POST("", server.createNewComment)
 		comment_group.GET("/:id", server.getOneComment)

@@ -6,6 +6,12 @@ ORDER BY created_at
 LIMIT 10
 OFFSET $2;
 
+-- name: GetClassroomMemberById :one
+SELECT *
+FROM classroom_members
+WHERE user_id = $1 AND class_id = $2
+LIMIT 1;
+
 -- name: GetAllJoinedClassrooms :many
 SELECT c.*
 FROM classrooms c

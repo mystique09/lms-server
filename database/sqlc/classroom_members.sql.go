@@ -135,6 +135,31 @@ func (q *Queries) GetAllJoinedClassrooms(ctx context.Context, arg GetAllJoinedCl
 	return items, nil
 }
 
+const getClassroomMemberById = `-- name: GetClassroomMemberById :one
+SELECT id, class_id, user_id, created_at, updated_at
+FROM classroom_members
+WHERE user_id = $1 AND class_id = $2
+LIMIT 1
+`
+
+type GetClassroomMemberByIdParams struct {
+	UserID  uuid.UUID `json:"user_id"`
+	ClassID uuid.UUID `json:"class_id"`
+}
+
+func (q *Queries) GetClassroomMemberById(ctx context.Context, arg GetClassroomMemberByIdParams) (ClassroomMember, error) {
+	row := q.queryRow(ctx, q.getClassroomMemberByIdStmt, getClassroomMemberById, arg.UserID, arg.ClassID)
+	var i ClassroomMember
+	err := row.Scan(
+		&i.ID,
+		&i.ClassID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const leaveClassroom = `-- name: LeaveClassroom :one
 DELETE FROM classroom_members
 WHERE user_id = $1 AND class_id = $2

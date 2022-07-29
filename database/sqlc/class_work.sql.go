@@ -12,9 +12,10 @@ import (
 	"github.com/google/uuid"
 )
 
-const deleteClassworkFromClass = `-- name: DeleteClassworkFromClass :exec
+const deleteClassworkFromClass = `-- name: DeleteClassworkFromClass :one
 DELETE FROM class_works
 WHERE id = $1 AND user_id = $2 AND class_id = $3
+RETURNING id, url, user_id, class_id, mark, created_at, updated_at
 `
 
 type DeleteClassworkFromClassParams struct {
@@ -23,30 +24,39 @@ type DeleteClassworkFromClassParams struct {
 	ClassID uuid.UUID `json:"class_id"`
 }
 
-func (q *Queries) DeleteClassworkFromClass(ctx context.Context, arg DeleteClassworkFromClassParams) error {
-	_, err := q.exec(ctx, q.deleteClassworkFromClassStmt, deleteClassworkFromClass, arg.ID, arg.UserID, arg.ClassID)
-	return err
+func (q *Queries) DeleteClassworkFromClass(ctx context.Context, arg DeleteClassworkFromClassParams) (ClassWork, error) {
+	row := q.queryRow(ctx, q.deleteClassworkFromClassStmt, deleteClassworkFromClass, arg.ID, arg.UserID, arg.ClassID)
+	var i ClassWork
+	err := row.Scan(
+		&i.ID,
+		&i.Url,
+		&i.UserID,
+		&i.ClassID,
+		&i.Mark,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const getClassWork = `-- name: GetClassWork :one
-SELECT id, name, user_id, class_id, mark, created_at, updated_at 
+SELECT id, url, user_id, class_id, mark, created_at, updated_at 
 FROM class_works 
-WHERE id = $1 AND user_id = $2 AND class_id = $3
+WHERE id = $1 AND user_id = $2
 LIMIT 1
 `
 
 type GetClassWorkParams struct {
-	ID      uuid.UUID `json:"id"`
-	UserID  uuid.UUID `json:"user_id"`
-	ClassID uuid.UUID `json:"class_id"`
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
 }
 
 func (q *Queries) GetClassWork(ctx context.Context, arg GetClassWorkParams) (ClassWork, error) {
-	row := q.queryRow(ctx, q.getClassWorkStmt, getClassWork, arg.ID, arg.UserID, arg.ClassID)
+	row := q.queryRow(ctx, q.getClassWorkStmt, getClassWork, arg.ID, arg.UserID)
 	var i ClassWork
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
+		&i.Url,
 		&i.UserID,
 		&i.ClassID,
 		&i.Mark,
@@ -58,15 +68,15 @@ func (q *Queries) GetClassWork(ctx context.Context, arg GetClassWorkParams) (Cla
 
 const insertNewClasswork = `-- name: InsertNewClasswork :one
 INSERT INTO class_works (
-  id, name, user_id, class_id
+  id, url, user_id, class_id
 ) VALUES (
   $1, $2, $3, $4
-) RETURNING id, name, user_id, class_id, mark, created_at, updated_at
+) RETURNING id, url, user_id, class_id, mark, created_at, updated_at
 `
 
 type InsertNewClassworkParams struct {
 	ID      uuid.UUID `json:"id"`
-	Name    string    `json:"name"`
+	Url     string    `json:"url"`
 	UserID  uuid.UUID `json:"user_id"`
 	ClassID uuid.UUID `json:"class_id"`
 }
@@ -74,14 +84,14 @@ type InsertNewClassworkParams struct {
 func (q *Queries) InsertNewClasswork(ctx context.Context, arg InsertNewClassworkParams) (ClassWork, error) {
 	row := q.queryRow(ctx, q.insertNewClassworkStmt, insertNewClasswork,
 		arg.ID,
-		arg.Name,
+		arg.Url,
 		arg.UserID,
 		arg.ClassID,
 	)
 	var i ClassWork
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
+		&i.Url,
 		&i.UserID,
 		&i.ClassID,
 		&i.Mark,
@@ -92,7 +102,7 @@ func (q *Queries) InsertNewClasswork(ctx context.Context, arg InsertNewClasswork
 }
 
 const listClassworkAdmin = `-- name: ListClassworkAdmin :many
-SELECT id, name, user_id, class_id, mark, created_at, updated_at
+SELECT id, url, user_id, class_id, mark, created_at, updated_at
 FROM class_works
 WHERE class_id = $1
 ORDER BY created_at
@@ -116,7 +126,7 @@ func (q *Queries) ListClassworkAdmin(ctx context.Context, arg ListClassworkAdmin
 		var i ClassWork
 		if err := rows.Scan(
 			&i.ID,
-			&i.Name,
+			&i.Url,
 			&i.UserID,
 			&i.ClassID,
 			&i.Mark,
@@ -137,7 +147,7 @@ func (q *Queries) ListClassworkAdmin(ctx context.Context, arg ListClassworkAdmin
 }
 
 const listSubmittedClassworks = `-- name: ListSubmittedClassworks :many
-SELECT id, name, user_id, class_id, mark, created_at, updated_at
+SELECT id, url, user_id, class_id, mark, created_at, updated_at
 FROM class_works
 WHERE user_id = $1
 ORDER BY created_at
@@ -161,7 +171,7 @@ func (q *Queries) ListSubmittedClassworks(ctx context.Context, arg ListSubmitted
 		var i ClassWork
 		if err := rows.Scan(
 			&i.ID,
-			&i.Name,
+			&i.Url,
 			&i.UserID,
 			&i.ClassID,
 			&i.Mark,
