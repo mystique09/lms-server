@@ -10,8 +10,8 @@ import (
 )
 
 type AuthRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"required,gt=6"`
+	Password string `json:"password" validate:"required,gt=6"`
 }
 
 type AuthSuccessResponse struct {
@@ -27,8 +27,8 @@ func (s *Server) loginHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse("", "One field might be missing, fill in the missing fields."))
 	}
 
-	if len(payload.Username) == 0 || len(payload.Password) == 0 {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse("", "One field might be missing, fill in the missing fields."))
+	if err := c.Validate(payload); err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
 	}
 
 	user, err := s.DB.GetUserByUsername(c.Request().Context(), payload.Username)
@@ -50,8 +50,6 @@ func (s *Server) loginHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
-	//cookie := utils.NewCookie("session", refresh_token, (60*60)*30)
-	//c.SetCookie(&cookie)
 	return c.JSON(http.StatusOK, utils.NewResponse(AuthSuccessResponse{Message: "Logged in.", Access: access_token, Refresh: refresh_token}, ""))
 }
 
