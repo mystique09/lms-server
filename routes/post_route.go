@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	database "server/database/sqlc"
 	"server/utils"
 
@@ -12,12 +11,12 @@ import (
 
 type (
 	CreatePostRequest struct {
-		Content string `json:"content"`
-		ClassID string `json:"class_id"`
+		Content string `json:"content" validate:"required,gt=0"`
+		ClassID string `json:"class_id" validate:"required,uuid"`
 	}
 
 	UpdatePostRequest struct {
-		Content string `json:"content"`
+		Content string `json:"content" validate:"required,gt=0"`
 	}
 )
 
@@ -25,7 +24,7 @@ func (s *Server) getOnePost(c echo.Context) error {
 	id := c.Param("id")
 	pid, err := uuid.Parse(id)
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
@@ -33,7 +32,7 @@ func (s *Server) getOnePost(c echo.Context) error {
 
 	post, err := s.DB.GetOnePost(c.Request().Context(), pid)
 	if err != nil || post.ID == uuid.Nil {
-		return c.JSON(404, utils.NewResponse(nil, fmt.Sprintf("post with id [%v] doesn't exist", pid)))
+		return c.JSON(404, POST_NOTFOUND)
 	}
 
 	check_user_if_member, err := s.DB.GetClassroomMemberById(c.Request().Context(), database.GetClassroomMemberByIdParams{
@@ -41,26 +40,29 @@ func (s *Server) getOnePost(c echo.Context) error {
 		ClassID: post.ClassID,
 	})
 	if err != nil || check_user_if_member.ID == uuid.Nil {
-		return c.JSON(404, utils.NewResponse(nil, fmt.Sprintf("user with id [%v] is not a member of classroom with id [%v]", jwt_payload.ID, post.ClassID)))
+		return c.JSON(404, NOT_A_MEMBER)
 	}
 
-	return c.JSON(200, utils.NewResponse(post, ""))
+	return c.JSON(200, post)
 }
 
 func (s *Server) createNewPost(c echo.Context) error {
 	var payload CreatePostRequest
-	if err := (&echo.DefaultBinder{}).BindBody(c, &payload); err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+
+	c.Bind(&payload)
+
+	if err := c.Validate(payload); err != nil {
+		return c.JSON(400, err)
 	}
 
 	parsed_classId, err := uuid.Parse(payload.ClassID)
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
 	check_class, err := s.DB.GetClass(c.Request().Context(), parsed_classId)
 	if err != nil || check_class.ID == uuid.Nil {
-		return c.JSON(404, utils.NewResponse("", fmt.Sprintf("classroom with id [%v] doesn't exist", parsed_classId)))
+		return c.JSON(404, CLASSROOM_NOTFOUND)
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
@@ -71,7 +73,7 @@ func (s *Server) createNewPost(c echo.Context) error {
 		ClassID: parsed_classId,
 	})
 	if err != nil || check_user_if_member.ID == uuid.Nil {
-		return c.JSON(404, utils.NewResponse(nil, fmt.Sprintf("user with id [%v] is not a member of classroom with id [%v]", jwt_payload.ID, parsed_classId)))
+		return c.JSON(404, NOT_A_MEMBER)
 	}
 
 	new_postParam := database.InsertNewPostParams{
@@ -83,22 +85,24 @@ func (s *Server) createNewPost(c echo.Context) error {
 
 	new_post, err := s.DB.InsertNewPost(c.Request().Context(), new_postParam)
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
-	return c.JSON(200, utils.NewResponse(new_post, ""))
+	return c.JSON(200, new_post)
 }
 
 func (s *Server) updatePost(c echo.Context) error {
 	postId := c.Param("id")
 	puid, err := uuid.Parse(postId)
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
 	var payload UpdatePostRequest
-	if err := (&echo.DefaultBinder{}).BindBody(c, &payload); err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+
+	c.Bind(&payload)
+	if err := c.Validate(payload); err != nil {
+		return c.JSON(400, err)
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
@@ -106,11 +110,11 @@ func (s *Server) updatePost(c echo.Context) error {
 
 	check_post, err := s.DB.GetOnePost(c.Request().Context(), puid)
 	if err != nil || check_post.ID == uuid.Nil {
-		return c.JSON(400, utils.NewResponse(nil, fmt.Sprintf("post with id [%v] doesn't exist", puid)))
+		return c.JSON(400, POST_NOTFOUND)
 	}
 
 	if jwt_payload.ID != check_post.AuthorID {
-		return c.JSON(401, utils.NewResponse(nil, "you can't perform this action"))
+		return c.JSON(401, UNAUTHORIZED)
 	}
 
 	updated_post, err := s.DB.UpdatePostContent(c.Request().Context(), database.UpdatePostContentParams{
@@ -118,17 +122,17 @@ func (s *Server) updatePost(c echo.Context) error {
 	})
 
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
-	return c.JSON(200, utils.NewResponse(updated_post, ""))
+	return c.JSON(200, updated_post)
 }
 
 func (s *Server) deletePost(c echo.Context) error {
 	post_id := c.Param("id")
 	puid, err := uuid.Parse(post_id)
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
@@ -136,11 +140,11 @@ func (s *Server) deletePost(c echo.Context) error {
 
 	check_post, err := s.DB.GetOnePost(c.Request().Context(), puid)
 	if err != nil || check_post.ID == uuid.Nil {
-		return c.JSON(400, utils.NewResponse(nil, fmt.Sprintf("post with id [%v] doesn't exist", puid)))
+		return c.JSON(400, POST_NOTFOUND)
 	}
 
 	if jwt_payload.ID != check_post.AuthorID {
-		return c.JSON(401, utils.NewResponse(nil, "you can't perform this action"))
+		return c.JSON(401, UNAUTHORIZED)
 	}
 
 	deleted_post, err := s.DB.DeletePostFromClass(c.Request().Context(), database.DeletePostFromClassParams{
@@ -149,10 +153,10 @@ func (s *Server) deletePost(c echo.Context) error {
 		ID:       check_post.ID,
 	})
 	if err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
-	return c.JSON(200, utils.NewResponse(deleted_post, ""))
+	return c.JSON(200, deleted_post)
 }
 
 func (s *Server) getAllPostLikes(c echo.Context) error {
