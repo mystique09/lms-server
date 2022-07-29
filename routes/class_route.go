@@ -14,20 +14,31 @@ import (
 )
 
 type CreateClassroomDTO struct {
-	Name        string `json:"name"`
+	Name        string `json:"name" validate:"required"`
 	Description string `json:"description"`
 	Section     string `json:"section"`
 	Room        string `json:"room"`
 	Subject     string `json:"subject"`
 }
 
-type UpdateClassroomDTO struct {
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Section     string    `json:"section"`
-	Room        string    `json:"room"`
-	Subject     string    `json:"subject"`
-	InviteCode  uuid.UUID `json:"invite_code"`
+type UpdateClassroomName struct {
+	Name string `json:"name" validate:"required"`
+}
+
+type UpdateClassroomDescription struct {
+	Description string `json:"description" validate:"required"`
+}
+
+type UpdateClassroomSubject struct {
+	Subject string `json:"name" validate:"required"`
+}
+
+type UpdateClassroomSection struct {
+	Section string `json:"section" validate:"required"`
+}
+
+type UpdateClassroomRoom struct {
+	Room string `json:"room" validate:"required"`
 }
 
 type ClassroomResponse struct {
@@ -36,7 +47,7 @@ type ClassroomResponse struct {
 }
 
 type ClassroomJoinRequest struct {
-	InviteCode uuid.UUID `json:"invite_code"`
+	InviteCode uuid.UUID `json:"invite_code" validate:"uuid"`
 }
 
 func (s *Server) getClassrooms(c echo.Context) error {
@@ -124,10 +135,14 @@ func (s *Server) createNewClassroom(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
+	if err := c.Validate(payload); err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+	}
+
 	jwt_token := c.Get("user")
 	jwt_payload := utils.GetPayloadFromJwt(jwt_token.(*jwt.Token))
 
-	class_param := database.CreateClassParams{
+	new_classroom, err := s.DB.CreateClass(c.Request().Context(), database.CreateClassParams{
 		ID:          uuid.New(),
 		AdminID:     jwt_payload.ID,
 		Name:        payload.Name,
@@ -137,9 +152,7 @@ func (s *Server) createNewClassroom(c echo.Context) error {
 		Subject:     payload.Subject,
 		InviteCode:  uuid.New(),
 		Visibility:  database.VisibilityPUBLIC,
-	}
-
-	new_classroom, err := s.DB.CreateClass(c.Request().Context(), class_param)
+	})
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
@@ -162,14 +175,10 @@ func (s *Server) createNewClassroom(c echo.Context) error {
 
 func (s *Server) updateClassroom(c echo.Context) error {
 	id := c.Param("id")
+	field := c.QueryParam("field")
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
-	}
-
-	var payload UpdateClassroomDTO
-	if err := (&echo.DefaultBinder{}).BindBody(c, &payload); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
 	}
 
@@ -186,22 +195,98 @@ func (s *Server) updateClassroom(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, utils.NewResponse(nil, "You are not authorized to perform this action."))
 	}
 
-	update_class_param := database.UpdateClassParams{
-		ID:          uid,
-		Name:        payload.Name,
-		Description: payload.Description,
-		Section:     payload.Section,
-		Room:        payload.Room,
-		Subject:     payload.Subject,
-		InviteCode:  payload.InviteCode,
+	switch field {
+	case "name":
+		var payload UpdateClassroomName
+		if err := (&echo.DefaultBinder{}).BindBody(c, &payload); err != nil {
+			return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		}
+
+		updated_class, err := s.DB.UpdateClassroomName(c.Request().Context(), database.UpdateClassroomNameParams{
+			ID:   uid,
+			Name: payload.Name,
+		})
+
+		if err != nil {
+			return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		}
+		return c.JSON(200, utils.NewResponse(updated_class, ""))
+
+	case "description":
+		var payload UpdateClassroomDescription
+		if err := (&echo.DefaultBinder{}).BindBody(c, &payload); err != nil {
+			return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		}
+		updated_class, err := s.DB.UpdateClassroomDescription(c.Request().Context(), database.UpdateClassroomDescriptionParams{
+			ID:          uid,
+			Description: payload.Description,
+		})
+
+		if err != nil {
+			return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		}
+		return c.JSON(200, utils.NewResponse(updated_class, ""))
+
+	case "subject":
+		var payload UpdateClassroomSubject
+		if err := (&echo.DefaultBinder{}).BindBody(c, &payload); err != nil {
+			return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		}
+
+		updated_class, err := s.DB.UpdateClassroomSubject(c.Request().Context(), database.UpdateClassroomSubjectParams{
+			ID:      uid,
+			Subject: payload.Subject,
+		})
+
+		if err != nil {
+			return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		}
+		return c.JSON(200, utils.NewResponse(updated_class, ""))
+
+	case "section":
+		var payload UpdateClassroomSection
+		if err := (&echo.DefaultBinder{}).BindBody(c, &payload); err != nil {
+			return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		}
+
+		updated_class, err := s.DB.UpdateClassroomSection(c.Request().Context(), database.UpdateClassroomSectionParams{
+			ID:      uid,
+			Section: payload.Section,
+		})
+
+		if err != nil {
+			return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		}
+		return c.JSON(200, utils.NewResponse(updated_class, ""))
+
+	case "room":
+		var payload UpdateClassroomRoom
+		if err := (&echo.DefaultBinder{}).BindBody(c, &payload); err != nil {
+			return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		}
+		updated_class, err := s.DB.UpdateClassroomRoom(c.Request().Context(), database.UpdateClassroomRoomParams{
+			ID:   uid,
+			Room: payload.Room,
+		})
+
+		if err != nil {
+			return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		}
+		return c.JSON(200, utils.NewResponse(updated_class, ""))
+
+	case "invite_code":
+		updated_class, err := s.DB.UpdateClassroomInviteCode(c.Request().Context(), database.UpdateClassroomInviteCodeParams{
+			ID:         uid,
+			InviteCode: uuid.New(),
+		})
+
+		if err != nil {
+			return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		}
+		return c.JSON(200, utils.NewResponse(updated_class, ""))
 	}
 
-	updated_classroom, err := s.DB.UpdateClass(c.Request().Context(), update_class_param)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
-	}
-
-	return c.JSON(http.StatusOK, utils.NewResponse(updated_classroom, ""))
+	return c.JSON(400, utils.NewResponse(nil, fmt.Sprintf("unknown [%v] in query parameter", field)))
 }
 
 func (s *Server) deleteClassroom(c echo.Context) error {
@@ -279,6 +364,10 @@ func (s *Server) joinClassroom(c echo.Context) error {
 	var payload ClassroomJoinRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &payload); err != nil {
 		return c.JSON(400, err.Error())
+	}
+
+	if err := c.Validate(payload); err != nil {
+		return c.JSON(400, utils.NewResponse(nil, err.Error()))
 	}
 
 	classroom_id, err := s.DB.GetClassroomWithInviteCode(c.Request().Context(), payload.InviteCode)
