@@ -220,33 +220,175 @@ func (q *Queries) ListAllPublicClass(ctx context.Context, offset int32) ([]Class
 	return items, nil
 }
 
-const updateClass = `-- name: UpdateClass :one
+const updateClassroomDescription = `-- name: UpdateClassroomDescription :one
 UPDATE classrooms
-SET name = $1, description = $2, section = $3, room = $4, subject = $5, invite_code = $6
-WHERE id = $7
+SET description = $1
+WHERE id = $2
 RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
 `
 
-type UpdateClassParams struct {
-	Name        string    `json:"name"`
+type UpdateClassroomDescriptionParams struct {
 	Description string    `json:"description"`
-	Section     string    `json:"section"`
-	Room        string    `json:"room"`
-	Subject     string    `json:"subject"`
-	InviteCode  uuid.UUID `json:"invite_code"`
 	ID          uuid.UUID `json:"id"`
 }
 
-func (q *Queries) UpdateClass(ctx context.Context, arg UpdateClassParams) (Classroom, error) {
-	row := q.queryRow(ctx, q.updateClassStmt, updateClass,
-		arg.Name,
-		arg.Description,
-		arg.Section,
-		arg.Room,
-		arg.Subject,
-		arg.InviteCode,
-		arg.ID,
+func (q *Queries) UpdateClassroomDescription(ctx context.Context, arg UpdateClassroomDescriptionParams) (Classroom, error) {
+	row := q.queryRow(ctx, q.updateClassroomDescriptionStmt, updateClassroomDescription, arg.Description, arg.ID)
+	var i Classroom
+	err := row.Scan(
+		&i.ID,
+		&i.AdminID,
+		&i.Name,
+		&i.Description,
+		&i.Section,
+		&i.Room,
+		&i.Subject,
+		&i.InviteCode,
+		&i.Visibility,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
+	return i, err
+}
+
+const updateClassroomInviteCode = `-- name: UpdateClassroomInviteCode :one
+UPDATE classrooms
+SET invite_code = $1
+WHERE id = $2
+RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
+`
+
+type UpdateClassroomInviteCodeParams struct {
+	InviteCode uuid.UUID `json:"invite_code"`
+	ID         uuid.UUID `json:"id"`
+}
+
+func (q *Queries) UpdateClassroomInviteCode(ctx context.Context, arg UpdateClassroomInviteCodeParams) (Classroom, error) {
+	row := q.queryRow(ctx, q.updateClassroomInviteCodeStmt, updateClassroomInviteCode, arg.InviteCode, arg.ID)
+	var i Classroom
+	err := row.Scan(
+		&i.ID,
+		&i.AdminID,
+		&i.Name,
+		&i.Description,
+		&i.Section,
+		&i.Room,
+		&i.Subject,
+		&i.InviteCode,
+		&i.Visibility,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateClassroomName = `-- name: UpdateClassroomName :one
+UPDATE classrooms
+SET name = $1
+WHERE id = $2
+RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
+`
+
+type UpdateClassroomNameParams struct {
+	Name string    `json:"name"`
+	ID   uuid.UUID `json:"id"`
+}
+
+func (q *Queries) UpdateClassroomName(ctx context.Context, arg UpdateClassroomNameParams) (Classroom, error) {
+	row := q.queryRow(ctx, q.updateClassroomNameStmt, updateClassroomName, arg.Name, arg.ID)
+	var i Classroom
+	err := row.Scan(
+		&i.ID,
+		&i.AdminID,
+		&i.Name,
+		&i.Description,
+		&i.Section,
+		&i.Room,
+		&i.Subject,
+		&i.InviteCode,
+		&i.Visibility,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateClassroomRoom = `-- name: UpdateClassroomRoom :one
+UPDATE classrooms
+SET room = $1
+WHERE id = $2
+RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
+`
+
+type UpdateClassroomRoomParams struct {
+	Room string    `json:"room"`
+	ID   uuid.UUID `json:"id"`
+}
+
+func (q *Queries) UpdateClassroomRoom(ctx context.Context, arg UpdateClassroomRoomParams) (Classroom, error) {
+	row := q.queryRow(ctx, q.updateClassroomRoomStmt, updateClassroomRoom, arg.Room, arg.ID)
+	var i Classroom
+	err := row.Scan(
+		&i.ID,
+		&i.AdminID,
+		&i.Name,
+		&i.Description,
+		&i.Section,
+		&i.Room,
+		&i.Subject,
+		&i.InviteCode,
+		&i.Visibility,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateClassroomSection = `-- name: UpdateClassroomSection :one
+UPDATE classrooms
+SET section = $1
+WHERE id = $2
+RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
+`
+
+type UpdateClassroomSectionParams struct {
+	Section string    `json:"section"`
+	ID      uuid.UUID `json:"id"`
+}
+
+func (q *Queries) UpdateClassroomSection(ctx context.Context, arg UpdateClassroomSectionParams) (Classroom, error) {
+	row := q.queryRow(ctx, q.updateClassroomSectionStmt, updateClassroomSection, arg.Section, arg.ID)
+	var i Classroom
+	err := row.Scan(
+		&i.ID,
+		&i.AdminID,
+		&i.Name,
+		&i.Description,
+		&i.Section,
+		&i.Room,
+		&i.Subject,
+		&i.InviteCode,
+		&i.Visibility,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateClassroomSubject = `-- name: UpdateClassroomSubject :one
+UPDATE classrooms
+SET subject = $1
+WHERE id = $2
+RETURNING id, admin_id, name, description, section, room, subject, invite_code, visibility, created_at, updated_at
+`
+
+type UpdateClassroomSubjectParams struct {
+	Subject string    `json:"subject"`
+	ID      uuid.UUID `json:"id"`
+}
+
+func (q *Queries) UpdateClassroomSubject(ctx context.Context, arg UpdateClassroomSubjectParams) (Classroom, error) {
+	row := q.queryRow(ctx, q.updateClassroomSubjectStmt, updateClassroomSubject, arg.Subject, arg.ID)
 	var i Classroom
 	err := row.Scan(
 		&i.ID,

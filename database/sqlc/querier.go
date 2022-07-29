@@ -47,7 +47,12 @@ type Querier interface {
 	ListSubmittedClassworks(ctx context.Context, arg ListSubmittedClassworksParams) ([]ClassWork, error)
 	UnfollowUser(ctx context.Context, id uuid.UUID) (UserFollow, error)
 	UpdateAClassworkMark(ctx context.Context, arg UpdateAClassworkMarkParams) error
-	UpdateClass(ctx context.Context, arg UpdateClassParams) (Classroom, error)
+	UpdateClassroomDescription(ctx context.Context, arg UpdateClassroomDescriptionParams) (Classroom, error)
+	UpdateClassroomInviteCode(ctx context.Context, arg UpdateClassroomInviteCodeParams) (Classroom, error)
+	UpdateClassroomName(ctx context.Context, arg UpdateClassroomNameParams) (Classroom, error)
+	UpdateClassroomRoom(ctx context.Context, arg UpdateClassroomRoomParams) (Classroom, error)
+	UpdateClassroomSection(ctx context.Context, arg UpdateClassroomSectionParams) (Classroom, error)
+	UpdateClassroomSubject(ctx context.Context, arg UpdateClassroomSubjectParams) (Classroom, error)
 	UpdateCommentContentInPost(ctx context.Context, arg UpdateCommentContentInPostParams) (interface{}, error)
 	UpdatePostContent(ctx context.Context, arg UpdatePostContentParams) (interface{}, error)
 	UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) (User, error)

@@ -35,10 +35,40 @@ FROM classrooms
 WHERE invite_code = $1
 LIMIT 1;
 
--- name: UpdateClass :one
+-- name: UpdateClassroomName :one
 UPDATE classrooms
-SET name = $1, description = $2, section = $3, room = $4, subject = $5, invite_code = $6
-WHERE id = $7
+SET name = $1
+WHERE id = $2
+RETURNING *;
+
+-- name: UpdateClassroomDescription :one
+UPDATE classrooms
+SET description = $1
+WHERE id = $2
+RETURNING *;
+
+-- name: UpdateClassroomSubject :one
+UPDATE classrooms
+SET subject = $1
+WHERE id = $2
+RETURNING *;
+
+-- name: UpdateClassroomSection :one
+UPDATE classrooms
+SET section = $1
+WHERE id = $2
+RETURNING *;
+
+-- name: UpdateClassroomRoom :one
+UPDATE classrooms
+SET room = $1
+WHERE id = $2
+RETURNING *;
+
+-- name: UpdateClassroomInviteCode :one
+UPDATE classrooms
+SET invite_code = $1
+WHERE id = $2
 RETURNING *;
 
 -- name: DeleteClass :one
