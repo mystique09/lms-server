@@ -57,16 +57,16 @@ func (s *Server) getUsers(c echo.Context) error {
 
 	offset, err := strconv.Atoi(page)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	users, err := s.DB.GetUsers(c.Request().Context(), int32(offset*10))
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(users, ""))
+	return c.JSON(http.StatusOK, users)
 }
 
 func (s *Server) getUser(c echo.Context) error {
@@ -80,23 +80,23 @@ func (s *Server) getUser(c echo.Context) error {
 	offset, err := strconv.Atoi(page)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide an ID."))
+		return c.JSON(http.StatusBadRequest, MISSING_ID_FIELD)
 	}
 
 	user, err := s.DB.GetUser(c.Request().Context(), uid)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	classrooms, err := s.DB.GetAllJoinedClassrooms(c.Request().Context(), database.GetAllJoinedClassroomsParams{
@@ -105,7 +105,7 @@ func (s *Server) getUser(c echo.Context) error {
 	})
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	user_wclassrooms := UserClassrooms{
@@ -113,29 +113,27 @@ func (s *Server) getUser(c echo.Context) error {
 		Rooms: classrooms,
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(user_wclassrooms, ""))
+	return c.JSON(http.StatusOK, user_wclassrooms)
 }
 
 func (s *Server) createUser(c echo.Context) error {
 	user_data := new(UserCreateDTO)
-	if err := c.Bind(user_data); err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
-	}
+	c.Bind(&user_data)
 
 	if err := c.Validate(user_data); err != nil {
-		return c.JSON(400, utils.NewResponse(nil, err.Error()))
+		return c.JSON(400, err)
 	}
 
 	check_user, err := s.DB.GetUserByUsername(c.Request().Context(), user_data.Username)
 
 	if check_user.ID != uuid.Nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "User already exist."))
+		return c.JSON(http.StatusBadRequest, USER_ALREADY_EXIST)
 	}
 
 	hashed_password, err := utils.Encrypt(user_data.Password)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	var new_user_param database.CreateUserParams = database.CreateUserParams{
@@ -150,37 +148,34 @@ func (s *Server) createUser(c echo.Context) error {
 	user, err := s.DB.CreateUser(c.Request().Context(), new_user_param)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(user, ""))
+	return c.JSON(http.StatusOK, user)
 }
 
 func (s *Server) updateUser(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide an ID."))
+		return c.JSON(http.StatusBadRequest, MISSING_ID_FIELD)
 	}
 
 	field := c.QueryParam("field")
 
 	if field == "" {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Invalid query field, idk what to update."))
+		return c.JSON(http.StatusBadRequest, EMPTY_QUERY_PARAM)
 	}
 
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	var updateDto UserUpdateDTO
-	if err := (&echo.DefaultBinder{}).BindBody(c, &updateDto); err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
-	}
-
+	c.Bind(&updateDto)
 	if err := c.Validate(updateDto); err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	// check if the current user is the one being updated
@@ -190,11 +185,11 @@ func (s *Server) updateUser(c echo.Context) error {
 	check_user, err := s.DB.GetUser(c.Request().Context(), uid)
 
 	if err != nil || check_user.ID == uuid.Nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "User not found."))
+		return c.JSON(http.StatusBadRequest, USER_NOTFOUND)
 	}
 
 	if check_user.Username != payload.Username || check_user.Email != payload.Email {
-		return c.JSON(http.StatusUnauthorized, "You don't have the permission to update this user.")
+		return c.JSON(http.StatusUnauthorized, UNAUTHORIZED)
 	}
 
 	if field == "username" {
@@ -204,15 +199,15 @@ func (s *Server) updateUser(c echo.Context) error {
 		}
 
 		if updateDto.Username == "" {
-			return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Empty required field."))
+			return c.JSON(http.StatusBadRequest, MISSING_FIELDS)
 		}
 
 		new_user, err := s.DB.UpdateUsername(c.Request().Context(), payload)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		return c.JSON(http.StatusOK, utils.NewResponse(new_user, ""))
+		return c.JSON(http.StatusOK, new_user)
 	} else if field == "email" {
 		payload := database.UpdateUserEmailParams{
 			ID:    uid,
@@ -220,20 +215,20 @@ func (s *Server) updateUser(c echo.Context) error {
 		}
 
 		if updateDto.Email == "" {
-			return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Empty required field."))
+			return c.JSON(http.StatusBadRequest, MISSING_FIELDS)
 		}
 
 		new_user, err := s.DB.UpdateUserEmail(c.Request().Context(), payload)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		return c.JSON(http.StatusOK, utils.NewResponse(new_user, ""))
+		return c.JSON(http.StatusOK, new_user)
 	} else if field == "password" {
 		hashed_password, err := utils.Encrypt(updateDto.Password)
 
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+			return c.JSON(http.StatusBadRequest, err)
 		}
 
 		payload := database.UpdateUserPasswordParams{
@@ -242,18 +237,18 @@ func (s *Server) updateUser(c echo.Context) error {
 		}
 
 		if updateDto.Password == "" {
-			return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Empty required field."))
+			return c.JSON(http.StatusBadRequest, MISSING_FIELDS)
 		}
 
 		new_user, err := s.DB.UpdateUserPassword(c.Request().Context(), payload)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		return c.JSON(http.StatusOK, utils.NewResponse(new_user, ""))
+		return c.JSON(http.StatusOK, new_user)
 	}
 
-	return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Invalid query field, idk what to update."))
+	return c.JSON(http.StatusBadRequest, UNKNOWN_FIELD)
 }
 
 func (s *Server) deleteUser(c echo.Context) error {
@@ -261,11 +256,11 @@ func (s *Server) deleteUser(c echo.Context) error {
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "Please provide an ID."))
+		return c.JSON(http.StatusBadRequest, MISSING_ID_FIELD)
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
@@ -274,18 +269,18 @@ func (s *Server) deleteUser(c echo.Context) error {
 	check_user, err := s.DB.GetUser(c.Request().Context(), uid)
 
 	if err != nil || check_user.ID == uuid.Nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, "User not found."))
+		return c.JSON(http.StatusBadRequest, USER_NOTFOUND)
 	}
 
 	if check_user.Username != payload.Username || check_user.Email != payload.Email {
-		return c.JSON(http.StatusUnauthorized, "You don't have the permission to delete this user.")
+		return c.JSON(http.StatusUnauthorized, UNAUTHORIZED)
 	}
 
 	deleted_user, err := s.DB.DeleteUser(c.Request().Context(), uid)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.NewResponse(nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(deleted_user, ""))
+	return c.JSON(http.StatusOK, deleted_user)
 }
