@@ -30,6 +30,41 @@ func (q *Queries) DeleteCommentFromPost(ctx context.Context, arg DeleteCommentFr
 	return column_1, err
 }
 
+const getAllCommentLikes = `-- name: GetAllCommentLikes :many
+SELECT id, comment_id, user_id, created_at, updated_at
+FROM comment_likes
+WHERE comment_id = $1
+`
+
+func (q *Queries) GetAllCommentLikes(ctx context.Context, commentID uuid.UUID) ([]CommentLike, error) {
+	rows, err := q.query(ctx, q.getAllCommentLikesStmt, getAllCommentLikes, commentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CommentLike
+	for rows.Next() {
+		var i CommentLike
+		if err := rows.Scan(
+			&i.ID,
+			&i.CommentID,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllCommentsFromPost = `-- name: GetAllCommentsFromPost :many
 SELECT id, content, author_id, post_id, created_at, updated_at
 FROM comments
@@ -102,6 +137,57 @@ func (q *Queries) InsertNewCommentInPost(ctx context.Context, arg InsertNewComme
 		&i.Content,
 		&i.AuthorID,
 		&i.PostID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const likeComment = `-- name: LikeComment :one
+INSERT INTO comment_likes (
+  id, comment_id, user_id
+) VALUES (
+$1, $2, $3
+) RETURNING id, comment_id, user_id, created_at, updated_at
+`
+
+type LikeCommentParams struct {
+	ID        uuid.UUID `json:"id"`
+	CommentID uuid.UUID `json:"comment_id"`
+	UserID    uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) LikeComment(ctx context.Context, arg LikeCommentParams) (CommentLike, error) {
+	row := q.queryRow(ctx, q.likeCommentStmt, likeComment, arg.ID, arg.CommentID, arg.UserID)
+	var i CommentLike
+	err := row.Scan(
+		&i.ID,
+		&i.CommentID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const unlikeComment = `-- name: UnlikeComment :one
+DELETE FROM comment_likes
+WHERE id = $1 AND comment_id = $2
+RETURNING id, comment_id, user_id, created_at, updated_at
+`
+
+type UnlikeCommentParams struct {
+	ID        uuid.UUID `json:"id"`
+	CommentID uuid.UUID `json:"comment_id"`
+}
+
+func (q *Queries) UnlikeComment(ctx context.Context, arg UnlikeCommentParams) (CommentLike, error) {
+	row := q.queryRow(ctx, q.unlikeCommentStmt, unlikeComment, arg.ID, arg.CommentID)
+	var i CommentLike
+	err := row.Scan(
+		&i.ID,
+		&i.CommentID,
+		&i.UserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
