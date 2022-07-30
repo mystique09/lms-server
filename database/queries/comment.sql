@@ -24,3 +24,19 @@ DELETE FROM comments
 WHERE id = $1 AND author_id = $2 AND post_id = $3
 RETURNING (id, content, author_id);
 
+-- name: GetAllCommentLikes :many
+SELECT *
+FROM comment_likes
+WHERE comment_id = $1;
+
+-- name: LikeComment :one
+INSERT INTO comment_likes (
+  id, comment_id, user_id
+) VALUES (
+$1, $2, $3
+) RETURNING *;
+
+-- name: UnlikeComment :one
+DELETE FROM comment_likes
+WHERE id = $1 AND comment_id = $2
+RETURNING *;

@@ -35,3 +35,20 @@ RETURNING (id, content, author_id);
 DELETE FROM posts
 WHERE id = $1 AND author_id = $2 AND class_id = $3
 RETURNING (id, content, author_id);
+
+-- name: GetAllPostLikes :many
+SELECT *
+FROM post_likes
+WHERE post_id = $1;
+
+-- name: LikePost :one
+INSERT INTO post_likes (
+  id, post_id, user_id
+) VALUES (
+$1, $2, $3
+) RETURNING *;
+
+-- name: UnlikePost :one
+DELETE FROM post_likes
+WHERE id = $1 AND post_id = $2 AND user_id = $3
+RETURNING *;
