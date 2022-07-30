@@ -18,6 +18,14 @@ type (
 	UpdatePostRequest struct {
 		Content string `json:"content" validate:"required,gt=0"`
 	}
+
+	LikeRequest struct {
+		ClassID uuid.UUID `json:"class_id" validate:"required,uuid"`
+	}
+
+	UnlikeRequest struct {
+		iD uuid.UUID `json:"id" validate:"required,uuid"`
+	}
 )
 
 func (s *Server) getOnePost(c echo.Context) error {
@@ -160,13 +168,85 @@ func (s *Server) deletePost(c echo.Context) error {
 }
 
 func (s *Server) getAllPostLikes(c echo.Context) error {
-	return c.String(200, "TODO")
+	post_id := c.Param("id")
+
+	post_uuid, err := uuid.Parse(post_id)
+	if err != nil {
+		return c.JSON(400, err)
+	}
+
+	likes, err := s.DB.GetAllPostLikes(c.Request().Context(), post_uuid)
+	if err != nil {
+		return c.JSON(400, err)
+	}
+	// todo
+	return c.JSON(200, likes)
 }
 
 func (s *Server) likePost(c echo.Context) error {
-	return c.String(200, "TODO")
+	post_id := c.Param("id")
+
+	post_uuid, err := uuid.Parse(post_id)
+	if err != nil {
+		return c.JSON(400, err)
+	}
+
+	var payload LikeRequest
+	c.Bind(&payload)
+
+	if err := c.Validate(payload); err != nil {
+		return c.JSON(400, err)
+	}
+
+	jwt_token := c.Get("user").(*jwt.Token)
+	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+
+	check_member, err := s.DB.GetClassroomMemberById(c.Request().Context(), database.GetClassroomMemberByIdParams{
+		UserID:  jwt_payload.ID,
+		ClassID: payload.ClassID,
+	})
+	if err != nil || check_member.ID == uuid.Nil {
+		return c.JSON(401, NOT_A_MEMBER)
+	}
+
+	liked_post, err := s.DB.LikePost(c.Request().Context(), database.LikePostParams{
+		ID:     uuid.New(),
+		UserID: jwt_payload.ID,
+		PostID: post_uuid,
+	})
+	if err != nil {
+		return c.JSON(400, err)
+	}
+
+	return c.JSON(200, liked_post)
 }
 
 func (s *Server) unlikePost(c echo.Context) error {
-	return c.String(200, "TODO")
+	post_id := c.Param("id")
+	post_uid, err := uuid.Parse(post_id)
+
+	if err != nil {
+		return c.JSON(400, err)
+	}
+
+	var payload UnlikeRequest
+	c.Bind(&payload)
+
+	if err := c.Validate(payload); err != nil {
+		return c.JSON(400, err)
+	}
+
+	jwt_token := c.Get("user").(*jwt.Token)
+	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+
+	unliked_post, err := s.DB.UnlikePost(c.Request().Context(), database.UnlikePostParams{
+		ID:     post_uid,
+		PostID: payload.iD,
+		UserID: jwt_payload.ID,
+	})
+	if err != nil || unliked_post.ID == uuid.Nil {
+		return c.JSON(400, POST_NOTFOUND)
+	}
+
+	return c.JSON(200, unliked_post)
 }
