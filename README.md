@@ -81,21 +81,21 @@ DELETE /api/v1/comments/:id/likes
 - [x] Create the initial routers of comments
 - [x] Create the initial routers of class_works/assignments
 - [x] Create a post inside a classroom
-- [ ] Udpate a post
-- [ ] Delete a post
+- [x] Udpate a post
+- [x] Delete a post
 - [x] Get all posts
 - [x] Get one posts
-- [ ] Like a post
-- [ ] Unlike a post
-- [ ] Get all likes of a post
+- [x] Like a post
+- [x] Unlike a post
+- [x] Get all likes of a post
 - [ ] Get all comments of a post inside a classroom
 - [ ] Get one comment of a post
 - [ ] Like a comment of a post
 - [ ] Unlike a comment of a post
 - [ ] Delete a comment
 - [ ] Update a comment
-- [ ] Integrate storage provider for file uploads 
-- [ ] Implement file upload for class works
+- [x] Integrate storage provider for file uploads 
+- [x] Implement file upload for class works
 - [ ] Implement charts for teachers
 - [ ] Implement role base access
 
