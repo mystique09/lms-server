@@ -3,7 +3,7 @@ DB_NAME=class-manager
 setup:
 	go install github.com/cosmtrek/air@latest \
 	# install sqlc
-	go get github.com/cosmtrek/sqlc@latest \
+	 \
 	# install golang-migrate
 	go get github.com/golang-migrate/migrate@latest \
 	# install package dependencies
@@ -11,6 +11,9 @@ setup:
 
 dev:
 	cd frontend && pnpm watch & go run cmd/main.go && fg
+
+run: 
+    docker run --name mystique09 -e POSTGRES_PASSWORD=mystique09 -d postgres
 
 watch:
 	cd frontend && pnpm build & air && fg
@@ -27,4 +30,4 @@ drop:
 force:
 	migrate -path ./database/migrations/ -database "postgresql://mystique09:mystique09@localhost/${DB_NAME}?sslmode=disable" -verbose force 1
 
-.PHONY: create migrateup drop force setup
+.PHONY: create migrateup drop force setup run
