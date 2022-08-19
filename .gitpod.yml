@@ -13,7 +13,7 @@ tasks:
      echo FRONTEND_URL=$FRONTEND_URL >> .env
      echo JWT_SECRET_KEY=$JWT_SECRET_KEY >> .env
      echo JWT_REFRESH_SECRET_KEY=$JWT_REFRESH_SECRET_KEY >> .env
-     pg_start.sh
+     pg_start
      go get
      go run cmd/main.go
 
