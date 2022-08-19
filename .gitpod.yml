@@ -5,4 +5,4 @@
 tasks:
   - init: go get && cp .sample.env .env
     command: go run cmd/main.go
-# image: gitpod/workspace-postgres
+image: gitpod/workspace-postgres
