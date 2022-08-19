@@ -15,6 +15,9 @@ tasks:
      echo JWT_REFRESH_SECRET_KEY=$JWT_REFRESH_SECRET_KEY >> .env
      pg_start
      go get
+     echo "--- DATABASE MIGRATION START ---"
+     migrate -path ./database/migrations/ -database $DATABASE_URL -verbose up
+     echo "--- DATABASE MIGRATION DONE ---"
      go run cmd/main.go
 
 ports:
