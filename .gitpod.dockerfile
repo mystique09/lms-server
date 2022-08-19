@@ -1,15 +1,16 @@
 FROM gitpod/workspace-postgresql
 
+USER root
+RUN apt-get update && \
+     apt-get install -y \
+     apt-transport-https \
+     ca-certificates \
+     curl \
+     gnupg-agent
+
 USER gitpod
 ENV PATH="$HOME/go/bin:$PATH"
 RUN go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
-
-RUN apt-get update && \ 
-     apt-get install -y \ 
-     apt-transport-https \ 
-     ca-certificates \ 
-     curl \
-     gnupg-agent
 
 # Installing golang-migrate
 RUN curl -sSL https://packagecloud.io/golang-migrate/migrate/gpgkey | apt-key add -
