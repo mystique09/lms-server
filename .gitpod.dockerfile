@@ -10,5 +10,4 @@ ENV CLD_URL=https://
 ENV FRONTEND_URL=http://localhost:3000
 ENV JWT_SECRET_KEY=secretkeywthisthatlmao
 ENV JWT_REFRESH_SECRET_KEY=secretrefreshkeysamplelmao
-
 USER root
