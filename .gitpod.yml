@@ -2,7 +2,18 @@
 # Please adjust to your needs (see https://www.gitpod.io/docs/config-gitpod-file)
 # and commit this file to your remote git repository to share the goodness with others.
 
+image:
+  file: .gitod.dockerfile
+
 tasks:
-  - init: go get && cp .sample.env .env
-    command: go run cmd/main.go
-image: gitpod/workspace-postgres
+  - command: |
+     echo DATABASE_URL=$DATABASE_URL >> .env
+     echo PORT=$PORT >> .env
+     echo CLD_URL=$CLD_URL >> .env
+     pg_start.sh
+     go get
+     migrate -path ./database/migrations/ -database $DATABASE_URL
+     go run cmd/main.go
+
+ports:
+  - port: 8000
