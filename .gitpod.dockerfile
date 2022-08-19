@@ -6,11 +6,10 @@ RUN go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
 
 # Installing golang-migrate
 RUN echo "Installing golang-migrate/migrate ..."
-RUN go get -u -d github.com/golang-migrate/migrate/cmd/migrate
-RUN cd $GOPATH/src/github.com/golang-migrate/migrate/cmd/migrate
-RUN git checkout master  # e.g. v4.1.0
+RUN go get -u -d github.com/golang-migrate/migrate/v4/cmd/migrate
+RUN cd $GOPATH/pkg/mod/github.com/golang-migrate/migrate/v4@v4.15.2/cmd/migrate/
 # Go 1.16+
-RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@$TAG
+RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate
 
 # Create new database user
 # ENV DATABASE_URL=postgres://mystique09:@localhost/class-manager
