@@ -12,7 +12,6 @@ tasks:
      echo CLD_URL=$CLD_URL >> .env
      pg_start.sh
      go get
-     migrate -path ./database/migrations/ -database $DATABASE_URL
      go run cmd/main.go
 
 ports:
