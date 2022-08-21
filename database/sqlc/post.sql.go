@@ -30,6 +30,41 @@ func (q *Queries) DeletePostFromClass(ctx context.Context, arg DeletePostFromCla
 	return column_1, err
 }
 
+const getAllPostLikes = `-- name: GetAllPostLikes :many
+SELECT id, post_id, user_id, created_at, updated_at
+FROM post_likes
+WHERE post_id = $1
+`
+
+func (q *Queries) GetAllPostLikes(ctx context.Context, postID uuid.UUID) ([]PostLike, error) {
+	rows, err := q.query(ctx, q.getAllPostLikesStmt, getAllPostLikes, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PostLike
+	for rows.Next() {
+		var i PostLike
+		if err := rows.Scan(
+			&i.ID,
+			&i.PostID,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getOnePost = `-- name: GetOnePost :one
 SELECT id, content, author_id, class_id, created_at, updated_at
 FROM posts
@@ -78,6 +113,33 @@ func (q *Queries) InsertNewPost(ctx context.Context, arg InsertNewPostParams) (P
 		&i.Content,
 		&i.AuthorID,
 		&i.ClassID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const likePost = `-- name: LikePost :one
+INSERT INTO post_likes (
+  id, post_id, user_id
+) VALUES (
+$1, $2, $3
+) RETURNING id, post_id, user_id, created_at, updated_at
+`
+
+type LikePostParams struct {
+	ID     uuid.UUID `json:"id"`
+	PostID uuid.UUID `json:"post_id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) LikePost(ctx context.Context, arg LikePostParams) (PostLike, error) {
+	row := q.queryRow(ctx, q.likePostStmt, likePost, arg.ID, arg.PostID, arg.UserID)
+	var i PostLike
+	err := row.Scan(
+		&i.ID,
+		&i.PostID,
+		&i.UserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -168,6 +230,31 @@ func (q *Queries) ListAllPostsFromClass(ctx context.Context, arg ListAllPostsFro
 		return nil, err
 	}
 	return items, nil
+}
+
+const unlikePost = `-- name: UnlikePost :one
+DELETE FROM post_likes
+WHERE id = $1 AND post_id = $2 AND user_id = $3
+RETURNING id, post_id, user_id, created_at, updated_at
+`
+
+type UnlikePostParams struct {
+	ID     uuid.UUID `json:"id"`
+	PostID uuid.UUID `json:"post_id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) UnlikePost(ctx context.Context, arg UnlikePostParams) (PostLike, error) {
+	row := q.queryRow(ctx, q.unlikePostStmt, unlikePost, arg.ID, arg.PostID, arg.UserID)
+	var i PostLike
+	err := row.Scan(
+		&i.ID,
+		&i.PostID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const updatePostContent = `-- name: UpdatePostContent :one
