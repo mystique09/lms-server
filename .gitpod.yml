@@ -9,8 +9,8 @@ tasks:
   - command: |
      rm -rf .env
      pg_start
-     export DATABASE_URL="postgres://gitpod@localhost/postgres?sslmode=disable"
-     echo $DATABASE_URL >> .env
+     unset PGHOSTADDR
+     echo DATABASE_URL=$DATABASE_URL >> .env
      echo PORT=$PORT >> .env
      echo CLD_URL=$CLD_URL >> .env
      echo FRONTEND_URL=$FRONTEND_URL >> .env
