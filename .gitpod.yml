@@ -7,14 +7,15 @@ image:
 
 tasks:
   - command: |
+     rm -rf .env
+     pg_start
+     unset PGHOSTADDR
      echo DATABASE_URL=$DATABASE_URL >> .env
      echo PORT=$PORT >> .env
      echo CLD_URL=$CLD_URL >> .env
      echo FRONTEND_URL=$FRONTEND_URL >> .env
      echo JWT_SECRET_KEY=$JWT_SECRET_KEY >> .env
      echo JWT_REFRESH_SECRET_KEY=$JWT_REFRESH_SECRET_KEY >> .env
-     unset PGHOSTADDR
-     pg_start
      go get
      go run cmd/main.go
 
