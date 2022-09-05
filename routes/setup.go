@@ -1,7 +1,10 @@
 package routes
 
 import (
+	"io"
 	"log"
+	"text/template"
+
 	//"net/http"
 	"server/config"
 	database "server/database/sqlc"
@@ -15,6 +18,14 @@ import (
 	"github.com/labstack/echo/v4"
 	//"github.com/labstack/echo/v4/middleware"
 )
+
+type Template struct {
+	templates *template.Template
+}
+
+func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
+}
 
 var server Server
 
@@ -63,6 +74,10 @@ func Launch() {
 	e.Use(LoggerMiddleware())
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(server.Cfg))
+
+	e.Renderer = &Template{
+		templates: template.Must(template.ParseGlob("web/templates/*.html")),
+	}
 	/*
 		// remove this if deploy to production
 		e.StaticFS("frontend/build", frontend.BuildHTTPFS())
@@ -73,6 +88,9 @@ func Launch() {
 			HTML5: true,
 		}))
 	*/
+	e.GET("/", func(c echo.Context) error {
+		return c.Render(200, "indexPage", nil)
+	})
 	e.GET("/api/v1", server.indexRoute)
 	e.POST("/api/v1/signup", server.createUser)
 	e.POST("/api/v1/login", server.loginHandler)
