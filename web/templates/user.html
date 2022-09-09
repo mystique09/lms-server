@@ -11,7 +11,9 @@
     <ul>
       {{ with . }}
       {{ range .}}
-      Username: {{ .Username }}
+      <li>Username: {{ .Username }}</li>
+      <li>Email: {{ .Email }}</li>
+      <a href="/profile/{{.Username}}">{{ .Username }}</a>
       {{ end }}
       {{ end }}
     </ul>
