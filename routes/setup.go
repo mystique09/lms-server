@@ -4,7 +4,6 @@ import (
 	"html/template"
 	"io"
 	"log"
-	"os"
 
 	//"net/http"
 	"server/config"
@@ -20,12 +19,25 @@ import (
 	//"github.com/labstack/echo/v4/middleware"
 )
 
-type Template struct {
-	templates *template.Template
+type TemplateExecutor interface {
+	Render(wr io.Writer, name string, data interface{}, c echo.Context) error
 }
 
-func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
+type DebugTemplateExecutor struct {
+	Glob string
+}
+
+func (e DebugTemplateExecutor) Render(wr io.Writer, name string, data interface{}, c echo.Context) error {
+	t := template.Must(template.ParseGlob(e.Glob))
+	return t.ExecuteTemplate(wr, name, data)
+}
+
+type ReleaseTemplateExecutor struct {
+	Template *template.Template
+}
+
+func (e ReleaseTemplateExecutor) Render(wr io.Writer, name string, data interface{}, c echo.Context) error {
+	return e.Template.ExecuteTemplate(wr, name, data)
 }
 
 var server Server
@@ -66,8 +78,21 @@ func addNewHandleserveroGroup(g *echo.Group, handlers []Handler) {
 	}
 }
 
+var executor TemplateExecutor
+
 func Launch() {
 	server = Setup()
+	debug := true
+	templateGlob := "web/templates/*.html"
+
+	if debug {
+		executor = DebugTemplateExecutor{templateGlob}
+
+	} else {
+		executor = ReleaseTemplateExecutor{
+			template.Must(template.ParseGlob(templateGlob)),
+		}
+	}
 
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
@@ -76,9 +101,7 @@ func Launch() {
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(server.Cfg))
 
-	e.Renderer = &Template{
-		templates: template.Must(template.ParseFS(os.DirFS("web"), "templates/*.html")),
-	}
+	e.Renderer = executor
 
 	e.GET("/", func(c echo.Context) error {
 		return c.Render(200, "indexPage", nil)
