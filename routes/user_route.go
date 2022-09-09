@@ -65,8 +65,8 @@ func (s *Server) getUsers(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
-
-	return c.JSON(http.StatusOK, users)
+	return c.Render(200, "userPage", users)
+	//return c.JSON(http.StatusOK, users)
 }
 
 func (s *Server) getUser(c echo.Context) error {

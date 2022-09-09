@@ -1,9 +1,10 @@
 package routes
 
 import (
+	"html/template"
 	"io"
 	"log"
-	"text/template"
+	"os"
 
 	//"net/http"
 	"server/config"
@@ -76,27 +77,19 @@ func Launch() {
 	e.Use(CorsMiddleware(server.Cfg))
 
 	e.Renderer = &Template{
-		templates: template.Must(template.ParseGlob("web/templates/*.html")),
+		templates: template.Must(template.ParseFS(os.DirFS("web"), "templates/*.html")),
 	}
-	/*
-		// remove this if deploy to production
-		e.StaticFS("frontend/build", frontend.BuildHTTPFS())
 
-		e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
-			//Filesystem: http.FS(frontend.BuildHTTPFS()),
-			Root:  "frontend/build",
-			HTML5: true,
-		}))
-	*/
 	e.GET("/", func(c echo.Context) error {
 		return c.Render(200, "indexPage", nil)
 	})
+
 	e.GET("/api/v1", server.indexRoute)
 	e.POST("/api/v1/signup", server.createUser)
 	e.POST("/api/v1/login", server.loginHandler)
 	e.POST("/api/v1/refresh", server.refreshToken, RefreshTokenAuthMiddleware(server.Cfg))
 
-	user_group := e.Group("/api/v1/users", JwtAuthMiddleware(server.Cfg))
+	user_group := e.Group("/api/v1/users" /*JwtAuthMiddleware(server.Cfg)*/)
 	{
 		user_group.GET("", server.getUsers)
 		user_group.GET("/:id", server.getUser)
