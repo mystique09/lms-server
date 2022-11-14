@@ -16,7 +16,7 @@ import (
 
 var server Server
 
-func Setup() Server {
+func Init() Server {
 	err := godotenv.Load()
 
 	if err != nil {
@@ -37,7 +37,7 @@ func Setup() Server {
 }
 
 func Launch() {
-	server = Setup()
+	server = Init()
 
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
