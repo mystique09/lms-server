@@ -18,6 +18,10 @@ func SetupDB(DATABASE_URL string) *sql.DB {
 	}
 	//defer db.Close()
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	m, err := migrate.NewWithDatabaseInstance(
 		"file://database/migrations",
 		"postgres", driver)
@@ -27,7 +31,10 @@ func SetupDB(DATABASE_URL string) *sql.DB {
 	}
 
 	log.Println("-- Migration started --")
-	m.Up()
+	migrateErr := m.Up()
+	if migrateErr != nil {
+		log.Fatal(migrateErr.Error())
+	}
 	log.Println("-- Migration done --")
 
 	return db
