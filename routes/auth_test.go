@@ -36,7 +36,7 @@ func TestLoginWithOneAccount(t *testing.T) {
 		}
 
 		assert.Equal(t, 404, rec.Code)
-		assert.Equal(t, "User doesn't exist.", res.Error)
+		assert.Equal(t, USER_NOTFOUND, res.Error)
 	}
 }
 
@@ -78,12 +78,12 @@ func TestLoginWithManyInvalidAccounts(t *testing.T) {
 		{
 			Status:  400,
 			Data:    `{"username":"jzudhsjsj"}`,
-			Message: "One field might be missing, fill in the missing fields.",
+			Message: "Missing required fields.",
 		},
 		{
 			Status:  400,
 			Data:    `{"username":"jzudhsjsj", "password":""}`,
-			Message: "One field might be missing, fill in the missing fields.",
+			Message: "Missing required fields.",
 		},
 		{
 			Status:  403,
