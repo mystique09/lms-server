@@ -92,7 +92,7 @@ func TestListUsers(t *testing.T) {
 	users, err := testQuesries.GetUsers(context.Background(), 5)
 
 	require.NoError(t, err)
-	require.Equal(t, 10, len(users))
+	require.Less(t, 5, len(users))
 
 	for _, user := range users {
 		require.NotEmpty(t, user)
