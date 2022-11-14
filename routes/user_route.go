@@ -57,7 +57,6 @@ func (s *Server) getUsers(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 	return c.Render(200, "userPage", users)
-	//return c.JSON(http.StatusOK, users)
 }
 
 func (s *Server) getUser(c echo.Context) error {
@@ -98,12 +97,12 @@ func (s *Server) createUser(c echo.Context) error {
 		return c.JSON(400, err)
 	}
 
-	check_user, err := s.store.GetUserByUsername(c.Request().Context(), user_data.Username)
+	has_user, err := s.store.GetUserByUsername(c.Request().Context(), user_data.Username)
 	if err != nil {
 		return c.JSON(400, err.Error())
 	}
 
-	if check_user.ID != uuid.Nil {
+	if has_user.ID != uuid.Nil {
 		return c.JSON(http.StatusBadRequest, USER_ALREADY_EXIST)
 	}
 
