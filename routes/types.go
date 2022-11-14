@@ -10,10 +10,6 @@ import (
 
 type (
 	/*
-	   The Route struct to hold the route information.
-	*/
-
-	/*
 	   A Response struct to hold the response information.
 	*/
 	Response struct {
