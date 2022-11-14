@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"net/http"
 	"server/config"
 
 	"github.com/labstack/echo/v4"
@@ -39,6 +40,9 @@ func JwtAuthMiddleware(cfg config.Config) echo.MiddlewareFunc {
 	return middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningMethod: "HS256",
 		SigningKey:    cfg.JWT_SECRET_KEY,
+		Skipper: func(c echo.Context) bool {
+			return c.Request().Method == http.MethodGet
+		},
 	})
 }
 

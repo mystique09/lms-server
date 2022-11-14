@@ -38,12 +38,12 @@ func (s *Server) getOnePost(c echo.Context) error {
 	jwt_token := c.Get("user").(*jwt.Token)
 	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
 
-	post, err := s.DB.GetOnePost(c.Request().Context(), pid)
+	post, err := s.store.GetOnePost(c.Request().Context(), pid)
 	if err != nil || post.ID == uuid.Nil {
 		return c.JSON(404, POST_NOTFOUND)
 	}
 
-	check_user_if_member, err := s.DB.GetClassroomMemberById(c.Request().Context(), database.GetClassroomMemberByIdParams{
+	check_user_if_member, err := s.store.GetClassroomMemberById(c.Request().Context(), database.GetClassroomMemberByIdParams{
 		UserID:  jwt_payload.ID,
 		ClassID: post.ClassID,
 	})
@@ -68,7 +68,7 @@ func (s *Server) createNewPost(c echo.Context) error {
 		return c.JSON(400, err)
 	}
 
-	check_class, err := s.DB.GetClass(c.Request().Context(), parsed_classId)
+	check_class, err := s.store.GetClass(c.Request().Context(), parsed_classId)
 	if err != nil || check_class.ID == uuid.Nil {
 		return c.JSON(404, CLASSROOM_NOTFOUND)
 	}
@@ -76,7 +76,7 @@ func (s *Server) createNewPost(c echo.Context) error {
 	jwt_token := c.Get("user").(*jwt.Token)
 	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
 
-	check_user_if_member, err := s.DB.GetClassroomMemberById(c.Request().Context(), database.GetClassroomMemberByIdParams{
+	check_user_if_member, err := s.store.GetClassroomMemberById(c.Request().Context(), database.GetClassroomMemberByIdParams{
 		UserID:  jwt_payload.ID,
 		ClassID: parsed_classId,
 	})
@@ -91,7 +91,7 @@ func (s *Server) createNewPost(c echo.Context) error {
 		ClassID:  parsed_classId,
 	}
 
-	new_post, err := s.DB.InsertNewPost(c.Request().Context(), new_postParam)
+	new_post, err := s.store.InsertNewPost(c.Request().Context(), new_postParam)
 	if err != nil {
 		return c.JSON(400, err)
 	}
@@ -116,7 +116,7 @@ func (s *Server) updatePost(c echo.Context) error {
 	jwt_token := c.Get("user").(*jwt.Token)
 	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
 
-	check_post, err := s.DB.GetOnePost(c.Request().Context(), puid)
+	check_post, err := s.store.GetOnePost(c.Request().Context(), puid)
 	if err != nil || check_post.ID == uuid.Nil {
 		return c.JSON(400, POST_NOTFOUND)
 	}
@@ -125,7 +125,7 @@ func (s *Server) updatePost(c echo.Context) error {
 		return c.JSON(401, UNAUTHORIZED)
 	}
 
-	updated_post, err := s.DB.UpdatePostContent(c.Request().Context(), database.UpdatePostContentParams{
+	updated_post, err := s.store.UpdatePostContent(c.Request().Context(), database.UpdatePostContentParams{
 		Content: payload.Content,
 	})
 
@@ -146,7 +146,7 @@ func (s *Server) deletePost(c echo.Context) error {
 	jwt_token := c.Get("user").(*jwt.Token)
 	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
 
-	check_post, err := s.DB.GetOnePost(c.Request().Context(), puid)
+	check_post, err := s.store.GetOnePost(c.Request().Context(), puid)
 	if err != nil || check_post.ID == uuid.Nil {
 		return c.JSON(400, POST_NOTFOUND)
 	}
@@ -155,7 +155,7 @@ func (s *Server) deletePost(c echo.Context) error {
 		return c.JSON(401, UNAUTHORIZED)
 	}
 
-	deleted_post, err := s.DB.DeletePostFromClass(c.Request().Context(), database.DeletePostFromClassParams{
+	deleted_post, err := s.store.DeletePostFromClass(c.Request().Context(), database.DeletePostFromClassParams{
 		ClassID:  check_post.ClassID,
 		AuthorID: check_post.AuthorID,
 		ID:       check_post.ID,
@@ -175,7 +175,7 @@ func (s *Server) getAllPostLikes(c echo.Context) error {
 		return c.JSON(400, err)
 	}
 
-	likes, err := s.DB.GetAllPostLikes(c.Request().Context(), post_uuid)
+	likes, err := s.store.GetAllPostLikes(c.Request().Context(), post_uuid)
 	if err != nil {
 		return c.JSON(400, err)
 	}
@@ -201,7 +201,7 @@ func (s *Server) likePost(c echo.Context) error {
 	jwt_token := c.Get("user").(*jwt.Token)
 	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
 
-	check_member, err := s.DB.GetClassroomMemberById(c.Request().Context(), database.GetClassroomMemberByIdParams{
+	check_member, err := s.store.GetClassroomMemberById(c.Request().Context(), database.GetClassroomMemberByIdParams{
 		UserID:  jwt_payload.ID,
 		ClassID: payload.ClassID,
 	})
@@ -209,7 +209,7 @@ func (s *Server) likePost(c echo.Context) error {
 		return c.JSON(401, NOT_A_MEMBER)
 	}
 
-	liked_post, err := s.DB.LikePost(c.Request().Context(), database.LikePostParams{
+	liked_post, err := s.store.LikePost(c.Request().Context(), database.LikePostParams{
 		ID:     uuid.New(),
 		UserID: jwt_payload.ID,
 		PostID: post_uuid,
@@ -239,7 +239,7 @@ func (s *Server) unlikePost(c echo.Context) error {
 	jwt_token := c.Get("user").(*jwt.Token)
 	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
 
-	unliked_post, err := s.DB.UnlikePost(c.Request().Context(), database.UnlikePostParams{
+	unliked_post, err := s.store.UnlikePost(c.Request().Context(), database.UnlikePostParams{
 		ID:     post_uid,
 		PostID: payload.ID,
 		UserID: jwt_payload.ID,

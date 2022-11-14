@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"database/sql"
 	"net/http"
 	database "server/database/sqlc"
 	"server/utils"
@@ -33,16 +34,6 @@ type (
 	}
 )
 
-func newUserResponse(user database.User) UserResponse {
-	return UserResponse{
-		ID:         user.ID,
-		Username:   user.Username,
-		Email:      user.Email,
-		UserRole:   user.UserRole,
-		Visibility: user.Visibility,
-	}
-}
-
 type UserClassrooms struct {
 	*database.User
 	Rooms []database.Classroom `json:"classrooms"`
@@ -60,7 +51,7 @@ func (s *Server) getUsers(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	users, err := s.DB.GetUsers(c.Request().Context(), int32(offset*10))
+	users, err := s.store.GetUsers(c.Request().Context(), int32(offset*10))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -71,17 +62,6 @@ func (s *Server) getUsers(c echo.Context) error {
 
 func (s *Server) getUser(c echo.Context) error {
 	id := c.Param("id")
-	page := c.QueryParam("page")
-
-	if page == "" {
-		page = "0"
-	}
-
-	offset, err := strconv.Atoi(page)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
 
 	uid, err := uuid.Parse(id)
 
@@ -93,27 +73,17 @@ func (s *Server) getUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, MISSING_ID_FIELD)
 	}
 
-	user, err := s.DB.GetUser(c.Request().Context(), uid)
+	user, err := s.store.GetUser(c.Request().Context(), uid)
+
+	if err == sql.ErrNoRows {
+		return c.JSON(http.StatusNotFound, err)
+	}
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	classrooms, err := s.DB.GetAllJoinedClassrooms(c.Request().Context(), database.GetAllJoinedClassroomsParams{
-		UserID: uid,
-		Offset: int32(offset * 10),
-	})
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
-
-	user_wclassrooms := UserClassrooms{
-		User:  &user,
-		Rooms: classrooms,
-	}
-
-	return c.JSON(http.StatusOK, user_wclassrooms)
+	return c.JSON(http.StatusOK, user)
 }
 
 func (s *Server) createUser(c echo.Context) error {
@@ -124,7 +94,10 @@ func (s *Server) createUser(c echo.Context) error {
 		return c.JSON(400, err)
 	}
 
-	check_user, err := s.DB.GetUserByUsername(c.Request().Context(), user_data.Username)
+	check_user, err := s.store.GetUserByUsername(c.Request().Context(), user_data.Username)
+	if err != nil {
+		return c.JSON(400, err.Error())
+	}
 
 	if check_user.ID != uuid.Nil {
 		return c.JSON(http.StatusBadRequest, USER_ALREADY_EXIST)
@@ -145,7 +118,7 @@ func (s *Server) createUser(c echo.Context) error {
 		Visibility: database.VisibilityPUBLIC,
 	}
 
-	user, err := s.DB.CreateUser(c.Request().Context(), new_user_param)
+	user, err := s.store.CreateUser(c.Request().Context(), new_user_param)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
@@ -182,7 +155,7 @@ func (s *Server) updateUser(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
 	var payload utils.JwtUserPayload = utils.GetPayloadFromJwt(token)
 
-	check_user, err := s.DB.GetUser(c.Request().Context(), uid)
+	check_user, err := s.store.GetUser(c.Request().Context(), uid)
 
 	if err != nil || check_user.ID == uuid.Nil {
 		return c.JSON(http.StatusBadRequest, USER_NOTFOUND)
@@ -202,7 +175,7 @@ func (s *Server) updateUser(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, MISSING_FIELDS)
 		}
 
-		new_user, err := s.DB.UpdateUsername(c.Request().Context(), payload)
+		new_user, err := s.store.UpdateUsername(c.Request().Context(), payload)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -218,7 +191,7 @@ func (s *Server) updateUser(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, MISSING_FIELDS)
 		}
 
-		new_user, err := s.DB.UpdateUserEmail(c.Request().Context(), payload)
+		new_user, err := s.store.UpdateUserEmail(c.Request().Context(), payload)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -240,7 +213,7 @@ func (s *Server) updateUser(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, MISSING_FIELDS)
 		}
 
-		new_user, err := s.DB.UpdateUserPassword(c.Request().Context(), payload)
+		new_user, err := s.store.UpdateUserPassword(c.Request().Context(), payload)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -266,7 +239,7 @@ func (s *Server) deleteUser(c echo.Context) error {
 	jwt_token := c.Get("user").(*jwt.Token)
 	var payload utils.JwtUserPayload = utils.GetPayloadFromJwt(jwt_token)
 
-	check_user, err := s.DB.GetUser(c.Request().Context(), uid)
+	check_user, err := s.store.GetUser(c.Request().Context(), uid)
 
 	if err != nil || check_user.ID == uuid.Nil {
 		return c.JSON(http.StatusBadRequest, USER_NOTFOUND)
@@ -276,7 +249,7 @@ func (s *Server) deleteUser(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, UNAUTHORIZED)
 	}
 
-	deleted_user, err := s.DB.DeleteUser(c.Request().Context(), uid)
+	deleted_user, err := s.store.DeleteUser(c.Request().Context(), uid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)

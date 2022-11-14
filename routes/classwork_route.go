@@ -34,7 +34,7 @@ func (s *Server) getAllClassworks(c echo.Context) error {
 		return c.JSON(400, NEGATIVE_OFFSET)
 	}
 
-	check_classrooms, err := s.DB.GetClass(c.Request().Context(), cuid)
+	check_classrooms, err := s.store.GetClass(c.Request().Context(), cuid)
 	if err != nil || check_classrooms.ID == uuid.Nil {
 		return c.JSON(400, CLASSROOM_NOTFOUND)
 	}
@@ -46,10 +46,14 @@ func (s *Server) getAllClassworks(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, UNAUTHORIZED)
 	}
 
-	classworks, err := s.DB.ListClassworkAdmin(c.Request().Context(), database.ListClassworkAdminParams{
+	classworks, err := s.store.ListClassworkAdmin(c.Request().Context(), database.ListClassworkAdminParams{
 		ClassID: cuid,
 		Offset:  int32(offset * 10),
 	})
+
+	if err != nil {
+		return c.JSON(400, err.Error())
+	}
 
 	return c.JSON(200, classworks)
 }
@@ -84,7 +88,7 @@ func (s *Server) getAllUserClassworks(c echo.Context) error {
 		return c.JSON(403, UNAUTHORIZED)
 	}
 
-	classworks, err := s.DB.ListSubmittedClassworks(c.Request().Context(), database.ListSubmittedClassworksParams{
+	classworks, err := s.store.ListSubmittedClassworks(c.Request().Context(), database.ListSubmittedClassworksParams{
 		UserID: uid,
 		Offset: int32(offset * 10),
 	})
@@ -109,7 +113,7 @@ func (s *Server) getClassworkById(c echo.Context) error {
 		return c.JSON(400, err)
 	}
 
-	check_user, err := s.DB.GetUser(c.Request().Context(), uid)
+	check_user, err := s.store.GetUser(c.Request().Context(), uid)
 	if err != nil || check_user.ID == uuid.Nil {
 		return c.JSON(404, USER_NOTFOUND)
 	}
@@ -121,7 +125,7 @@ func (s *Server) getClassworkById(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, UNAUTHORIZED)
 	}
 
-	classwork, err := s.DB.GetClassWork(c.Request().Context(), database.GetClassWorkParams{
+	classwork, err := s.store.GetClassWork(c.Request().Context(), database.GetClassWorkParams{
 		UserID: uid,
 		ID:     parsed_cwid,
 	})
@@ -147,12 +151,12 @@ func (s *Server) addNewClasswork(c echo.Context) error {
 	jwt_token := c.Get("user").(*jwt.Token)
 	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
 
-	check_classrooms, err := s.DB.GetClass(c.Request().Context(), cid)
+	check_classrooms, err := s.store.GetClass(c.Request().Context(), cid)
 	if err != nil || check_classrooms.ID == uuid.Nil {
 		return c.JSON(400, CLASSROOM_NOTFOUND)
 	}
 
-	check_member, err := s.DB.GetClassroomMemberById(c.Request().Context(), database.GetClassroomMemberByIdParams{
+	check_member, err := s.store.GetClassroomMemberById(c.Request().Context(), database.GetClassroomMemberByIdParams{
 		UserID:  jwt_payload.ID,
 		ClassID: cid,
 	})
@@ -168,13 +172,17 @@ func (s *Server) addNewClasswork(c echo.Context) error {
 	}
 	defer src.Close()
 
-	resp, err := s.Cld.Upload.Upload(c.Request().Context(), src, uploader.UploadParams{
+	resp, err := s.cld.Upload.Upload(c.Request().Context(), src, uploader.UploadParams{
 		PublicID:       fmt.Sprintf("class-management/classworks/%v", file_id.String()),
 		Transformation: "c_crop,g_center,/q_auto/f_auto",
 		Tags:           []string{"assignments", "classworks", file_id.String()},
 	})
 
-	new_classwork, err := s.DB.InsertNewClasswork(c.Request().Context(), database.InsertNewClassworkParams{
+	if err != nil {
+		return c.JSON(400, err.Error())
+	}
+
+	new_classwork, err := s.store.InsertNewClasswork(c.Request().Context(), database.InsertNewClassworkParams{
 		ID:      file_id,
 		ClassID: cid,
 		UserID:  jwt_payload.ID,
@@ -204,7 +212,7 @@ func (s *Server) deleteClasswork(c echo.Context) error {
 	jwt_token := c.Get("user").(*jwt.Token)
 	jwt_payoad := utils.GetPayloadFromJwt(jwt_token)
 
-	deleted_cw, err := s.DB.DeleteClassworkFromClass(c.Request().Context(), database.DeleteClassworkFromClassParams{
+	deleted_cw, err := s.store.DeleteClassworkFromClass(c.Request().Context(), database.DeleteClassworkFromClassParams{
 		ClassID: class_uuid,
 		ID:      cw_uuid,
 		UserID:  jwt_payoad.ID,

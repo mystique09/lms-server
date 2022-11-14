@@ -76,7 +76,7 @@ func (s *Server) getClassrooms(c echo.Context) error {
 		Offset:  int32(offset) * 10,
 	}
 
-	classes, err := s.DB.GetAllClassFromUser(c.Request().Context(), param)
+	classes, err := s.store.GetAllClassFromUser(c.Request().Context(), param)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
@@ -102,7 +102,7 @@ func (s *Server) getAllClassrooms(c echo.Context) error {
 		return c.JSON(400, NEGATIVE_OFFSET)
 	}
 
-	public_classrooms, err := s.DB.ListAllPublicClass(c.Request().Context(), int32(offset*10))
+	public_classrooms, err := s.store.ListAllPublicClass(c.Request().Context(), int32(offset*10))
 
 	if err != nil {
 		return c.JSON(400, err)
@@ -119,7 +119,7 @@ func (s *Server) getClassroom(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	class, err := s.DB.GetClass(c.Request().Context(), uuid)
+	class, err := s.store.GetClass(c.Request().Context(), uuid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
@@ -139,7 +139,7 @@ func (s *Server) createNewClassroom(c echo.Context) error {
 	jwt_token := c.Get("user")
 	jwt_payload := utils.GetPayloadFromJwt(jwt_token.(*jwt.Token))
 
-	new_classroom, err := s.DB.CreateClass(c.Request().Context(), database.CreateClassParams{
+	new_classroom, err := s.store.CreateClass(c.Request().Context(), database.CreateClassParams{
 		ID:          uuid.New(),
 		AdminID:     jwt_payload.ID,
 		Name:        payload.Name,
@@ -155,7 +155,7 @@ func (s *Server) createNewClassroom(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	new_member, err := s.DB.AddNewClassroomMember(c.Request().Context(), database.AddNewClassroomMemberParams{
+	new_member, err := s.store.AddNewClassroomMember(c.Request().Context(), database.AddNewClassroomMemberParams{
 		ID:      uuid.New(),
 		ClassID: new_classroom.ID,
 		UserID:  new_classroom.AdminID,
@@ -179,7 +179,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	classroom, err := s.DB.GetClass(c.Request().Context(), uid)
+	classroom, err := s.store.GetClass(c.Request().Context(), uid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, CLASSROOM_NOTFOUND)
@@ -201,7 +201,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 			return c.JSON(400, err)
 		}
 
-		updated_class, err := s.DB.UpdateClassroomName(c.Request().Context(), database.UpdateClassroomNameParams{
+		updated_class, err := s.store.UpdateClassroomName(c.Request().Context(), database.UpdateClassroomNameParams{
 			ID:   uid,
 			Name: payload.Name,
 		})
@@ -219,7 +219,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 			return c.JSON(400, err)
 		}
 
-		updated_class, err := s.DB.UpdateClassroomDescription(c.Request().Context(), database.UpdateClassroomDescriptionParams{
+		updated_class, err := s.store.UpdateClassroomDescription(c.Request().Context(), database.UpdateClassroomDescriptionParams{
 			ID:          uid,
 			Description: payload.Description,
 		})
@@ -237,7 +237,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 			return c.JSON(400, err)
 		}
 
-		updated_class, err := s.DB.UpdateClassroomSubject(c.Request().Context(), database.UpdateClassroomSubjectParams{
+		updated_class, err := s.store.UpdateClassroomSubject(c.Request().Context(), database.UpdateClassroomSubjectParams{
 			ID:      uid,
 			Subject: payload.Subject,
 		})
@@ -255,7 +255,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 			return c.JSON(400, err)
 		}
 
-		updated_class, err := s.DB.UpdateClassroomSection(c.Request().Context(), database.UpdateClassroomSectionParams{
+		updated_class, err := s.store.UpdateClassroomSection(c.Request().Context(), database.UpdateClassroomSectionParams{
 			ID:      uid,
 			Section: payload.Section,
 		})
@@ -273,7 +273,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 			return c.JSON(400, err)
 		}
 
-		updated_class, err := s.DB.UpdateClassroomRoom(c.Request().Context(), database.UpdateClassroomRoomParams{
+		updated_class, err := s.store.UpdateClassroomRoom(c.Request().Context(), database.UpdateClassroomRoomParams{
 			ID:   uid,
 			Room: payload.Room,
 		})
@@ -284,7 +284,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 		return c.JSON(200, updated_class)
 
 	case "invite_code":
-		updated_class, err := s.DB.UpdateClassroomInviteCode(c.Request().Context(), database.UpdateClassroomInviteCodeParams{
+		updated_class, err := s.store.UpdateClassroomInviteCode(c.Request().Context(), database.UpdateClassroomInviteCodeParams{
 			ID:         uid,
 			InviteCode: uuid.New(),
 		})
@@ -309,7 +309,7 @@ func (s *Server) deleteClassroom(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
 	jwt_payload := utils.GetPayloadFromJwt(token)
 
-	classroom, err := s.DB.GetClass(c.Request().Context(), uid)
+	classroom, err := s.store.GetClass(c.Request().Context(), uid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
@@ -319,7 +319,7 @@ func (s *Server) deleteClassroom(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, UNAUTHORIZED)
 	}
 
-	deleted_classroom, err := s.DB.DeleteClass(c.Request().Context(), uid)
+	deleted_classroom, err := s.store.DeleteClass(c.Request().Context(), uid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
@@ -342,11 +342,16 @@ func (s *Server) getClassroomUsers(c echo.Context) error {
 	}
 
 	offset, err := strconv.Atoi(page)
+
+	if err != nil {
+		return c.JSON(400, err.Error())
+	}
+
 	if offset < 0 {
 		return c.JSON(400, NEGATIVE_OFFSET)
 	}
 
-	members, err := s.DB.GetAllClassroomMembers(c.Request().Context(), database.GetAllClassroomMembersParams{
+	members, err := s.store.GetAllClassroomMembers(c.Request().Context(), database.GetAllClassroomMembersParams{
 		ClassID: uid,
 		Offset:  int32(offset * 10),
 	})
@@ -365,7 +370,7 @@ func (s *Server) joinClassroom(c echo.Context) error {
 		return c.JSON(400, err)
 	}
 
-	check_user, err := s.DB.GetUser(c.Request().Context(), uid)
+	check_user, err := s.store.GetUser(c.Request().Context(), uid)
 	if err == sql.ErrNoRows && check_user.ID == uuid.Nil {
 		return c.JSON(400, USER_NOTFOUND)
 	}
@@ -379,7 +384,7 @@ func (s *Server) joinClassroom(c echo.Context) error {
 		return c.JSON(400, err)
 	}
 
-	classroom_id, err := s.DB.GetClassroomWithInviteCode(c.Request().Context(), payload.InviteCode)
+	classroom_id, err := s.store.GetClassroomWithInviteCode(c.Request().Context(), payload.InviteCode)
 	if err == sql.ErrNoRows && classroom_id == uuid.Nil {
 		return c.JSON(400, CLASSROOM_NOTFOUND)
 	}
@@ -391,7 +396,7 @@ func (s *Server) joinClassroom(c echo.Context) error {
 		return c.JSON(400, UNAUTHORIZED)
 	}
 
-	joined, err := s.DB.AddNewClassroomMember(c.Request().Context(), database.AddNewClassroomMemberParams{
+	joined, err := s.store.AddNewClassroomMember(c.Request().Context(), database.AddNewClassroomMemberParams{
 		ID:      uuid.New(),
 		ClassID: classroom_id,
 		UserID:  uid,
@@ -416,12 +421,12 @@ func (s *Server) leaveClassroom(c echo.Context) error {
 		return c.JSON(400, err)
 	}
 
-	check_user, err := s.DB.GetUser(c.Request().Context(), uid)
+	check_user, err := s.store.GetUser(c.Request().Context(), uid)
 	if err == sql.ErrNoRows && check_user.ID == uuid.Nil {
 		return c.JSON(400, USER_NOTFOUND)
 	}
 
-	check_class, err := s.DB.GetClass(c.Request().Context(), parsed_classId)
+	check_class, err := s.store.GetClass(c.Request().Context(), parsed_classId)
 	if err == sql.ErrNoRows && check_class.ID == uuid.Nil {
 		return c.JSON(400, CLASSROOM_NOTFOUND)
 	}
@@ -433,7 +438,7 @@ func (s *Server) leaveClassroom(c echo.Context) error {
 		return c.JSON(400, UNAUTHORIZED)
 	}
 
-	leaved, err := s.DB.LeaveClassroom(c.Request().Context(), database.LeaveClassroomParams{
+	leaved, err := s.store.LeaveClassroom(c.Request().Context(), database.LeaveClassroomParams{
 		UserID:  jwt_payload.ID,
 		ClassID: parsed_classId,
 	})
@@ -468,10 +473,14 @@ func (s *Server) getClassroomPosts(c echo.Context) error {
 		return c.JSON(400, NEGATIVE_OFFSET)
 	}
 
-	posts, err := s.DB.ListAllPostsFromClass(c.Request().Context(), database.ListAllPostsFromClassParams{
+	posts, err := s.store.ListAllPostsFromClass(c.Request().Context(), database.ListAllPostsFromClassParams{
 		ClassID: uid,
 		Offset:  int32(offset * 10),
 	})
+
+	if err != nil {
+		return c.JSON(400, err.Error())
+	}
 
 	return c.JSON(200, posts)
 }

@@ -14,32 +14,30 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var server Server
-
-func Init() Server {
-	err := godotenv.Load()
-
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	config := config.Init()
-
-	conn := utils.SetupDB(config.DATABASE_URL)
-	db := database.New(conn)
-	cld, err := cloudinary.NewFromURL(config.CLD_URL)
-
-	return Server{
-		DB:  db,
-		Cfg: config,
-		Cld: cld,
-	}
+type Server struct {
+	store  database.Store
+	router *echo.Echo
+	cfg    config.Config
+	cld    cloudinary.Cloudinary
 }
 
-func Launch() {
-	server = Init()
+func NewServer(store database.Store) *Server {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
+	cfg := config.Init()
+
+	cld, err := cloudinary.NewFromURL(cfg.CLD_URL)
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	server := &Server{store: store, cld: *cld, cfg: cfg}
 	e := echo.New()
+
 	e.Validator = &CustomValidator{validator: validator.New()}
 
 	trace := jaegertracing.New(e, nil)
@@ -47,7 +45,7 @@ func Launch() {
 
 	e.Use(LoggerMiddleware())
 	e.Use(RateLimitMiddleware(20))
-	e.Use(CorsMiddleware(server.Cfg))
+	e.Use(CorsMiddleware(server.cfg))
 
 	e.GET("/", func(c echo.Context) error {
 		return c.Render(200, "indexPage", nil)
@@ -56,9 +54,9 @@ func Launch() {
 	e.GET("/api/v1", server.indexRoute)
 	e.POST("/api/v1/signup", server.createUser)
 	e.POST("/api/v1/login", server.loginHandler)
-	e.POST("/api/v1/refresh", server.refreshToken, RefreshTokenAuthMiddleware(server.Cfg))
+	e.POST("/api/v1/refresh", server.refreshToken, RefreshTokenAuthMiddleware(server.cfg))
 
-	user_group := e.Group("/api/v1/users", JwtAuthMiddleware(server.Cfg))
+	user_group := e.Group("/api/v1/users", JwtAuthMiddleware(server.cfg))
 	{
 		user_group.GET("", server.getUsers)
 		user_group.GET("/:id", server.getUser)
@@ -80,7 +78,7 @@ func Launch() {
 		user_group.DELETE("/:id/followings/:following_id", server.removeFollowing)
 	}
 
-	class_group := e.Group("/api/v1/classrooms", JwtAuthMiddleware(server.Cfg))
+	class_group := e.Group("/api/v1/classrooms", JwtAuthMiddleware(server.cfg))
 	{
 		class_group.GET("", server.getAllClassrooms)
 		class_group.POST("", server.createNewClassroom)
@@ -97,7 +95,7 @@ func Launch() {
 		class_group.GET("/:id/posts", server.getClassroomPosts)
 	}
 
-	post_group := e.Group("/api/v1/posts", JwtAuthMiddleware(server.Cfg))
+	post_group := e.Group("/api/v1/posts", JwtAuthMiddleware(server.cfg))
 	{
 		post_group.POST("", server.createNewPost)
 		post_group.GET("/:id", server.getOnePost)
@@ -109,7 +107,7 @@ func Launch() {
 		post_group.DELETE("/:id", server.unlikePost)
 	}
 
-	comment_group := e.Group("/api/v1/comments", JwtAuthMiddleware(server.Cfg))
+	comment_group := e.Group("/api/v1/comments", JwtAuthMiddleware(server.cfg))
 	{
 		comment_group.POST("", server.createNewComment)
 		comment_group.GET("/:id", server.getOneComment)
@@ -121,5 +119,22 @@ func Launch() {
 		comment_group.DELETE("/:id", server.unlikeComment)
 	}
 
-	e.Logger.Fatal(e.Start(server.Cfg.PORT))
+	server.router = e
+
+	return server
+}
+
+func Launch() {
+	err := godotenv.Load()
+	cfg := config.Init()
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	conn := utils.SetupDB(cfg.DATABASE_URL)
+	store := database.NewStore(conn, cfg)
+	server := NewServer(store)
+
+	log.Fatal(server.router.Start(cfg.PORT))
 }
