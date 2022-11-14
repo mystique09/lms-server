@@ -131,7 +131,11 @@ func (s *Server) getClassroom(c echo.Context) error {
 func (s *Server) createNewClassroom(c echo.Context) error {
 	var payload CreateClassroomDTO
 
-	c.Bind(&payload)
+	bindErr := c.Bind(&payload)
+	if bindErr != nil {
+		return c.JSON(400, bindErr)
+	}
+
 	if err := c.Validate(payload); err != nil {
 		return c.JSON(400, err)
 	}
@@ -196,7 +200,11 @@ func (s *Server) updateClassroom(c echo.Context) error {
 	case "name":
 		var payload UpdateClassroomName
 
-		c.Bind(&payload)
+		bindErr := c.Bind(&payload)
+		if bindErr != nil {
+			return c.JSON(400, bindErr)
+		}
+
 		if err := c.Validate(payload); err != nil {
 			return c.JSON(400, err)
 		}
@@ -214,7 +222,11 @@ func (s *Server) updateClassroom(c echo.Context) error {
 	case "description":
 		var payload UpdateClassroomDescription
 
-		c.Bind(&payload)
+		bindErr := c.Bind(&payload)
+		if bindErr != nil {
+			return c.JSON(400, bindErr)
+		}
+
 		if err := c.Validate(payload); err != nil {
 			return c.JSON(400, err)
 		}
@@ -232,7 +244,10 @@ func (s *Server) updateClassroom(c echo.Context) error {
 	case "subject":
 		var payload UpdateClassroomSubject
 
-		c.Bind(&payload)
+		bindErr := c.Bind(&payload)
+		if bindErr != nil {
+			return c.JSON(400, bindErr)
+		}
 		if err := c.Validate(payload); err != nil {
 			return c.JSON(400, err)
 		}
@@ -250,7 +265,10 @@ func (s *Server) updateClassroom(c echo.Context) error {
 	case "section":
 		var payload UpdateClassroomSection
 
-		c.Bind(&payload)
+		bindErr := c.Bind(&payload)
+		if bindErr != nil {
+			return c.JSON(400, bindErr)
+		}
 		if err := c.Validate(payload); err != nil {
 			return c.JSON(400, err)
 		}
@@ -268,7 +286,10 @@ func (s *Server) updateClassroom(c echo.Context) error {
 	case "room":
 		var payload UpdateClassroomRoom
 
-		c.Bind(&payload)
+		bindErr := c.Bind(&payload)
+		if bindErr != nil {
+			return c.JSON(400, bindErr)
+		}
 		if err := c.Validate(payload); err != nil {
 			return c.JSON(400, err)
 		}

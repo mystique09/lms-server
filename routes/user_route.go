@@ -88,7 +88,11 @@ func (s *Server) getUser(c echo.Context) error {
 
 func (s *Server) createUser(c echo.Context) error {
 	user_data := new(UserCreateDTO)
-	c.Bind(&user_data)
+
+	bindErr := c.Bind(&user_data)
+	if bindErr != nil {
+		return c.JSON(400, bindErr)
+	}
 
 	if err := c.Validate(user_data); err != nil {
 		return c.JSON(400, err)
@@ -146,7 +150,12 @@ func (s *Server) updateUser(c echo.Context) error {
 	}
 
 	var updateDto UserUpdateDTO
-	c.Bind(&updateDto)
+
+	bindErr := c.Bind(&updateDto)
+	if bindErr != nil {
+		return c.JSON(400, bindErr)
+	}
+
 	if err := c.Validate(updateDto); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}

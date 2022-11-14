@@ -57,7 +57,10 @@ func (s *Server) getOnePost(c echo.Context) error {
 func (s *Server) createNewPost(c echo.Context) error {
 	var payload CreatePostRequest
 
-	c.Bind(&payload)
+	bindErr := c.Bind(&payload)
+	if bindErr != nil {
+		return c.JSON(400, bindErr)
+	}
 
 	if err := c.Validate(payload); err != nil {
 		return c.JSON(400, err)
@@ -108,7 +111,10 @@ func (s *Server) updatePost(c echo.Context) error {
 
 	var payload UpdatePostRequest
 
-	c.Bind(&payload)
+	bindErr := c.Bind(&payload)
+	if bindErr != nil {
+		return c.JSON(400, bindErr)
+	}
 	if err := c.Validate(payload); err != nil {
 		return c.JSON(400, err)
 	}
@@ -192,7 +198,10 @@ func (s *Server) likePost(c echo.Context) error {
 	}
 
 	var payload LikeRequest
-	c.Bind(&payload)
+	bindErr := c.Bind(&payload)
+	if bindErr != nil {
+		return c.JSON(400, bindErr)
+	}
 
 	if err := c.Validate(payload); err != nil {
 		return c.JSON(400, err)
@@ -230,7 +239,10 @@ func (s *Server) unlikePost(c echo.Context) error {
 	}
 
 	var payload UnlikeRequest
-	c.Bind(&payload)
+	bindErr := c.Bind(&payload)
+	if bindErr != nil {
+		return c.JSON(400, bindErr)
+	}
 
 	if err := c.Validate(payload); err != nil {
 		return c.JSON(400, err)

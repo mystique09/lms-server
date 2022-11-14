@@ -23,7 +23,11 @@ type AuthSuccessResponse struct {
 func (s *Server) loginHandler(c echo.Context) error {
 	var payload AuthRequest
 
-	c.Bind(&payload)
+	bindErr := c.Bind(&payload)
+	if bindErr != nil {
+		return c.JSON(400, bindErr)
+	}
+
 	if err := c.Validate(payload); err != nil {
 		return c.JSON(400, err)
 	}
