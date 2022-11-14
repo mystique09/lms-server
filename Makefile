@@ -1,13 +1,13 @@
 DB_NAME=class-manager
 
 postgres:
-	docker run --name postgres12 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
+	sudo docker run --name postgres -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
 
 createdb:
-	docker exec -it postgres12 createdb --username=root --owner=root class-manager
+	sudo docker exec -it postgres createdb --username=root --owner=root class-manager
 
 dropdb:
-	docker exec -it postgres12 dropdb class-manager
+	docker exec -it postgres dropdb class-manager
 
 migrateup:
 	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/class-manager?sslmode=disable" -verbose up
@@ -24,4 +24,10 @@ sqlc:
 test:
 	go test -v -cover ./...
 
-.PHONY: postgres create migrateup migratedown force test
+server:
+	go run cmd/main.go
+
+mock:
+	mockgen -package mockdb -destination database/mock/store.go server/database/sqlc Store
+
+.PHONY: postgres create migrateup migratedown force test server mock
