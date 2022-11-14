@@ -10,13 +10,13 @@ dropdb:
 	docker exec -it postgres12 dropdb class-manager
 
 migrateup:
-	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost/${DB_NAME}?sslmode=disable" -verbose up
+	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/class-manager?sslmode=disable" -verbose up
 
 migratedown:
-	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost/${DB_NAME}?sslmode=disable" -verbose down
+	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/class-manager?sslmode=disable" -verbose down
 
 force:
-	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost/${DB_NAME}?sslmode=disable" -verbose force 1
+	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/class-manager?sslmode=disable" -verbose force 1
 
 sqlc:
 	sqlc generate
