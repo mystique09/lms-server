@@ -2,91 +2,99 @@ package database
 
 import (
 	"context"
+	"database/sql"
+	"server/utils"
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-var user_id uuid.UUID
-
-func TestCreateUser(t *testing.T) {
-	username := "mystique09"
-	password := "testpassword"
-	email := "testemail@gmail.com"
-	user, err := precreateUser(username, password, email)
-
-	if assert.NoError(t, err) {
-		assert.Equal(t, username, user.Username)
-		assert.Equal(t, password, user.Password)
-		assert.Equal(t, email, user.Email)
-		assert.Equal(t, RoleSTUDENT, user.UserRole)
-		assert.NotZero(t, user.CreatedAt)
-		assert.NotZero(t, user.UpdatedAt)
-		user_id = user.ID
+func createAccount(t *testing.T) User {
+	arg := CreateUserParams{
+		ID:         uuid.New(),
+		Username:   utils.RandomString(8),
+		Password:   utils.RandomString(8),
+		Email:      utils.RandomString(16),
+		UserRole:   RoleSTUDENT,
+		Visibility: VisibilityPUBLIC,
 	}
+
+	user, err := testQuesries.CreateUser(context.Background(), arg)
+
+	require.NoError(t, err)
+
+	require.NotZero(t, user.ID)
+	require.Equal(t, arg.ID, user.ID)
+	require.Equal(t, arg.Username, user.Username)
+	require.Equal(t, arg.Email, user.Email)
+	require.Equal(t, arg.UserRole, RoleSTUDENT)
+	require.Equal(t, arg.Visibility, VisibilityPUBLIC)
+
+	return user
+}
+
+func TestCreateAccount(t *testing.T) {
+	createAccount(t)
 }
 
 func TestGetUser(t *testing.T) {
-	user, err := testQueries.GetUser(context.Background(), user_id)
+	new_user := createAccount(t)
 
-	if assert.NoError(t, err) {
-		assert.Equal(t, user_id, user.ID)
-		assert.Equal(t, "mystique09", user.Username)
-		assert.Equal(t, "testemail@gmail.com", user.Email)
-		assert.Equal(t, RoleSTUDENT, user.UserRole)
-		assert.Equal(t, VisibilityPUBLIC, user.Visibility)
-	}
+	user, err := testQuesries.GetUser(context.Background(), new_user.ID)
+
+	require.NoError(t, err)
+
+	require.NotEmpty(t, user)
+	require.Equal(t, new_user.ID, user.ID)
+	require.Equal(t, new_user.Username, user.Username)
+	require.Equal(t, new_user.Password, user.Password)
+	require.Equal(t, new_user.Email, user.Email)
+	require.Equal(t, new_user.UserRole, user.UserRole)
+	require.Equal(t, new_user.Visibility, user.Visibility)
 }
 
-func TestUpdateUserPassword(t *testing.T) {
-	args := UpdateUserPasswordParams{
-		ID:       user_id,
-		Password: "new_testpassword",
+func TestUpdateUsername(t *testing.T) {
+	user := createAccount(t)
+
+	arg := UpdateUsernameParams{
+		Username: utils.RandomString(8),
+		ID:       user.ID,
 	}
 
-	updated, err := testQueries.UpdateUserPassword(context.Background(), args)
+	updated, err := testQuesries.UpdateUsername(context.Background(), arg)
 
-	if assert.NoError(t, err) {
-		assert.Equal(t, "new_testpassword", updated.Password)
-		assert.NotEqual(t, "testpassword", updated.Password)
-	}
+	require.NoError(t, err)
+	require.NotEmpty(t, updated)
+	require.Equal(t, arg.Username, updated.Username)
 }
 
-func TestUpdateUserEmail(t *testing.T) {
-	args := UpdateUserEmailParams{
-		ID:    user_id,
-		Email: "new_testemail@gmail.com",
-	}
+func TestDeleteAccount(t *testing.T) {
+	new_user := createAccount(t)
 
-	updated, err := testQueries.UpdateUserEmail(context.Background(), args)
+	deleted, err := testQuesries.DeleteUser(context.Background(), new_user.ID)
 
-	if assert.NoError(t, err) {
-		assert.Equal(t, "new_testemail@gmail.com", updated.Email)
-		assert.NotEqual(t, "testemail@gmail.com", updated.Email)
-	}
+	require.NoError(t, err)
+	require.NotEmpty(t, deleted)
+
+	user, err := testQuesries.GetUser(context.Background(), deleted.ID)
+
+	require.Error(t, err)
+	require.EqualError(t, err, sql.ErrNoRows.Error())
+	require.Empty(t, user)
 }
 
-func TestUpdateUserName(t *testing.T) {
-	args := UpdateUsernameParams{
-		ID:       user_id,
-		Username: "new_mystique09",
+func TestListUsers(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		createAccount(t)
 	}
 
-	updated, err := testQueries.UpdateUsername(context.Background(), args)
+	users, err := testQuesries.GetUsers(context.Background(), 5)
 
-	if assert.NoError(t, err) {
-		assert.Equal(t, "new_mystique09", updated.Username)
-		assert.NotEqual(t, "mystique09", updated.Username)
-	}
-}
+	require.NoError(t, err)
+	require.Less(t, 5, len(users))
 
-func TestDeleteUser(t *testing.T) {
-	postDeleteUser(user_id)
-
-	user, err := testQueries.GetUser(context.Background(), user_id)
-
-	if assert.Error(t, err) {
-		assert.Equal(t, uuid.Nil, user.ID)
+	for _, user := range users {
+		require.NotEmpty(t, user)
 	}
 }

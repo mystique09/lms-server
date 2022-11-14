@@ -24,7 +24,7 @@ type (
 	}
 
 	UnlikeRequest struct {
-		iD uuid.UUID `json:"id" validate:"required,uuid"`
+		ID uuid.UUID `json:"id" validate:"required,uuid"`
 	}
 )
 
@@ -241,7 +241,7 @@ func (s *Server) unlikePost(c echo.Context) error {
 
 	unliked_post, err := s.DB.UnlikePost(c.Request().Context(), database.UnlikePostParams{
 		ID:     post_uid,
-		PostID: payload.iD,
+		PostID: payload.ID,
 		UserID: jwt_payload.ID,
 	})
 	if err != nil || unliked_post.ID == uuid.Nil {

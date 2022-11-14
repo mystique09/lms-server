@@ -1,33 +1,27 @@
 DB_NAME=class-manager
 
-setup:
-	go install github.com/cosmtrek/air@latest \
-	# install sqlc
-	 \
-	# install golang-migrate
-	go get github.com/golang-migrate/migrate@latest \
-	# install package dependencies
-	go install
+postgres:
+	docker run --name postgres12 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
 
-dev:
-	cd frontend && pnpm watch & go run cmd/main.go && fg
+createdb:
+	docker exec -it postgres12 createdb --username=root --owner=root class-manager
 
-run: 
-    docker run --name mystique09 -e POSTGRES_PASSWORD=mystique09 -d postgres
-
-watch:
-	cd frontend && pnpm build & air && fg
-
-create:
-	migrate create -ext sql -dir ./database/migrations/ -seq $(name)
+dropdb:
+	docker exec -it postgres12 dropdb class-manager
 
 migrateup:
-	migrate -path ./database/migrations/ -database "postgresql://mystique09:mystique09@localhost/${DB_NAME}?sslmode=disable" -verbose up
+	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/class-manager?sslmode=disable" -verbose up
 
-drop:
-	migrate -path ./database/migrations/ -database "postgresql://mystique09:mystique09@localhost/${DB_NAME}?sslmode=disable" -verbose down
+migratedown:
+	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/class-manager?sslmode=disable" -verbose down
 
 force:
-	migrate -path ./database/migrations/ -database "postgresql://mystique09:mystique09@localhost/${DB_NAME}?sslmode=disable" -verbose force 1
+	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/class-manager?sslmode=disable" -verbose force 1
 
-.PHONY: create migrateup drop force setup run
+sqlc:
+	sqlc generate
+
+test:
+	go test -v -cover ./...
+
+.PHONY: postgres create migrateup migratedown force test

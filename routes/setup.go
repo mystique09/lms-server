@@ -1,48 +1,22 @@
 package routes
 
 import (
-	"html/template"
-	"io"
 	"log"
 
-	//"net/http"
 	"server/config"
 	database "server/database/sqlc"
-
-	//"server/frontend"
 	"server/utils"
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo-contrib/jaegertracing"
 	"github.com/labstack/echo/v4"
-	//"github.com/labstack/echo/v4/middleware"
 )
-
-type TemplateExecutor interface {
-	Render(wr io.Writer, name string, data interface{}, c echo.Context) error
-}
-
-type DebugTemplateExecutor struct {
-	Glob string
-}
-
-func (e DebugTemplateExecutor) Render(wr io.Writer, name string, data interface{}, c echo.Context) error {
-	t := template.Must(template.ParseGlob(e.Glob))
-	return t.ExecuteTemplate(wr, name, data)
-}
-
-type ReleaseTemplateExecutor struct {
-	Template *template.Template
-}
-
-func (e ReleaseTemplateExecutor) Render(wr io.Writer, name string, data interface{}, c echo.Context) error {
-	return e.Template.ExecuteTemplate(wr, name, data)
-}
 
 var server Server
 
-func Setup() Server {
+func Init() Server {
 	err := godotenv.Load()
 
 	if err != nil {
@@ -62,46 +36,18 @@ func Setup() Server {
 	}
 }
 
-func addNewHandleserveroGroup(g *echo.Group, handlers []Handler) {
-	for _, handler := range handlers {
-		if handler.Action == "GET" {
-			g.GET(handler.Path, handler.HandlerFunc)
-		} else if handler.Action == "POST" {
-			g.POST(handler.Path, handler.HandlerFunc)
-		} else if handler.Action == "UPDATE" {
-			g.PUT(handler.Path, handler.HandlerFunc)
-		} else if handler.Action == "PATCH" {
-			g.PATCH(handler.Path, handler.HandlerFunc)
-		} else {
-			g.DELETE(handler.Path, handler.HandlerFunc)
-		}
-	}
-}
-
-var executor TemplateExecutor
-
 func Launch() {
-	server = Setup()
-	debug := true
-	templateGlob := "web/templates/*.html"
-
-	if debug {
-		executor = DebugTemplateExecutor{templateGlob}
-
-	} else {
-		executor = ReleaseTemplateExecutor{
-			template.Must(template.ParseGlob(templateGlob)),
-		}
-	}
+	server = Init()
 
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
 
+	trace := jaegertracing.New(e, nil)
+	defer trace.Close()
+
 	e.Use(LoggerMiddleware())
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(server.Cfg))
-
-	e.Renderer = executor
 
 	e.GET("/", func(c echo.Context) error {
 		return c.Render(200, "indexPage", nil)
@@ -112,13 +58,13 @@ func Launch() {
 	e.POST("/api/v1/login", server.loginHandler)
 	e.POST("/api/v1/refresh", server.refreshToken, RefreshTokenAuthMiddleware(server.Cfg))
 
-	user_group := e.Group("/api/v1/users" /*JwtAuthMiddleware(server.Cfg)*/)
+	user_group := e.Group("/api/v1/users", JwtAuthMiddleware(server.Cfg))
 	{
 		user_group.GET("", server.getUsers)
 		user_group.GET("/:id", server.getUser)
 		user_group.PUT("/:id", server.updateUser)
 		user_group.DELETE("/:id", server.deleteUser)
-		// classrokms relationships
+		// classrooms relationships
 		user_group.GET("/:id/classrooms", server.getClassrooms)
 		user_group.POST("/:id/classrooms", server.joinClassroom)
 		user_group.DELETE("/:id/classrooms/:class_id", server.leaveClassroom)
