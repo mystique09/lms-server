@@ -12,6 +12,8 @@ jobs:
       # Run Codeball on all new Pull Requests and Review Comments! 🚀
       # For customizations and more documentation, see https://github.com/sturdy-dev/codeball-action
       - name: Codeball
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: sturdy-dev/codeball-action@v2
         with:
           approvePullRequests: "true"
