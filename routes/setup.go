@@ -22,11 +22,6 @@ type Server struct {
 }
 
 func NewServer(store database.Store) *Server {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
 	cfg := config.Init()
 
 	cld, err := cloudinary.NewFromURL(cfg.CLD_URL)
