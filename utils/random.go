@@ -23,3 +23,7 @@ func RandomString(l int) string {
 	}
 	return sb.String()
 }
+
+func randomEmail() string {
+	return RandomString(8) + "@gmail.com"
+}

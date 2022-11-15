@@ -23,12 +23,16 @@ type AuthSuccessResponse struct {
 func (s *Server) loginHandler(c echo.Context) error {
 	var payload AuthRequest
 
-	c.Bind(&payload)
+	bindErr := c.Bind(&payload)
+	if bindErr != nil {
+		return c.JSON(400, bindErr)
+	}
+
 	if err := c.Validate(payload); err != nil {
 		return c.JSON(400, err)
 	}
 
-	user, err := s.DB.GetUserByUsername(c.Request().Context(), payload.Username)
+	user, err := s.store.GetUserByUsername(c.Request().Context(), payload.Username)
 	if err != nil || user.ID == uuid.Nil {
 		return c.JSON(http.StatusNotFound, USER_NOTFOUND)
 	}
@@ -37,12 +41,12 @@ func (s *Server) loginHandler(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, LOGIN_FAILED)
 	}
 
-	access_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.ID, user.Username, user.Email, string(user.UserRole)), 5), s.Cfg.JWT_SECRET_KEY)
+	access_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.ID, user.Username, user.Email, string(user.UserRole)), 5), s.cfg.JWT_SECRET_KEY)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	refresh_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.ID, user.Username, user.Email, string(user.UserRole)), 60*60*7*31), s.Cfg.JWT_REFRESH_SECRET_KEY)
+	refresh_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.ID, user.Username, user.Email, string(user.UserRole)), 60*60*7*31), s.cfg.JWT_REFRESH_SECRET_KEY)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
@@ -53,13 +57,13 @@ func (s *Server) loginHandler(c echo.Context) error {
 func (s *Server) refreshToken(c echo.Context) error {
 	token := c.Get("refresh").(*jwt.Token)
 	user := utils.GetPayloadFromJwt(token)
-	updated_user, err := s.DB.GetUser(c.Request().Context(), user.ID)
+	updated_user, err := s.store.GetUser(c.Request().Context(), user.ID)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	new_access_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(updated_user.ID, updated_user.Username, updated_user.Email, string(updated_user.UserRole)), 5), s.Cfg.JWT_SECRET_KEY)
+	new_access_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(updated_user.ID, updated_user.Username, updated_user.Email, string(updated_user.UserRole)), 5), s.cfg.JWT_SECRET_KEY)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}

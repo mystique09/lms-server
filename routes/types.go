@@ -2,25 +2,13 @@ package routes
 
 import (
 	"net/http"
-	"server/config"
-	database "server/database/sqlc"
 	"server/utils"
 
-	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
 
 type (
-	/*
-	   The Route struct to hold the route information.
-	*/
-	Server struct {
-		DB  *database.Queries
-		Cfg config.Config
-		Cld *cloudinary.Cloudinary
-	}
-
 	/*
 	   A Response struct to hold the response information.
 	*/

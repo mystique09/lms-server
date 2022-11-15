@@ -48,7 +48,7 @@ func (s *Server) getFollowers(c echo.Context) error {
 		return c.JSON(400, NEGATIVE_OFFSET)
 	}
 
-	followers, err := s.DB.GetAllFollowers(c.Request().Context(), database.GetAllFollowersParams{
+	followers, err := s.store.GetAllFollowers(c.Request().Context(), database.GetAllFollowersParams{
 		Following: uid,
 		Offset:    int32(offset * 10),
 	})
@@ -88,7 +88,7 @@ func (s *Server) getFollowings(c echo.Context) error {
 		return c.JSON(400, NEGATIVE_OFFSET)
 	}
 
-	following, err := s.DB.GetAllFollowing(c.Request().Context(), database.GetAllFollowingParams{
+	following, err := s.store.GetAllFollowing(c.Request().Context(), database.GetAllFollowingParams{
 		Follower: uid,
 		Offset:   int32(offset * 10),
 	})
@@ -118,12 +118,16 @@ func (s *Server) addNewFollower(c echo.Context) error {
 
 	var payload FollowUserRequest
 
-	c.Bind(&payload)
+	bindErr := c.Bind(&payload)
+	if bindErr != nil {
+		return c.JSON(400, bindErr)
+	}
+
 	if err := c.Validate(payload); err != nil {
 		return c.JSON(400, err)
 	}
 
-	check_userid, err := s.DB.GetUser(c.Request().Context(), payload.UserId)
+	check_userid, err := s.store.GetUser(c.Request().Context(), payload.UserId)
 	if err != nil || check_userid.ID == uuid.Nil {
 		return c.JSON(400, USER_NOTFOUND)
 	}
@@ -136,7 +140,7 @@ func (s *Server) addNewFollower(c echo.Context) error {
 		return c.JSON(400, UNAUTHORIZED)
 	}
 
-	check_follow, err := s.DB.GetOneFollower(c.Request().Context(), database.GetOneFollowerParams{
+	check_follow, err := s.store.GetOneFollower(c.Request().Context(), database.GetOneFollowerParams{
 		Follower:  user.ID,
 		Following: payload.UserId,
 	})
@@ -145,7 +149,7 @@ func (s *Server) addNewFollower(c echo.Context) error {
 		return c.JSON(400, utils.NewResponse(nil, "you already followed this user"))
 	}
 
-	new_follower, err := s.DB.FollowUser(c.Request().Context(), database.FollowUserParams{
+	new_follower, err := s.store.FollowUser(c.Request().Context(), database.FollowUserParams{
 		ID:        uuid.New(),
 		Follower:  user.ID,
 		Following: payload.UserId,
@@ -172,13 +176,13 @@ func (s *Server) removeFollowing(c echo.Context) error {
 		return c.JSON(400, err)
 	}
 
-	check_user, err := s.DB.GetUser(c.Request().Context(), uid)
+	check_user, err := s.store.GetUser(c.Request().Context(), uid)
 
 	if check_user.ID == uuid.Nil || err != nil {
 		return c.JSON(400, USER_NOTFOUND)
 	}
 
-	check_following, err := s.DB.GetFollowerById(c.Request().Context(), follow_id)
+	check_following, err := s.store.GetFollowerById(c.Request().Context(), follow_id)
 
 	if check_following.ID == uuid.Nil || err != nil {
 		return c.JSON(400, utils.NewResponse(nil, fmt.Sprintf("[%v] is not in your followings list!", follow_id)))
@@ -195,7 +199,7 @@ func (s *Server) removeFollowing(c echo.Context) error {
 		return c.JSON(403, UNAUTHORIZED)
 	}
 
-	unfollowed, err := s.DB.UnfollowUser(c.Request().Context(), follow_id)
+	unfollowed, err := s.store.UnfollowUser(c.Request().Context(), follow_id)
 
 	if err != nil {
 		return c.JSON(400, err)
