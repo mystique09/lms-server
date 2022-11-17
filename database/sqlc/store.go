@@ -16,10 +16,10 @@ type SQLStore struct {
 	*Queries
 }
 
-func NewStore(db *sql.DB, cfg config.Config) Store {
+func NewStore(db *sql.DB, cfg *config.Config) Store {
 	return &SQLStore{
 		db:      db,
-		cfg:     cfg,
+		cfg:     *cfg,
 		Queries: New(db),
 	}
 }
