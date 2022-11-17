@@ -67,10 +67,10 @@ func (mr *MockStoreMockRecorder) CreateClass(arg0, arg1 interface{}) *gomock.Cal
 }
 
 // CreateUser mocks base method.
-func (m *MockStore) CreateUser(arg0 context.Context, arg1 database.CreateUserParams) (database.User, error) {
+func (m *MockStore) CreateUser(arg0 context.Context, arg1 database.CreateUserParams) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", arg0, arg1)
-	ret0, _ := ret[0].(database.User)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -142,10 +142,10 @@ func (mr *MockStoreMockRecorder) DeletePostFromClass(arg0, arg1 interface{}) *go
 }
 
 // DeleteUser mocks base method.
-func (m *MockStore) DeleteUser(arg0 context.Context, arg1 uuid.UUID) (database.User, error) {
+func (m *MockStore) DeleteUser(arg0 context.Context, arg1 uuid.UUID) (uuid.UUID, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteUser", arg0, arg1)
-	ret0, _ := ret[0].(database.User)
+	ret0, _ := ret[0].(uuid.UUID)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -786,10 +786,10 @@ func (mr *MockStoreMockRecorder) UpdatePostContent(arg0, arg1 interface{}) *gomo
 }
 
 // UpdateUserEmail mocks base method.
-func (m *MockStore) UpdateUserEmail(arg0 context.Context, arg1 database.UpdateUserEmailParams) (database.User, error) {
+func (m *MockStore) UpdateUserEmail(arg0 context.Context, arg1 database.UpdateUserEmailParams) (uuid.UUID, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUserEmail", arg0, arg1)
-	ret0, _ := ret[0].(database.User)
+	ret0, _ := ret[0].(uuid.UUID)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -801,10 +801,10 @@ func (mr *MockStoreMockRecorder) UpdateUserEmail(arg0, arg1 interface{}) *gomock
 }
 
 // UpdateUserPassword mocks base method.
-func (m *MockStore) UpdateUserPassword(arg0 context.Context, arg1 database.UpdateUserPasswordParams) (database.User, error) {
+func (m *MockStore) UpdateUserPassword(arg0 context.Context, arg1 database.UpdateUserPasswordParams) (uuid.UUID, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUserPassword", arg0, arg1)
-	ret0, _ := ret[0].(database.User)
+	ret0, _ := ret[0].(uuid.UUID)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -816,10 +816,10 @@ func (mr *MockStoreMockRecorder) UpdateUserPassword(arg0, arg1 interface{}) *gom
 }
 
 // UpdateUsername mocks base method.
-func (m *MockStore) UpdateUsername(arg0 context.Context, arg1 database.UpdateUsernameParams) (database.User, error) {
+func (m *MockStore) UpdateUsername(arg0 context.Context, arg1 database.UpdateUsernameParams) (uuid.UUID, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUsername", arg0, arg1)
-	ret0, _ := ret[0].(database.User)
+	ret0, _ := ret[0].(uuid.UUID)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
