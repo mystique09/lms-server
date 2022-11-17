@@ -26,7 +26,7 @@ type (
 	}
 )
 
-func NewJwtPayload(id uuid.UUID, username string, email string, role string) JwtUserPayload {
+func NewJwtPayload(id uuid.UUID, username, email, role string) JwtUserPayload {
 	return JwtUserPayload{
 		ID:       id,
 		Username: username,
@@ -35,8 +35,8 @@ func NewJwtPayload(id uuid.UUID, username string, email string, role string) Jwt
 	}
 }
 
-func NewJwtClaims(payload JwtUserPayload, duration time.Duration) JwtClaims {
-	return JwtClaims{
+func NewJwtClaims(payload JwtUserPayload, duration time.Duration) *JwtClaims {
+	return &JwtClaims{
 		ID:       payload.ID,
 		Username: payload.Username,
 		Email:    payload.Email,
@@ -47,7 +47,7 @@ func NewJwtClaims(payload JwtUserPayload, duration time.Duration) JwtClaims {
 	}
 }
 
-func NewJwtToken(payload JwtClaims, secret_key []byte) (string, error) {
+func NewJwtToken(payload *JwtClaims, secret_key []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 	return token.SignedString(secret_key)
 }

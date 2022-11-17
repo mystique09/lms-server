@@ -13,10 +13,10 @@ type Response struct {
 /*
 A function to create a new response.
 */
-func NewResponse(data interface{}, error string) Response {
+func NewResponse(data interface{}, err string) Response {
 	return Response{
 		Data:  data,
-		Error: error,
+		Error: err,
 	}
 }
 

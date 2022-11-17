@@ -17,7 +17,7 @@ func LoggerMiddleware() echo.MiddlewareFunc {
 	)
 }
 
-func CorsMiddleware(cfg config.Config) echo.MiddlewareFunc {
+func CorsMiddleware(cfg *config.Config) echo.MiddlewareFunc {
 	return middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
 			cfg.FRONTEND_URL,
@@ -36,7 +36,7 @@ func RateLimitMiddleware(limit rate.Limit) echo.MiddlewareFunc {
 	return middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(limit))
 }
 
-func JwtAuthMiddleware(cfg config.Config) echo.MiddlewareFunc {
+func JwtAuthMiddleware(cfg *config.Config) echo.MiddlewareFunc {
 	return middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningMethod: "HS256",
 		SigningKey:    cfg.JWT_SECRET_KEY,
@@ -46,7 +46,7 @@ func JwtAuthMiddleware(cfg config.Config) echo.MiddlewareFunc {
 	})
 }
 
-func RefreshTokenAuthMiddleware(cfg config.Config) echo.MiddlewareFunc {
+func RefreshTokenAuthMiddleware(cfg *config.Config) echo.MiddlewareFunc {
 	return middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningMethod: "HS256",
 		SigningKey:    cfg.JWT_REFRESH_SECRET_KEY,

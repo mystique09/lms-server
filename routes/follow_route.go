@@ -188,10 +188,6 @@ func (s *Server) removeFollowing(c echo.Context) error {
 		return c.JSON(400, utils.NewResponse(nil, fmt.Sprintf("[%v] is not in your followings list!", follow_id)))
 	}
 
-	// if check_user.ID == uuid.Nil {
-	// 	return c.JSON(400, utils.NewResponse(nil, "are you sure the id you provided is correct?"))
-	// }
-
 	token := c.Get("user").(*jwt.Token)
 	user := utils.GetPayloadFromJwt(token)
 
