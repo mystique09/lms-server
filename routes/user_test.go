@@ -173,6 +173,42 @@ func TestCreateUserAPI(t *testing.T) {
 				require.Equal(t, http.StatusBadRequest, rec.Code)
 			},
 		},
+		{
+			name: "Missing password field",
+			body: fmt.Sprintf(`{"username": "%v", "email": "%v"}`, user.Username, user.Email),
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					CreateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(rec *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, rec.Code)
+			},
+		},
+		{
+			name: "Missing email field",
+			body: fmt.Sprintf(`{"password": "%v", "username": "%v"}`, password, user.Username),
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					CreateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(rec *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, rec.Code)
+			},
+		},
+		{
+			name: "Invalid email",
+			body: fmt.Sprintf(`{"password": "%v", "username": "%v", "email":"invalidemail"}`, password, user.Username),
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					CreateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(rec *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, rec.Code)
+			},
+		},
 	}
 
 	for i := range testCases {
