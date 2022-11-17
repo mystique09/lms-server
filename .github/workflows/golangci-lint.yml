@@ -26,4 +26,4 @@ jobs:
           version: latest
 
           # Optional: golangci-lint command line arguments.
-          args: --disable-all --enable "errcheck" "gosimple" "govet" "ineffassign" "staticcheck" "typecheck" "unused" "gosec" "gocritic" --fast
+          args: --disable-all -E "errcheck" -E "gosimple" -E "govet" -E "ineffassign" -E "staticcheck" -E "typecheck" -E "unused" -E "gosec" -E "gocritic" --fast
