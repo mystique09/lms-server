@@ -10,13 +10,13 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func SetupDB(DATABASE_URL string) *sql.DB {
-	db, err := sql.Open("postgres", DATABASE_URL)
+func SetupDB(databaseUrl string) *sql.DB {
+	db, err := sql.Open("postgres", databaseUrl)
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	//defer db.Close()
+
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		log.Fatal(err.Error())
