@@ -24,27 +24,27 @@ INSERT INTO users(
 ) VALUES (
   $1, $2, $3, $4, $5, $6
 )
-RETURNING *;
+RETURNING username;
 
 -- name: UpdateUsername :one
 UPDATE users
 SET username = $1
 WHERE id =  $2
-RETURNING *;
+RETURNING id;
 
 -- name: UpdateUserEmail :one
 UPDATE users
 SET email = $1
 WHERE id =  $2
-RETURNING *;
+RETURNING id;
 
 -- name: UpdateUserPassword :one
 UPDATE users
 SET password = $1
 WHERE id =  $2
-RETURNING *;
+RETURNING id;
 
 -- name: DeleteUser :one
 DELETE FROM users
 WHERE id = $1
-RETURNING *;
+RETURNING id;
