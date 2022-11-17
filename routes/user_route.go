@@ -40,23 +40,25 @@ type UserClassrooms struct {
 }
 
 func (s *Server) getUsers(c echo.Context) error {
-	page := c.QueryParam("page")
+	ofst := c.QueryParam("offset")
 
-	if page == "" {
-		page = "0"
+	if ofst == "" || ofst == "0" {
+		ofst = "1"
 	}
 
-	offset, err := strconv.Atoi(page)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+	offset, err := strconv.Atoi(ofst)
+
+	if err != nil || offset < 0 {
+		return c.JSON(400, "Invalid page, must be a number!")
 	}
 
 	users, err := s.store.GetUsers(c.Request().Context(), int32(offset*10))
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return c.JSON(http.StatusBadRequest, err.Error())
 	}
-	return c.Render(200, "userPage", users)
+
+	return c.JSON(200, users)
 }
 
 func (s *Server) getUser(c echo.Context) error {
