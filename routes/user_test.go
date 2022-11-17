@@ -209,6 +209,18 @@ func TestCreateUserAPI(t *testing.T) {
 				require.Equal(t, http.StatusBadRequest, rec.Code)
 			},
 		},
+		{
+			name: "Invalid username length",
+			body: fmt.Sprintf(`{"password": "%v", "username": "%v", "email":"%v"}`, password, utils.RandomString(4), user.Email),
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					CreateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(rec *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, rec.Code)
+			},
+		},
 	}
 
 	for i := range testCases {
