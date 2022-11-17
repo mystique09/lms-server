@@ -40,9 +40,6 @@ func (server *Server) setupRouter() {
 
 	e.Validator = &CustomValidator{validator: validator.New()}
 
-	trace := jaegertracing.New(e, nil)
-	defer trace.Close()
-
 	e.Use(LoggerMiddleware())
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(&server.cfg))
@@ -110,6 +107,9 @@ func (server *Server) setupRouter() {
 	comment_group.GET("/:id/likes", server.getAllCommentLikes)
 	comment_group.POST("/:id/likes", server.likeComment)
 	comment_group.DELETE("/:id", server.unlikeComment)
+
+	trace := jaegertracing.New(e, nil)
+	defer trace.Close()
 
 	server.router = e
 }
