@@ -23,6 +23,135 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestGetAllUsersApi(t *testing.T) {
+	// TODO!
+
+	var users []database.User
+
+	for i := 0; i < 20; i++ {
+		user, _ := randomUser(t)
+		users = append(users, user)
+	}
+
+	testCases := []struct {
+		name          string
+		offset        string
+		buildStubs    func(store *mockdb.MockStore)
+		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name:   "OK",
+			offset: "1",
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUsers(gomock.Any(), gomock.Eq(int32(10))).
+					Times(1).
+					Return(users, nil)
+			},
+			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
+				require.Equal(t, 200, rec.Code)
+
+				data, err := io.ReadAll(rec.Body)
+				require.NoError(t, err)
+
+				var getUsers []database.User
+				err = json.Unmarshal(data, &getUsers)
+				require.NoError(t, err)
+				require.Equal(t, users, users)
+			},
+		},
+		{
+			name:   "OK: Offset is 0",
+			offset: "0",
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUsers(gomock.Any(), gomock.Eq(int32(10))).
+					Times(1).
+					Return(users, nil)
+			},
+			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
+				require.Equal(t, 200, rec.Code)
+
+				data, err := io.ReadAll(rec.Body)
+				require.NoError(t, err)
+
+				var getUsers []database.User
+				err = json.Unmarshal(data, &getUsers)
+				require.NoError(t, err)
+				require.Equal(t, users, users)
+			},
+		},
+		{
+			name:   "OK: Offset is empty",
+			offset: "",
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUsers(gomock.Any(), gomock.Eq(int32(10))).
+					Times(1).
+					Return(users, nil)
+			},
+			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
+				require.Equal(t, 200, rec.Code)
+
+				data, err := io.ReadAll(rec.Body)
+				require.NoError(t, err)
+
+				var getUsers []database.User
+				err = json.Unmarshal(data, &getUsers)
+				require.NoError(t, err)
+				require.Equal(t, users, users)
+			},
+		},
+		{
+			name:   "Invalid offset",
+			offset: "i am an invalid offset",
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUsers(gomock.Any(), gomock.Eq(0)).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
+				require.Equal(t, 400, rec.Code)
+			},
+		},
+		{
+			name:   "Negative offset",
+			offset: "-1",
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().GetUsers(gomock.Any(), gomock.Eq(0)).Times(0)
+			},
+			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
+				require.Equal(t, 400, rec.Code)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			store := mockdb.NewMockStore(ctrl)
+			tc.buildStubs(store)
+
+			server, err := NewServer(store)
+			require.NoError(t, err)
+
+			rec := httptest.NewRecorder()
+			url := fmt.Sprintf("/api/v1/users?offset=%v", tc.offset)
+
+			req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
+
+			require.NoError(t, err)
+
+			server.router.ServeHTTP(rec, req)
+			tc.checkResponse(t, rec)
+		})
+	}
+}
+
 func TestGetUserAPI(t *testing.T) {
 	user, _ := randomUser(t)
 
@@ -257,10 +386,6 @@ func TestUpdateUserApi(t *testing.T) {
 }
 
 func TestDeleteUserApi(t *testing.T) {
-	// TODO!
-}
-
-func TestListAllUsersApi(t *testing.T) {
 	// TODO!
 }
 
