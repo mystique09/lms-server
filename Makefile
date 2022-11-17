@@ -3,16 +3,15 @@ DB_NAME=class-manager
 clean:
 	rm -rf ./tmp coverage.out
 
+setup:
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1 \
+    curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz \
+    sudo mv migrate /usr/bin
+
 lint:
 	golangci-lint run ./...
 
-security:
-	gosec -quiet -exclude-dir database/sqlc ./...
-
-critic:
-	gocritic check -enableAll ./...
-
-test: clean lint security critic
+test: clean
 	go test -v -cover -coverprofile=coverage.out ./...
 
 server:
