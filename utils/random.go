@@ -1,16 +1,13 @@
 package utils
 
 import (
-	"math/rand"
+	"crypto/rand"
+	"log"
+	"math/big"
 	"strings"
-	"time"
 )
 
-const characters = "abcdefghijklmnopqrstuvwxyz"
-
-func init() {
-	rand.Seed(time.Now().Unix())
-}
+const characters = "abcdefghijklmnopqrstuvwxyz0123456789"
 
 func RandomString(l int) string {
 	var sb strings.Builder
@@ -18,12 +15,17 @@ func RandomString(l int) string {
 	k := len(characters)
 
 	for i := 0; i < l; i++ {
-		char := characters[rand.Intn(k)]
+		randn, err := rand.Int(rand.Reader, big.NewInt(int64(k)))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		char := characters[randn.Int64()]
 		sb.WriteByte(char)
 	}
 	return sb.String()
 }
 
-func randomEmail() string {
-	return RandomString(8) + "@gmail.com"
+func RandomEmail() string {
+	return RandomString(12) + "@gmail.com"
 }
