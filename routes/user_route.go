@@ -73,13 +73,14 @@ func (s *Server) getUser(c echo.Context) error {
 	}
 
 	user, err := s.store.GetUser(c.Request().Context(), uid)
+	user.Password = ""
 
 	if err == sql.ErrNoRows {
 		return c.JSON(http.StatusNotFound, err)
 	}
 
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+	if err == sql.ErrConnDone {
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -90,20 +91,11 @@ func (s *Server) createUser(c echo.Context) error {
 
 	bindErr := c.Bind(&user_data)
 	if bindErr != nil {
-		return c.JSON(400, bindErr)
+		return c.JSON(http.StatusBadRequest, "Missing required field.")
 	}
 
 	if err := c.Validate(user_data); err != nil {
 		return c.JSON(400, err)
-	}
-
-	has_user, err := s.store.GetUserByUsername(c.Request().Context(), user_data.Username)
-	if err != nil {
-		return c.JSON(400, err.Error())
-	}
-
-	if has_user.ID != uuid.Nil {
-		return c.JSON(http.StatusBadRequest, USER_ALREADY_EXIST)
 	}
 
 	hashed_password, err := utils.Encrypt(user_data.Password)
@@ -173,7 +165,8 @@ func (s *Server) updateUser(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, UNAUTHORIZED)
 	}
 
-	if field == "username" {
+	switch field {
+	case "username":
 		payload := database.UpdateUsernameParams{
 			ID:       uid,
 			Username: updateDto.Username,
@@ -189,7 +182,7 @@ func (s *Server) updateUser(c echo.Context) error {
 		}
 
 		return c.JSON(http.StatusOK, new_user)
-	} else if field == "email" {
+	case "email":
 		payload := database.UpdateUserEmailParams{
 			ID:    uid,
 			Email: updateDto.Email,
@@ -205,7 +198,7 @@ func (s *Server) updateUser(c echo.Context) error {
 		}
 
 		return c.JSON(http.StatusOK, new_user)
-	} else if field == "password" {
+	case "password":
 		hashed_password, err := utils.Encrypt(updateDto.Password)
 
 		if err != nil {
