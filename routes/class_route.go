@@ -73,7 +73,7 @@ func (s *Server) getClassrooms(c echo.Context) error {
 
 	param := database.GetAllClassFromUserParams{
 		AdminID: uid,
-		Offset:  int32(offset) * 10,
+		Offset:  int32(offset * 10),
 	}
 
 	classes, err := s.store.GetAllClassFromUser(c.Request().Context(), param)
@@ -113,13 +113,13 @@ func (s *Server) getAllClassrooms(c echo.Context) error {
 
 func (s *Server) getClassroom(c echo.Context) error {
 	uid := c.Param("id")
-	uuid, err := uuid.Parse(uid)
+	user_id, err := uuid.Parse(uid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	class, err := s.store.GetClass(c.Request().Context(), uuid)
+	class, err := s.store.GetClass(c.Request().Context(), user_id)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
