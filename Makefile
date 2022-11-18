@@ -18,16 +18,16 @@ server:
 	go run cmd/main.go
 
 pgstart:
-	sudo docker run -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
+	sudo docker run --name pg -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
 
 pgstop:
 	sudo docker stop $(id)
 
 createdb:
-	sudo docker exec -it postgres2 createdb --username=root --owner=root $(DB_NAME)
+	sudo docker exec -it pg createdb --username=root --owner=root $(DB_NAME)
 
 dropdb:
-	sudo docker exec -it postgres2 dropdb $(DB_NAME)
+	sudo docker exec -it pg dropdb $(DB_NAME)
 
 migrateup:
 	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/$(DB_NAME)?sslmode=disable" -verbose up
