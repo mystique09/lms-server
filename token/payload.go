@@ -8,6 +8,7 @@ import (
 )
 
 var ErrExpiredToken error = errors.New("token has expired")
+var ErrInvalidToken error = errors.New("token is invalid")
 
 type Payload struct {
 	ID        uuid.UUID `json:"id"`
