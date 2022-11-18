@@ -23,6 +23,9 @@ pgstart:
 pgstop:
 	sudo docker stop $(id)
 
+pgrestart:
+	sudo docker container restart pg
+
 createdb:
 	sudo docker exec -it pg createdb --username=root --owner=root $(DB_NAME)
 
