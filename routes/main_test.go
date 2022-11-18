@@ -11,7 +11,7 @@ var cfg utils.Config
 
 func TestMain(m *testing.M) {
 
-	conf, err := utils.LoadConfig("../")
+	conf, err := utils.LoadConfig("../", "app.sample")
 
 	if err != nil {
 		log.Fatal(err)
