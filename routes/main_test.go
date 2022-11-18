@@ -2,16 +2,22 @@ package routes
 
 import (
 	"log"
+	"os"
+	"server/utils"
 	"testing"
-
-	"github.com/joho/godotenv"
 )
 
+var cfg utils.Config
+
 func TestMain(m *testing.M) {
-	err := godotenv.Load(".development.env")
+
+	conf, err := utils.LoadConfig("../")
+
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(err)
 	}
 
-	m.Run()
+	cfg = conf
+
+	os.Exit(m.Run())
 }
