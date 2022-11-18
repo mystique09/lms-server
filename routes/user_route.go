@@ -43,7 +43,7 @@ func (s *Server) getUsers(c echo.Context) error {
 	ofst := c.QueryParam("offset")
 
 	if ofst == "" || ofst == "0" {
-		ofst = "1"
+		ofst = "0"
 	}
 
 	offset, err := strconv.Atoi(ofst)
@@ -58,7 +58,7 @@ func (s *Server) getUsers(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	return c.JSON(200, users)
+	return c.JSON(200, newResponse(users, ""))
 }
 
 func (s *Server) getUser(c echo.Context) error {
@@ -67,7 +67,7 @@ func (s *Server) getUser(c echo.Context) error {
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
 	}
 
 	if id == "" {
@@ -78,14 +78,14 @@ func (s *Server) getUser(c echo.Context) error {
 	user.Password = ""
 
 	if err == sql.ErrNoRows {
-		return c.JSON(http.StatusNotFound, err)
+		return c.JSON(http.StatusNotFound, USER_NOTFOUND)
 	}
 
 	if err == sql.ErrConnDone {
-		return c.JSON(http.StatusInternalServerError, err)
+		return c.JSON(http.StatusInternalServerError, newResponse[any](nil, err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, newResponse(user, ""))
 }
 
 func (s *Server) createUser(c echo.Context) error {
