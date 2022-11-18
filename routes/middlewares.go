@@ -51,7 +51,7 @@ func (s *Server) authMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		authorizationHeader := c.Request().Header.Get(authorizationHeaderKey)
-		if len(authorizationHeader) == 0 {
+		if authorizationHeader == "" {
 			return c.JSON(http.StatusUnauthorized, newResponse[any](nil, "authorization header is missing"))
 		}
 
