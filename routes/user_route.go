@@ -98,13 +98,12 @@ func (s *Server) createUser(c echo.Context) error {
 	}
 
 	if err := c.Validate(user_data); err != nil {
-		return c.JSON(400, err)
+		return c.JSON(400, newResponse[any](nil, err.Error()))
 	}
 
 	hashed_password, err := utils.Encrypt(user_data.Password)
-
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return c.JSON(http.StatusInternalServerError, newResponse[any](nil, err.Error()))
 	}
 
 	var new_user_param database.CreateUserParams = database.CreateUserParams{
@@ -119,10 +118,10 @@ func (s *Server) createUser(c echo.Context) error {
 	user, err := s.store.CreateUser(c.Request().Context(), new_user_param)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, USER_ALREADY_EXIST)
 	}
 
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, newResponse(user, ""))
 }
 
 func (s *Server) updateUser(c echo.Context) error {
@@ -155,8 +154,7 @@ func (s *Server) updateUser(c echo.Context) error {
 	}
 
 	// check if the current user is the one being updated
-	jwt_token := c.Get("user").(*jwt.Token)
-	payload := token.GetPayloadFromJwt(jwt_token)
+	payload := c.Get("user").(*token.Payload)
 
 	check_user, err := s.store.GetUser(c.Request().Context(), uid)
 
@@ -164,7 +162,7 @@ func (s *Server) updateUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, USER_NOTFOUND)
 	}
 
-	if check_user.Username != payload.Username || check_user.Email != payload.Email {
+	if check_user.Username != payload.Username || check_user.ID != payload.ID {
 		return c.JSON(http.StatusUnauthorized, UNAUTHORIZED)
 	}
 
