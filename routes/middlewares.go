@@ -2,7 +2,7 @@ package routes
 
 import (
 	"net/http"
-	"server/config"
+	"server/utils"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -17,10 +17,10 @@ func LoggerMiddleware() echo.MiddlewareFunc {
 	)
 }
 
-func CorsMiddleware(cfg *config.Config) echo.MiddlewareFunc {
+func CorsMiddleware(cfg *utils.Config) echo.MiddlewareFunc {
 	return middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
-			cfg.FRONTEND_URL,
+			cfg.FrontendUrl,
 		},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders: []string{
@@ -36,20 +36,20 @@ func RateLimitMiddleware(limit rate.Limit) echo.MiddlewareFunc {
 	return middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(limit))
 }
 
-func JwtAuthMiddleware(cfg *config.Config) echo.MiddlewareFunc {
+func JwtAuthMiddleware(cfg *utils.Config) echo.MiddlewareFunc {
 	return middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningMethod: "HS256",
-		SigningKey:    cfg.JWT_SECRET_KEY,
+		SigningKey:    cfg.JwtSecretKey,
 		Skipper: func(c echo.Context) bool {
 			return c.Request().Method == http.MethodGet
 		},
 	})
 }
 
-func RefreshTokenAuthMiddleware(cfg *config.Config) echo.MiddlewareFunc {
+func RefreshTokenAuthMiddleware(cfg *utils.Config) echo.MiddlewareFunc {
 	return middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningMethod: "HS256",
-		SigningKey:    cfg.JWT_REFRESH_SECRET_KEY,
+		SigningKey:    cfg.JwtRefreshSecretKey,
 		ContextKey:    "refresh",
 	})
 }
