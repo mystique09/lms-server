@@ -24,12 +24,11 @@ import (
 )
 
 func TestGetAllUsersApi(t *testing.T) {
-	// TODO!
-
 	var users []database.User
 
 	for i := 0; i < 20; i++ {
 		user, _ := randomUser(t)
+		user.Password = ""
 		users = append(users, user)
 	}
 
@@ -54,10 +53,10 @@ func TestGetAllUsersApi(t *testing.T) {
 				data, err := io.ReadAll(rec.Body)
 				require.NoError(t, err)
 
-				var getUsers []database.User
+				var getUsers Response[[]database.User]
 				err = json.Unmarshal(data, &getUsers)
 				require.NoError(t, err)
-				require.Equal(t, users, users)
+				require.Equal(t, newResponse(users, ""), getUsers)
 			},
 		},
 		{
@@ -65,7 +64,7 @@ func TestGetAllUsersApi(t *testing.T) {
 			offset: "0",
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetUsers(gomock.Any(), gomock.Eq(int32(10))).
+					GetUsers(gomock.Any(), gomock.Eq(int32(0))).
 					Times(1).
 					Return(users, nil)
 			},
@@ -75,10 +74,10 @@ func TestGetAllUsersApi(t *testing.T) {
 				data, err := io.ReadAll(rec.Body)
 				require.NoError(t, err)
 
-				var getUsers []database.User
+				var getUsers Response[[]database.User]
 				err = json.Unmarshal(data, &getUsers)
 				require.NoError(t, err)
-				require.Equal(t, users, users)
+				require.Equal(t, newResponse(users, ""), getUsers)
 			},
 		},
 		{
@@ -86,7 +85,7 @@ func TestGetAllUsersApi(t *testing.T) {
 			offset: "",
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetUsers(gomock.Any(), gomock.Eq(int32(10))).
+					GetUsers(gomock.Any(), gomock.Eq(int32(0))).
 					Times(1).
 					Return(users, nil)
 			},
@@ -96,10 +95,10 @@ func TestGetAllUsersApi(t *testing.T) {
 				data, err := io.ReadAll(rec.Body)
 				require.NoError(t, err)
 
-				var getUsers []database.User
+				var getUsers Response[[]database.User]
 				err = json.Unmarshal(data, &getUsers)
 				require.NoError(t, err)
-				require.Equal(t, users, users)
+				require.Equal(t, newResponse(users, ""), getUsers)
 			},
 		},
 		{
@@ -136,7 +135,7 @@ func TestGetAllUsersApi(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server, err := NewServer(store)
+			server, err := NewServer(store, &cfg)
 			require.NoError(t, err)
 
 			rec := httptest.NewRecorder()
@@ -212,7 +211,7 @@ func TestGetUserAPI(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server, err := NewServer(store)
+			server, err := NewServer(store, &cfg)
 			require.NoError(t, err)
 
 			rec := httptest.NewRecorder()
@@ -239,7 +238,6 @@ func (e *eqCreateUserParamsMatcher) Matches(x interface{}) bool {
 		return false
 	}
 
-	log.Println(arg, e.arg, e.password)
 	err := utils.MatchPassword([]byte(e.password), []byte(arg.Password))
 	if err != nil {
 		return false
@@ -362,7 +360,7 @@ func TestCreateUserAPI(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server, err := NewServer(store)
+			server, err := NewServer(store, &cfg)
 			require.NoError(t, err)
 
 			rec := httptest.NewRecorder()
@@ -410,10 +408,12 @@ func requireBodyMatch(t *testing.T, body *bytes.Buffer, user *database.User) {
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
 
-	var getUser database.User
+	var getUser Response[*database.User]
 	err = json.Unmarshal(data, &getUser)
+	log.Println(getUser)
 	require.NoError(t, err)
+
 	user.Password = ""
 
-	require.Equal(t, *user, getUser)
+	require.Equal(t, newResponse(user, ""), getUser)
 }
