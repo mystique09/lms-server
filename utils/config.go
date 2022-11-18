@@ -15,9 +15,9 @@ type Config struct {
 	CldUrl              string `mapstructure:"CLD_URL"`
 }
 
-func LoadConfig(path string) (Config, error) {
+func LoadConfig(path, configName string) (Config, error) {
 	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
+	viper.SetConfigName(configName)
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()
