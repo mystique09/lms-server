@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 
-	"server/config"
+	"server/utils"
 )
 
 type Store interface {
@@ -12,11 +12,11 @@ type Store interface {
 
 type SQLStore struct {
 	db  *sql.DB
-	cfg config.Config
+	cfg utils.Config
 	*Queries
 }
 
-func NewStore(db *sql.DB, cfg *config.Config) Store {
+func NewStore(db *sql.DB, cfg *utils.Config) Store {
 	return &SQLStore{
 		db:      db,
 		cfg:     *cfg,
