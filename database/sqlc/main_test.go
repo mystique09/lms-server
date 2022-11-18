@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"server/utils"
 	"testing"
 
 	_ "github.com/lib/pq"
@@ -11,13 +12,17 @@ import (
 
 const (
 	dbDriver = "postgres"
-	dbSource = "postgresql://root:secret@localhost:5432/class-manager?sslmode=disable"
 )
 
 var testQuesries *Queries
 
 func TestMain(m *testing.M) {
-	conn, err := sql.Open(dbDriver, dbSource)
+	cfg, err := utils.LoadConfig("../..", "app.sample")
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	conn, err := sql.Open(dbDriver, cfg.DBUrl)
 
 	if err != nil {
 		log.Fatal("Cannot connect to DB: ", err)

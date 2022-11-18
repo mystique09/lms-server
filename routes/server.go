@@ -3,13 +3,11 @@ package routes
 import (
 	"log"
 
-	"server/config"
 	database "server/database/sqlc"
 	"server/utils"
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/go-playground/validator/v10"
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo-contrib/jaegertracing"
 	"github.com/labstack/echo/v4"
 )
@@ -17,19 +15,30 @@ import (
 type Server struct {
 	store  database.Store
 	router *echo.Echo
-	cfg    config.Config
+	cfg    utils.Config
 	cld    cloudinary.Cloudinary
 }
 
-func NewServer(store database.Store) (*Server, error) {
-	cfg := config.Init()
-	cld, err := cloudinary.NewFromURL(cfg.CLD_URL)
+func Launch(cfg *utils.Config) {
+	conn := utils.SetupDB(cfg.DBUrl)
+	store := database.NewStore(conn, cfg)
+	server, err := NewServer(store, cfg)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Fatal(server.router.Start(cfg.Host))
+}
+
+func NewServer(store database.Store, cfg *utils.Config) (*Server, error) {
+	cld, err := cloudinary.NewFromURL(cfg.CldUrl)
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	server := &Server{store: store, cld: *cld, cfg: cfg}
+	server := &Server{store: store, cld: *cld, cfg: *cfg}
 	server.setupRouter()
 
 	return server, nil
@@ -39,9 +48,6 @@ func (server *Server) setupRouter() {
 	e := echo.New()
 
 	e.Validator = &CustomValidator{validator: validator.New()}
-
-	trace := jaegertracing.New(e, nil)
-	defer trace.Close()
 
 	e.Use(LoggerMiddleware())
 	e.Use(RateLimitMiddleware(20))
@@ -111,24 +117,8 @@ func (server *Server) setupRouter() {
 	comment_group.POST("/:id/likes", server.likeComment)
 	comment_group.DELETE("/:id", server.unlikeComment)
 
+	trace := jaegertracing.New(e, nil)
+	defer trace.Close()
+
 	server.router = e
-}
-
-func Launch() {
-	err := godotenv.Load()
-	cfg := config.Init()
-
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	conn := utils.SetupDB(cfg.DATABASE_URL)
-	store := database.NewStore(conn, &cfg)
-	server, err := NewServer(store)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Fatal(server.router.Start(cfg.PORT))
 }

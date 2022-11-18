@@ -166,7 +166,7 @@ type PostLike struct {
 type User struct {
 	ID         uuid.UUID  `json:"id"`
 	Username   string     `json:"username"`
-	Password   string     `json:"password"`
+	Password   string     `json:"-"`
 	Email      string     `json:"email"`
 	UserRole   Role       `json:"user_role"`
 	Visibility Visibility `json:"visibility"`

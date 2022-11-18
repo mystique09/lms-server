@@ -31,10 +31,12 @@ func SetupDB(databaseUrl string) *sql.DB {
 	}
 
 	log.Println("-- Migration started --")
+
 	migrateErr := m.Up()
 	if migrateErr != nil {
-		log.Fatal(migrateErr.Error())
+		log.Println("Migration err: ", migrateErr.Error())
 	}
+
 	log.Println("-- Migration done --")
 
 	return db
