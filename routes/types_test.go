@@ -3,43 +3,43 @@ package routes
 import "testing"
 
 func TestResponse(t *testing.T) {
-	type args struct {
-		Data  interface{}
+	type args[T any] struct {
+		Data  T
 		Error string
 	}
 
 	tests := []struct {
 		name string
-		args args
-		want Response
+		args args[string]
+		want Response[string]
 	}{
 		{
 			name: "TestResponse with valid arguments",
-			args: args{
+			args: args[string]{
 				Data:  "Hello, World!",
 				Error: "",
 			},
-			want: Response{
+			want: Response[string]{
 				Data:  "Hello, World!",
 				Error: "",
 			},
 		},
 		{
 			name: "TestResponse with missing arguments",
-			args: args{
+			args: args[string]{
 				Data: "Hello, World!",
 			},
-			want: Response{
+			want: Response[string]{
 				Data: "Hello, World!",
 			},
 		},
 		{
 			name: "TestResponse ",
-			args: args{
+			args: args[string]{
 				Data:  "",
 				Error: "Please complete missing fields",
 			},
-			want: Response{
+			want: Response[string]{
 				Data:  "",
 				Error: "Please complete missing fields",
 			},
@@ -60,10 +60,10 @@ func TestNewResponseUtil(t *testing.T) {
 	resp2 := newResponse("", "Please complete missing fields")
 
 	if resp1.Data != "Hello, World!" || resp1.Error != "" {
-		t.Errorf("NewResponseUtil() = %v, want %v", resp1, Response{Data: "Hello, World!", Error: ""})
+		t.Errorf("NewResponseUtil() = %v, want %v", resp1, newResponse("Hello, World!", ""))
 	}
 
 	if resp2.Data != "" || resp2.Error != "Please complete missing fields" {
-		t.Errorf("NewResponseUtil() = %v, want %v", resp2, Response{Data: "", Error: "Please complete missing fields"})
+		t.Errorf("NewResponseUtil() = %v, want %v", resp2, newResponse("", "Please complete missing fields"))
 	}
 }
