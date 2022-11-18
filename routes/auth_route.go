@@ -3,26 +3,26 @@ package routes
 import (
 	"database/sql"
 	"net/http"
+	database "server/database/sqlc"
 	"server/token"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthRequest struct {
+type authRequest struct {
 	Username string `json:"username" validate:"required,gt=6"`
 	Password string `json:"password" validate:"required,gt=6"`
 }
 
-type AuthSuccessResponse struct {
-	Access  string `json:"access_token"`
-	Refresh string `json:"refresh_token"`
+type authSuccessResponse struct {
+	Access string        `json:"access_token"`
+	User   database.User `json:"user"`
 }
 
 func (s *Server) loginHandler(c echo.Context) error {
-	var payload AuthRequest
+	var payload authRequest
 
 	bindErr := c.Bind(&payload)
 	if bindErr != nil {
@@ -34,25 +34,24 @@ func (s *Server) loginHandler(c echo.Context) error {
 	}
 
 	user, err := s.store.GetUserByUsername(c.Request().Context(), payload.Username)
-	if err == sql.ErrNoRows || user.ID == uuid.Nil {
-		return c.JSON(http.StatusBadRequest, USER_NOTFOUND)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.JSON(http.StatusBadRequest, USER_NOTFOUND)
+		}
+		return c.JSON(http.StatusInternalServerError, newResponse[any](nil, err.Error()))
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)) != nil {
-		return c.JSON(http.StatusForbidden, LOGIN_FAILED)
+		return c.JSON(http.StatusUnauthorized, LOGIN_FAILED)
 	}
 
-	access_token, err := token.NewJwtToken(token.NewJwtPayload(user.ID, user.Username, user.Email, string(user.UserRole), 5), []byte(s.cfg.JwtSecretKey))
+	accessToken, err := s.tokenMaker.CreateToken(user.Username, s.cfg.AccessTokenDuration)
 	if err != nil {
-		return c.JSON(402, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusInternalServerError, newResponse[any](nil, err.Error()))
 	}
 
-	refresh_token, err := token.NewJwtToken(token.NewJwtPayload(user.ID, user.Username, user.Email, string(user.UserRole), 30), []byte(s.cfg.JwtRefreshSecretKey))
-	if err != nil {
-		return c.JSON(402, newResponse[any](nil, err.Error()))
-	}
-
-	return c.JSON(http.StatusOK, newResponse(AuthSuccessResponse{Access: access_token, Refresh: refresh_token}, ""))
+	resp := authSuccessResponse{Access: accessToken, User: user}
+	return c.JSON(http.StatusOK, newResponse(resp, ""))
 }
 
 func (s *Server) refreshToken(c echo.Context) error {
