@@ -32,7 +32,7 @@ func TestLogin(t *testing.T) {
 				store.EXPECT().GetUserByUsername(gomock.Any(), gomock.Eq(user.Username)).Times(1).Return(user, nil)
 			},
 			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
-				var res Response[AuthSuccessResponse]
+				var res Response[authSuccessResponse]
 
 				body, err := io.ReadAll(rec.Body)
 				require.NoError(t, err)
@@ -41,7 +41,7 @@ func TestLogin(t *testing.T) {
 				require.NoError(t, err)
 
 				require.NotEmpty(t, res.Data.Access)
-				require.NotEmpty(t, res.Data.Refresh)
+				require.NotEmpty(t, res.Data.User)
 				require.Equal(t, 200, rec.Code)
 			},
 		},
@@ -63,7 +63,7 @@ func TestLogin(t *testing.T) {
 				require.Empty(t, res.Data)
 				require.NotEmpty(t, res.Error)
 				require.Equal(t, LOGIN_FAILED.Error, res.Error)
-				require.Equal(t, 403, rec.Code)
+				require.Equal(t, 401, rec.Code)
 			},
 		},
 		{
@@ -83,7 +83,7 @@ func TestLogin(t *testing.T) {
 
 				require.Empty(t, res.Data)
 				require.NotEmpty(t, res.Error)
-				require.Contains(t, res.Error, "AuthRequest.Password")
+				require.Contains(t, res.Error, "authRequest.Password")
 				require.Equal(t, 400, rec.Code)
 			},
 		},
@@ -104,7 +104,7 @@ func TestLogin(t *testing.T) {
 
 				require.Empty(t, res.Data)
 				require.NotEmpty(t, res.Error)
-				require.Contains(t, res.Error, "AuthRequest.Username")
+				require.Contains(t, res.Error, "authRequest.Username")
 				require.Equal(t, 400, rec.Code)
 			},
 		},
@@ -125,7 +125,7 @@ func TestLogin(t *testing.T) {
 
 				require.Empty(t, res.Data)
 				require.NotEmpty(t, res.Error)
-				require.Contains(t, res.Error, "AuthRequest.Username", "AuthRequest.Password")
+				require.Contains(t, res.Error, "authRequest.Username", "AuthRequest.Password")
 				require.Equal(t, 400, rec.Code)
 			},
 		},
@@ -146,7 +146,7 @@ func TestLogin(t *testing.T) {
 
 				require.Empty(t, res.Data)
 				require.NotEmpty(t, res.Error)
-				require.Contains(t, res.Error, "AuthRequest.Username", "required")
+				require.Contains(t, res.Error, "authRequest.Username", "required")
 				require.Equal(t, 400, rec.Code)
 			},
 		},

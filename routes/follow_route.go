@@ -3,7 +3,7 @@ package routes
 import (
 	"fmt"
 	database "server/database/sqlc"
-	"server/utils"
+	"server/token"
 	"strconv"
 
 	"github.com/golang-jwt/jwt"
@@ -113,8 +113,8 @@ func (s *Server) addNewFollower(c echo.Context) error {
 		return c.JSON(400, err)
 	}
 
-	token := c.Get("user").(*jwt.Token)
-	user := utils.GetPayloadFromJwt(token)
+	jwt_token := c.Get("user").(*jwt.Token)
+	user := token.GetPayloadFromJwt(jwt_token)
 
 	var payload FollowUserRequest
 
@@ -188,8 +188,8 @@ func (s *Server) removeFollowing(c echo.Context) error {
 		return c.JSON(400, newResponse[any](nil, fmt.Sprintf("[%v] is not in your followings list!", follow_id)))
 	}
 
-	token := c.Get("user").(*jwt.Token)
-	user := utils.GetPayloadFromJwt(token)
+	jwt_token := c.Get("user").(*jwt.Token)
+	user := token.GetPayloadFromJwt(jwt_token)
 
 	if user.ID != uid {
 		return c.JSON(403, UNAUTHORIZED)

@@ -1,9 +1,11 @@
 package routes
 
 import (
+	"fmt"
 	"log"
 
 	database "server/database/sqlc"
+	"server/token"
 	"server/utils"
 
 	"github.com/cloudinary/cloudinary-go/v2"
@@ -13,10 +15,11 @@ import (
 )
 
 type Server struct {
-	store  database.Store
-	router *echo.Echo
-	cfg    utils.Config
-	cld    cloudinary.Cloudinary
+	store      database.Store
+	router     *echo.Echo
+	tokenMaker token.Maker
+	cfg        utils.Config
+	cld        cloudinary.Cloudinary
 }
 
 func Launch(cfg *utils.Config) {
@@ -38,7 +41,17 @@ func NewServer(store database.Store, cfg *utils.Config) (*Server, error) {
 		log.Fatal(err.Error())
 	}
 
-	server := &Server{store: store, cld: *cld, cfg: *cfg}
+	tokenMaker, err := token.NewPasetoMaker(cfg.PasetoSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot make token maker")
+	}
+
+	server := &Server{
+		store:      store,
+		cld:        *cld,
+		cfg:        *cfg,
+		tokenMaker: tokenMaker,
+	}
 	server.setupRouter()
 
 	return server, nil
@@ -62,7 +75,7 @@ func (server *Server) setupRouter() {
 	e.POST("/api/v1/login", server.loginHandler)
 	e.POST("/api/v1/refresh", server.refreshToken, RefreshTokenAuthMiddleware(&server.cfg))
 
-	user_group := e.Group("/api/v1/users", JwtAuthMiddleware(&server.cfg))
+	user_group := e.Group("/api/v1/users", server.authMiddleware)
 	user_group.GET("", server.getUsers)
 	user_group.GET("/:id", server.getUser)
 	user_group.PUT("/:id", server.updateUser)
@@ -82,7 +95,7 @@ func (server *Server) setupRouter() {
 	user_group.POST("/:id/followings", server.addNewFollower)
 	user_group.DELETE("/:id/followings/:following_id", server.removeFollowing)
 
-	class_group := e.Group("/api/v1/classrooms", JwtAuthMiddleware(&server.cfg))
+	class_group := e.Group("/api/v1/classrooms", server.authMiddleware)
 	class_group.GET("", server.getAllClassrooms)
 	class_group.POST("", server.createNewClassroom)
 	class_group.GET("/:id", server.getClassroom)
@@ -97,7 +110,7 @@ func (server *Server) setupRouter() {
 	// posts relationships
 	class_group.GET("/:id/posts", server.getClassroomPosts)
 
-	post_group := e.Group("/api/v1/posts", JwtAuthMiddleware(&server.cfg))
+	post_group := e.Group("/api/v1/posts", server.authMiddleware)
 	post_group.POST("", server.createNewPost)
 	post_group.GET("/:id", server.getOnePost)
 	post_group.PUT("/:id", server.updatePost)
@@ -107,7 +120,7 @@ func (server *Server) setupRouter() {
 	post_group.POST("/:id/likes", server.likePost)
 	post_group.DELETE("/:id", server.unlikePost)
 
-	comment_group := e.Group("/api/v1/comments", JwtAuthMiddleware(&server.cfg))
+	comment_group := e.Group("/api/v1/comments", server.authMiddleware)
 	comment_group.POST("", server.createNewComment)
 	comment_group.GET("/:id", server.getOneComment)
 	comment_group.PUT("/:id", server.updateComment)

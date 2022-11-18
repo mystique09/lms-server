@@ -9,6 +9,8 @@ setup:
     sudo mv migrate /usr/bin
 
 lint:
+	gosec -quiet -exclude-generated ./...
+	gocritic check -enableAll ./...
 	golangci-lint run ./...
 
 test: clean
@@ -22,6 +24,9 @@ pgstart:
 
 pgstop:
 	sudo docker stop $(id)
+
+pgrestart:
+	sudo docker container restart pg
 
 createdb:
 	sudo docker exec -it pg createdb --username=root --owner=root $(DB_NAME)

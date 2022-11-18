@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	database "server/database/sqlc"
-	"server/utils"
+	"server/token"
 	"strconv"
 
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
@@ -40,7 +40,7 @@ func (s *Server) getAllClassworks(c echo.Context) error {
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	if jwt_payload.ID != check_classrooms.AdminID {
 		return c.JSON(http.StatusUnauthorized, UNAUTHORIZED)
@@ -82,7 +82,7 @@ func (s *Server) getAllUserClassworks(c echo.Context) error {
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	if uid != jwt_payload.ID {
 		return c.JSON(403, UNAUTHORIZED)
@@ -119,7 +119,7 @@ func (s *Server) getClassworkById(c echo.Context) error {
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	if jwt_payload.ID != uid {
 		return c.JSON(http.StatusUnauthorized, UNAUTHORIZED)
@@ -149,7 +149,7 @@ func (s *Server) addNewClasswork(c echo.Context) error {
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	check_classrooms, err := s.store.GetClass(c.Request().Context(), cid)
 	if err != nil || check_classrooms.ID == uuid.Nil {
@@ -210,7 +210,7 @@ func (s *Server) deleteClasswork(c echo.Context) error {
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
-	jwt_payoad := utils.GetPayloadFromJwt(jwt_token)
+	jwt_payoad := token.GetPayloadFromJwt(jwt_token)
 
 	deleted_cw, err := s.store.DeleteClassworkFromClass(c.Request().Context(), database.DeleteClassworkFromClassParams{
 		ClassID: class_uuid,
