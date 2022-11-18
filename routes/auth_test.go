@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	mockdb "server/database/mock"
+	"server/utils"
 	"strings"
 	"testing"
 
@@ -40,9 +40,114 @@ func TestLogin(t *testing.T) {
 				err = json.Unmarshal(body, &res)
 				require.NoError(t, err)
 
-				log.Println(res)
-				require.Equal(t, newResponse[any](nil, "Error"), res)
+				require.NotEmpty(t, res.Data.Access)
+				require.NotEmpty(t, res.Data.Refresh)
 				require.Equal(t, 200, rec.Code)
+			},
+		},
+		{
+			name:    "Login failed, mismatch password",
+			payload: fmt.Sprintf(`{"username":"%v","password":"%v"}`, user.Username, "invalid password"),
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().GetUserByUsername(gomock.Any(), gomock.Eq(user.Username)).Times(1).Return(user, nil)
+			},
+			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
+				var res Response[any]
+
+				body, err := io.ReadAll(rec.Body)
+				require.NoError(t, err)
+
+				err = json.Unmarshal(body, &res)
+				require.NoError(t, err)
+
+				require.Empty(t, res.Data)
+				require.NotEmpty(t, res.Error)
+				require.Equal(t, LOGIN_FAILED.Error, res.Error)
+				require.Equal(t, 403, rec.Code)
+			},
+		},
+		{
+			name:    "Missing password field",
+			payload: fmt.Sprintf(`{"username":"%v"}`, user.Username),
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().GetUserByUsername(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
+				var res Response[any]
+
+				body, err := io.ReadAll(rec.Body)
+				require.NoError(t, err)
+
+				err = json.Unmarshal(body, &res)
+				require.NoError(t, err)
+
+				require.Empty(t, res.Data)
+				require.NotEmpty(t, res.Error)
+				require.Contains(t, res.Error, "AuthRequest.Password")
+				require.Equal(t, 400, rec.Code)
+			},
+		},
+		{
+			name:    "Missing username field",
+			payload: fmt.Sprintf(`{"password":"%v"}`, password),
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().GetUserByUsername(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
+				var res Response[any]
+
+				body, err := io.ReadAll(rec.Body)
+				require.NoError(t, err)
+
+				err = json.Unmarshal(body, &res)
+				require.NoError(t, err)
+
+				require.Empty(t, res.Data)
+				require.NotEmpty(t, res.Error)
+				require.Contains(t, res.Error, "AuthRequest.Username")
+				require.Equal(t, 400, rec.Code)
+			},
+		},
+		{
+			name:    "Missing payload",
+			payload: "",
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().GetUserByUsername(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
+				var res Response[any]
+
+				body, err := io.ReadAll(rec.Body)
+				require.NoError(t, err)
+
+				err = json.Unmarshal(body, &res)
+				require.NoError(t, err)
+
+				require.Empty(t, res.Data)
+				require.NotEmpty(t, res.Error)
+				require.Contains(t, res.Error, "AuthRequest.Username", "AuthRequest.Password")
+				require.Equal(t, 400, rec.Code)
+			},
+		},
+		{
+			name:    "Username length error",
+			payload: fmt.Sprintf(`{"usernam":"%v","password":"%v"}`, utils.RandomString(5), password),
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().GetUserByUsername(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
+				var res Response[any]
+
+				body, err := io.ReadAll(rec.Body)
+				require.NoError(t, err)
+
+				err = json.Unmarshal(body, &res)
+				require.NoError(t, err)
+
+				require.Empty(t, res.Data)
+				require.NotEmpty(t, res.Error)
+				require.Contains(t, res.Error, "AuthRequest.Username", "required")
+				require.Equal(t, 400, rec.Code)
 			},
 		},
 	}
@@ -55,6 +160,8 @@ func TestLogin(t *testing.T) {
 			defer ctrl.Finish()
 
 			store := mockdb.NewMockStore(ctrl)
+			tc.buildStubs(store)
+
 			server, err := NewServer(store, &cfg)
 			require.NoError(t, err)
 
@@ -70,8 +177,4 @@ func TestLogin(t *testing.T) {
 			tc.checkResponse(t, rec)
 		})
 	}
-}
-
-func TestRefreshKey(t *testing.T) {
-
 }
