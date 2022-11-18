@@ -3,14 +3,15 @@ package main
 import (
 	"log"
 	"server/routes"
-
-	"github.com/joho/godotenv"
+	"server/utils"
 )
 
 func main() {
-	err := godotenv.Load(".env")
+	cfg, err := utils.LoadConfig(".")
+
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal("Error loading .env file")
 	}
-	routes.Launch()
+
+	routes.Launch(&cfg)
 }
