@@ -1,119 +1,126 @@
-Enum role {
-    STUDENT
-    TEACHER
+
+Enum "role" {
+  "STUDENT"
+  "TEACHER"
 }
 
-Enum visibility {
-    PUBLIC
-    PRIVATE
+Enum "visibility" {
+  "PUBLIC"
+  "PRIVATE"
 }
 
-Table user {
-  id uuid [pk]
-  username varchar [not null, unique]
-  password varchar [not null]
-  email varchar [not null, unique]
-  user_role role
-  visibility visibility 
-  created_at timestamptz [default: `now()`]
-  updated_at timestamptz [default: `now()`]
+Table "users" {
+  "id" UUID [pk]
+  "username" VARCHAR [unique, not null]
+  "password" VARCHAR [not null]
+  "email" VARCHAR [unique, not null]
+  "user_role" role [not null, default: "STUDENT"]
+  "visibility" visibility [not null, default: "PUBLIC"]
+  "created_at" DATE [not null, default: `now()`]
+  "updated_at" DATE [not null, default: `now()`]
 }
 
-Table user_follow {
-  id uuid [pk, unique]
-  follower uuid [not null]
-  following uuid [not null]
-  created_at timestamptz [default: `now()`]
-  updated_at timestamptz [default: `now()`]
+Table "user_follows" {
+  "id" UUID [unique, pk]
+  "follower" UUID [not null]
+  "following" UUID [not null]
+  "created_at" DATE [not null, default: `now()`]
+  "updated_at" DATE [not null, default: `now()`]
 }
 
-Ref: user_follow.follower > user.id [delete: cascade]
-Ref: user_follow.following > user.id [delete: cascade]
-
-Table class {
-  id uuid [pk, unique]
-  admin_id uuid [not null]
-  name varchar [not null]
-  description varchar [not null]
-  section varchar [not null]
-  room varchar [not null]
-  subject varchar [not null]
-  invite_code uuid [not null]
-  visibility visibility
-  created_at timestamptz [default: `now()`]
-  updated_at timestamptz [default: `now()`]
+Table "classrooms" {
+  "id" UUID [unique, pk]
+  "admin_id" UUID [not null]
+  "name" VARCHAR [not null]
+  "description" VARCHAR [not null]
+  "section" VARCHAR [not null]
+  "room" VARCHAR [not null]
+  "subject" VARCHAR [not null]
+  "invite_code" UUID [not null]
+  "visibility" visibility [not null]
+  "created_at" DATE [not null, default: `now()`]
+  "updated_at" DATE [not null, default: `now()`]
 }
 
-Ref: class.admin_id > user.id [delete: cascade]
-
-Table class_work {
-  id uuid [pk, unique]
-  name varchar [not null]
-  user_id uuid [not null]
-  class_id uuid [not null]
-  mark int [default: `0`]
-  created_at timestamptz [default: `now()`]
-  updated_at timestamptz [default: `now()`]
+Table "class_works" {
+  "id" UUID [unique, pk]
+  "url" VARCHAR [not null]
+  "user_id" UUID [not null]
+  "class_id" UUID [not null]
+  "mark" INTEGER
+  "created_at" timestamptz
+  "updated_at" timestamptz
 }
 
-Ref: class_work.user_id > user.id [delete: cascade]
-Ref: class_work.class_id > class.id [delete: cascade]
-
-Table class_member {
-  id uuid [pk, unique]
-  class_id uuid [not null]
-  user_id uuid [not null]
-  created_at timestamptz [default: `now()`]
-  updated_at timestamptz [default: `now()`]
+Table "classroom_members" {
+  "id" UUID [unique, pk]
+  "class_id" UUID [not null]
+  "user_id" UUID [not null]
+  "created_at" DATE [not null, default: `now()`]
+  "updated_at" DATE [not null, default: `now()`]
 }
 
-Ref: class_member.class_id > class.id [delete: cascade]
-Ref: class_member.user_id > user.id [delete: cascade]
-
-Table post {
-  id uuid [pk, unique]
-  content varchar [not null]
-  author_id uuid [not null]
-  class_id uuid [not null]
-  created_at timestamptz [default: `now()`]
-  updated_at timestamptz [default: `now()`]
+Table "posts" {
+  "id" UUID [unique, pk]
+  "content" VARCHAR [not null]
+  "author_id" UUID [not null]
+  "class_id" UUID [not null]
+  "created_at" DATE [not null, default: `now()`]
+  "updated_at" DATE [not null, default: `now()`]
 }
 
-Ref: post.author_id > user.id [delete: cascade]
-Ref: post.class_id > class.id [delete: cascade]
-
-Table post_like {
-  id uuid [pk, unique]
-  post_id uuid [not null]
-  user_id uuid [not null]
-  created_at timestamptz [default: `now()`]
-  updated_at timestamptz [default: `now()`]
+Table "post_likes" {
+  "id" UUID [unique, pk]
+  "post_id" UUID [not null]
+  "user_id" UUID [not null]
+  "created_at" DATE [not null, default: `now()`]
+  "updated_at" DATE [not null, default: `now()`]
 }
 
-Ref: post_like.post_id > post.id [delete: cascade]
-Ref: post_like.user_id > user.id [delete: cascade]
-
-Table comment {
-  id uuid [pk]
-  content varchar [not null]
-  author_id uuid [not null]
-  post_id uuid [not null]
-  created_at timestamptz [default: `now()`]
-  updated_at timestamptz [default: `now()`]
+Table "comments" {
+  "id" UUID [pk]
+  "content" VARCHAR [not null]
+  "author_id" UUID [not null]
+  "post_id" UUID [not null]
+  "created_at" DATE [not null, default: `now()`]
+  "updated_at" DATE [not null, default: `now()`]
 }
 
-Ref: comment.author_id > user.id [delete: cascade]
-Ref: comment.post_id > post.id [delete: cascade]
-
-Table comment_like {
-  id uuid [pk, unique]
-  comment_id uuid [not null]
-  user_id uuid [not null]
-  created_at timestamptz [default: `now()`]
-  updated_at timestamptz [default: `now()`]
+Table "comment_likes" {
+  "id" UUID [unique, pk]
+  "comment_id" UUID [not null]
+  "user_id" UUID [not null]
+  "created_at" DATE [not null, default: `now()`]
+  "updated_at" DATE [default: `now()`]
 }
 
-Ref: comment_like.comment_id > comment.id [delete: cascade]
-Ref: comment_like.user_id > user.id [delete: cascade]
+Ref "user_follows_follower_users_id":"users"."id" < "user_follows"."follower" [update: no action, delete: cascade]
 
+Ref "user_follows_following_users_id":"users"."id" < "user_follows"."following" [update: no action, delete: cascade]
+
+Ref "classrooms_admin_id_users_id":"users"."id" < "classrooms"."admin_id" [update: no action, delete: cascade]
+
+Ref "class_works_user_id_users_id":"users"."id" < "class_works"."user_id" [update: no action, delete: cascade]
+
+Ref "class_works_class_id_classrooms_id":"classrooms"."id" < "class_works"."class_id" [update: no action, delete: cascade]
+
+Ref "classroom_members_class_id_classrooms_id":"classrooms"."id" < "classroom_members"."class_id" [update: no action, delete: cascade]
+
+Ref "classroom_members_user_id_users_id":"users"."id" < "classroom_members"."user_id" [update: no action, delete: cascade]
+
+Ref "posts_author_id_users_id":"users"."id" < "posts"."author_id" [update: no action, delete: cascade]
+
+Ref "posts_class_id_classrooms_id":"classrooms"."id" < "posts"."class_id" [update: no action, delete: cascade]
+
+Ref "post_likes_post_id_posts_id":"posts"."id" < "post_likes"."post_id" [update: no action, delete: cascade]
+
+Ref "post_likes_user_id_users_id":"users"."id" < "post_likes"."user_id" [update: no action, delete: cascade]
+
+Ref "comments_author_id_users_id":"users"."id" < "comments"."author_id" [update: no action, delete: cascade]
+
+Ref "comments_post_id_posts_id":"posts"."id" < "comments"."post_id" [update: no action, delete: cascade]
+
+Ref "comment_likes_comment_id_comments_id":"comments"."id" < "comment_likes"."comment_id" [update: no action, delete: cascade]
+
+Ref "comment_likes_user_id_users_id":"users"."id" < "comment_likes"."user_id" [update: no action, delete: cascade]
 
