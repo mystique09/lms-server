@@ -23,8 +23,8 @@ type (
 	}
 )
 
-func NewJwtPayload(id uuid.UUID, username, email, role string, duration time.Duration) JwtUserPayload {
-	return JwtUserPayload{
+func NewJwtPayload(id uuid.UUID, username, email, role string, duration time.Duration) *JwtUserPayload {
+	return &JwtUserPayload{
 		ID:       id,
 		Username: username,
 		Email:    email,
@@ -35,7 +35,7 @@ func NewJwtPayload(id uuid.UUID, username, email, role string, duration time.Dur
 	}
 }
 
-func NewJwtToken(payload JwtUserPayload, secret_key []byte) (string, error) {
+func NewJwtToken(payload *JwtUserPayload, secret_key []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 	return token.SignedString(secret_key)
 }
