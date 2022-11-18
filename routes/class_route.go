@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	database "server/database/sqlc"
-	"server/utils"
+	"server/token"
 	"strconv"
 
 	"github.com/golang-jwt/jwt"
@@ -140,12 +140,12 @@ func (s *Server) createNewClassroom(c echo.Context) error {
 		return c.JSON(400, err)
 	}
 
-	jwt_token := c.Get("user")
-	jwt_payload := utils.GetPayloadFromJwt(jwt_token.(*jwt.Token))
+	jwt_header := c.Get("user")
+	jwt_token := token.GetPayloadFromJwt(jwt_header.(*jwt.Token))
 
 	new_classroom, err := s.store.CreateClass(c.Request().Context(), database.CreateClassParams{
 		ID:          uuid.New(),
-		AdminID:     jwt_payload.ID,
+		AdminID:     jwt_token.ID,
 		Name:        payload.Name,
 		Description: payload.Description,
 		Section:     payload.Section,
@@ -189,8 +189,8 @@ func (s *Server) updateClassroom(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, CLASSROOM_NOTFOUND)
 	}
 
-	token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(token)
+	jwt_token := c.Get("user").(*jwt.Token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	if classroom.AdminID != jwt_payload.ID {
 		return c.JSON(http.StatusUnauthorized, UNAUTHORIZED)
@@ -327,8 +327,8 @@ func (s *Server) deleteClassroom(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(token)
+	jwt_token := c.Get("user").(*jwt.Token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	classroom, err := s.store.GetClass(c.Request().Context(), uid)
 
@@ -410,8 +410,8 @@ func (s *Server) joinClassroom(c echo.Context) error {
 		return c.JSON(400, CLASSROOM_NOTFOUND)
 	}
 
-	token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(token)
+	jwt_token := c.Get("user").(*jwt.Token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	if jwt_payload.ID != uid {
 		return c.JSON(400, UNAUTHORIZED)
@@ -452,8 +452,8 @@ func (s *Server) leaveClassroom(c echo.Context) error {
 		return c.JSON(400, CLASSROOM_NOTFOUND)
 	}
 
-	token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(token)
+	jwt_token := c.Get("user").(*jwt.Token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	if jwt_payload.ID != uid {
 		return c.JSON(400, UNAUTHORIZED)

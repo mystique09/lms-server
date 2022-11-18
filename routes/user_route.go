@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	database "server/database/sqlc"
+	"server/token"
 	"server/utils"
 	"strconv"
 
@@ -154,8 +155,8 @@ func (s *Server) updateUser(c echo.Context) error {
 	}
 
 	// check if the current user is the one being updated
-	token := c.Get("user").(*jwt.Token)
-	var payload utils.JwtUserPayload = utils.GetPayloadFromJwt(token)
+	jwt_token := c.Get("user").(*jwt.Token)
+	payload := token.GetPayloadFromJwt(jwt_token)
 
 	check_user, err := s.store.GetUser(c.Request().Context(), uid)
 
@@ -240,7 +241,7 @@ func (s *Server) deleteUser(c echo.Context) error {
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
-	var payload utils.JwtUserPayload = utils.GetPayloadFromJwt(jwt_token)
+	payload := token.GetPayloadFromJwt(jwt_token)
 
 	check_user, err := s.store.GetUser(c.Request().Context(), uid)
 

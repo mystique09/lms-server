@@ -2,7 +2,7 @@ package routes
 
 import (
 	database "server/database/sqlc"
-	"server/utils"
+	"server/token"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
@@ -36,7 +36,7 @@ func (s *Server) getOnePost(c echo.Context) error {
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	post, err := s.store.GetOnePost(c.Request().Context(), pid)
 	if err != nil || post.ID == uuid.Nil {
@@ -77,7 +77,7 @@ func (s *Server) createNewPost(c echo.Context) error {
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	check_user_if_member, err := s.store.GetClassroomMemberById(c.Request().Context(), database.GetClassroomMemberByIdParams{
 		UserID:  jwt_payload.ID,
@@ -120,7 +120,7 @@ func (s *Server) updatePost(c echo.Context) error {
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	check_post, err := s.store.GetOnePost(c.Request().Context(), puid)
 	if err != nil || check_post.ID == uuid.Nil {
@@ -150,7 +150,7 @@ func (s *Server) deletePost(c echo.Context) error {
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	check_post, err := s.store.GetOnePost(c.Request().Context(), puid)
 	if err != nil || check_post.ID == uuid.Nil {
@@ -208,7 +208,7 @@ func (s *Server) likePost(c echo.Context) error {
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	check_member, err := s.store.GetClassroomMemberById(c.Request().Context(), database.GetClassroomMemberByIdParams{
 		UserID:  jwt_payload.ID,
@@ -249,7 +249,7 @@ func (s *Server) unlikePost(c echo.Context) error {
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
-	jwt_payload := utils.GetPayloadFromJwt(jwt_token)
+	jwt_payload := token.GetPayloadFromJwt(jwt_token)
 
 	unliked_post, err := s.store.UnlikePost(c.Request().Context(), database.UnlikePostParams{
 		ID:     post_uid,

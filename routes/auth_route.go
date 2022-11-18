@@ -3,7 +3,7 @@ package routes
 import (
 	"database/sql"
 	"net/http"
-	"server/utils"
+	"server/token"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
@@ -42,12 +42,12 @@ func (s *Server) loginHandler(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, LOGIN_FAILED)
 	}
 
-	access_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.ID, user.Username, user.Email, string(user.UserRole)), 5), []byte(s.cfg.JwtSecretKey))
+	access_token, err := token.NewJwtToken(token.NewJwtPayload(user.ID, user.Username, user.Email, string(user.UserRole), 5), []byte(s.cfg.JwtSecretKey))
 	if err != nil {
 		return c.JSON(402, newResponse[any](nil, err.Error()))
 	}
 
-	refresh_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(user.ID, user.Username, user.Email, string(user.UserRole)), 60*60*7*31), []byte(s.cfg.JwtRefreshSecretKey))
+	refresh_token, err := token.NewJwtToken(token.NewJwtPayload(user.ID, user.Username, user.Email, string(user.UserRole), 30), []byte(s.cfg.JwtRefreshSecretKey))
 	if err != nil {
 		return c.JSON(402, newResponse[any](nil, err.Error()))
 	}
@@ -56,15 +56,15 @@ func (s *Server) loginHandler(c echo.Context) error {
 }
 
 func (s *Server) refreshToken(c echo.Context) error {
-	token := c.Get("refresh").(*jwt.Token)
-	user := utils.GetPayloadFromJwt(token)
+	refresh := c.Get("refresh").(*jwt.Token)
+	user := token.GetPayloadFromJwt(refresh)
 	updated_user, err := s.store.GetUser(c.Request().Context(), user.ID)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
 	}
 
-	new_access_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(updated_user.ID, updated_user.Username, updated_user.Email, string(updated_user.UserRole)), 5), []byte(s.cfg.JwtSecretKey))
+	new_access_token, err := token.NewJwtToken(token.NewJwtPayload(updated_user.ID, updated_user.Username, updated_user.Email, string(updated_user.UserRole), 5), []byte(s.cfg.JwtSecretKey))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
 	}
