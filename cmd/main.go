@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	cfg, err := utils.LoadConfig(".")
+	cfg, err := utils.LoadConfig(".", "app")
 
 	if err != nil {
 		log.Fatal("Error loading .env file")
