@@ -6,6 +6,7 @@ import (
 	"server/utils"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -33,8 +34,8 @@ func (s *Server) loginHandler(c echo.Context) error {
 	}
 
 	user, err := s.store.GetUserByUsername(c.Request().Context(), payload.Username)
-	if err == sql.ErrNoRows {
-		return c.JSON(http.StatusNotFound, USER_NOTFOUND)
+	if err == sql.ErrNoRows || user.ID == uuid.Nil {
+		return c.JSON(http.StatusBadRequest, USER_NOTFOUND)
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)) != nil {
@@ -64,10 +65,6 @@ func (s *Server) refreshToken(c echo.Context) error {
 	}
 
 	new_access_token, err := utils.NewJwtToken(utils.NewJwtClaims(utils.NewJwtPayload(updated_user.ID, updated_user.Username, updated_user.Email, string(updated_user.UserRole)), 5), []byte(s.cfg.JwtSecretKey))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
-	}
-
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
 	}
