@@ -18,22 +18,25 @@ server:
 	go run cmd/main.go
 
 postgres:
-	sudo docker run --name postgres -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
+	sudo docker run --name postgres2 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
 
 createdb:
-	sudo docker exec -it postgres createdb --username=root --owner=root class-manager
+	sudo docker exec -it postgres2 createdb --username=root --owner=root $(DB_NAME)
 
 dropdb:
-	docker exec -it postgres dropdb class-manager
+	sudo docker exec -it postgres2 dropdb $(DB_NAME)
 
 migrateup:
-	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/class-manager?sslmode=disable" -verbose up
+	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/$(DB_NAME)?sslmode=disable" -verbose up
 
 migratedown:
-	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/class-manager?sslmode=disable" -verbose down
+	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/$(DB_NAME)?sslmode=disable" -verbose down
 
 force:
-	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/class-manager?sslmode=disable" -verbose force 1
+	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/$(DB_NAME)?sslmode=disable" -verbose force 1
+
+inspect:
+	sudo docker exec -it postgres2 psql $(DB_NAME)
 
 sqlc:
 	sqlc generate
