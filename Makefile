@@ -17,8 +17,11 @@ test: clean
 server:
 	go run cmd/main.go
 
-postgres:
-	sudo docker run --name postgres2 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
+pgstart:
+	sudo docker run -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
+
+pgstop:
+	sudo docker stop $(id)
 
 createdb:
 	sudo docker exec -it postgres2 createdb --username=root --owner=root $(DB_NAME)
