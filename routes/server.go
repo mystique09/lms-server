@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"log"
+	"os"
 
 	database "server/database/sqlc"
 	"server/token"
@@ -12,6 +13,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo-contrib/jaegertracing"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/rs/zerolog"
 )
 
 type Server struct {
@@ -62,7 +65,23 @@ func (server *Server) setupRouter() {
 
 	e.Validator = &CustomValidator{validator: validator.New()}
 
-	e.Use(LoggerMiddleware())
+	logger := zerolog.New(os.Stdout)
+
+	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogURI:    true,
+		LogStatus: true,
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			logger.Info().
+				Time("time", v.StartTime.UTC()).
+				Str("URI", v.URI).
+				Int("status", v.Status).
+				Msg("request")
+
+			return nil
+		},
+	}))
+
+	//e.Use(LoggerMiddleware())
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(&server.cfg))
 
