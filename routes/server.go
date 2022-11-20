@@ -81,7 +81,6 @@ func (server *Server) setupRouter() {
 		},
 	}))
 
-	//e.Use(LoggerMiddleware())
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(&server.cfg))
 
