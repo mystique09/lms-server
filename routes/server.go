@@ -1,20 +1,3 @@
-// LMS - GOOGLE CLASSROOM CLONE
-// version 0.0.2
-// title: LMS
-// Schemes: http, https
-// Host: 0.0.0.0:5000
-// BasePath: /
-// Produces:
-//   - applicationjson
-//
-// securityDefinitions:
-//
-//	apiKey:
-//	  type: apiKey
-//	  in: header
-//	  name: authorization
-//
-// swagger:meta
 package routes
 
 import (
@@ -77,6 +60,7 @@ func NewServer(store database.Store, cfg *utils.Config) (*Server, error) {
 	return server, nil
 }
 
+// Serves API from routes
 func (server *Server) setupRouter() {
 	e := echo.New()
 
@@ -108,9 +92,25 @@ func (server *Server) setupRouter() {
 	e.GET("/api/v1", server.indexRoute)
 	e.POST("/api/v1/signup", server.createUser)
 	e.POST("/api/v1/login", server.loginHandler)
-	e.POST("/api/v1/refresh", server.refreshToken, RefreshTokenAuthMiddleware(&server.cfg))
 
 	user_group := e.Group("/api/v1/users", server.authMiddleware)
+
+	// swagger:operation GET /api/v1/users Responses[database.User] getUsers
+	//
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: offset
+	//	 in: query
+	//   description: the offset
+	//	 required: false
+	//   type: integer
+	//
+	// responses:
+	//  '200':
+	//    description: user response
+	//    schema:
+	//      "$ref": "#/definitions/database.User"
 	user_group.GET("", server.getUsers)
 	user_group.GET("/:id", server.getUser)
 	user_group.PUT("/:id", server.updateUser)
