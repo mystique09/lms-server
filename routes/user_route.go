@@ -1,3 +1,19 @@
+// Package specification of User API.
+//
+// # The purpose of this API is to query the Users
+//
+// Schemes: http
+// Host: localhost:5000
+// BasePath: /
+// Version: 1.0.0
+//
+// Consumes:
+// - application/json
+//
+// Produces:
+// - application/json
+//
+// swagger:meta
 package routes
 
 import (
@@ -22,8 +38,8 @@ type (
 
 	UserUpdateDTO struct {
 		Username string `json:"username" validate:"required,gt=6"`
-		Email    string `json:"email" validate:"required, email"`
-		Password string `json:"password" validate:"required,gt-6"`
+		Email    string `json:"email" validate:"required,email"`
+		Password string `json:"password" validate:"required,gt=6"`
 	}
 
 	UserResponse struct {
@@ -41,6 +57,22 @@ type UserClassrooms struct {
 }
 
 func (s *Server) getUsers(c echo.Context) error {
+	// swagger:operation GET /api/v1/users Responses[database.User] getUsers
+	//
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: offset
+	// 	in: query
+	//  description: the offset
+	//	required: false
+	//  type: integer
+	//
+	// responses:
+	//  '200':
+	//    description: user response
+	//    schema:
+	//      "$ref": "#/definitions/database.User"
 	ofst := c.QueryParam("offset")
 
 	if ofst == "" || ofst == "0" {
@@ -139,30 +171,30 @@ func (s *Server) updateUser(c echo.Context) error {
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, newError(err.Error()))
 	}
 
 	var updateDto UserUpdateDTO
 
 	bindErr := c.Bind(&updateDto)
 	if bindErr != nil {
-		return c.JSON(400, bindErr)
+		c.Logger().Print(bindErr.Error())
+		return c.JSON(402, newError(bindErr.Error()))
 	}
 
 	if err := c.Validate(updateDto); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, newError(err.Error()))
 	}
 
 	// check if the current user is the one being updated
 	payload := c.Get("user").(*token.Payload)
-
 	check_user, err := s.store.GetUser(c.Request().Context(), uid)
 
 	if err != nil || check_user.ID == uuid.Nil {
 		return c.JSON(http.StatusBadRequest, USER_NOTFOUND)
 	}
 
-	if check_user.Username != payload.Username || check_user.ID != payload.ID {
+	if check_user.Username != payload.Username {
 		return c.JSON(http.StatusUnauthorized, UNAUTHORIZED)
 	}
 
@@ -179,10 +211,10 @@ func (s *Server) updateUser(c echo.Context) error {
 
 		new_user, err := s.store.UpdateUsername(c.Request().Context(), payload)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return c.JSON(http.StatusBadRequest, newError(err.Error()))
 		}
 
-		return c.JSON(http.StatusOK, new_user)
+		return c.JSON(http.StatusOK, newResponse(new_user))
 	case "email":
 		payload := database.UpdateUserEmailParams{
 			ID:    uid,
@@ -195,15 +227,15 @@ func (s *Server) updateUser(c echo.Context) error {
 
 		new_user, err := s.store.UpdateUserEmail(c.Request().Context(), payload)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return c.JSON(http.StatusBadRequest, newError(err.Error()))
 		}
 
-		return c.JSON(http.StatusOK, new_user)
+		return c.JSON(http.StatusOK, newResponse(new_user))
 	case "password":
 		hashed_password, err := utils.Encrypt(updateDto.Password)
 
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return c.JSON(http.StatusBadRequest, newError(err.Error()))
 		}
 
 		payload := database.UpdateUserPasswordParams{
@@ -220,7 +252,7 @@ func (s *Server) updateUser(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		return c.JSON(http.StatusOK, new_user)
+		return c.JSON(http.StatusOK, newResponse(new_user))
 	}
 
 	return c.JSON(http.StatusBadRequest, UNKNOWN_FIELD)
