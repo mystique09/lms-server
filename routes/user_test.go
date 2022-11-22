@@ -1,12 +1,7 @@
 package routes
 
 import (
-	"bytes"
-	"database/sql"
-	"encoding/json"
 	"fmt"
-	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -22,210 +17,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 )
-
-func TestGetAllUsersApi(t *testing.T) {
-	var users []database.User
-
-	for i := 0; i < 20; i++ {
-		user, _ := randomUser(t)
-		user.Password = ""
-		users = append(users, user)
-	}
-
-	testCases := []struct {
-		name          string
-		offset        string
-		buildStubs    func(store *mockdb.MockStore)
-		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
-	}{
-		{
-			name:   "OK",
-			offset: "1",
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUsers(gomock.Any(), gomock.Eq(int32(10))).
-					Times(1).
-					Return(users, nil)
-			},
-			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
-				require.Equal(t, 200, rec.Code)
-
-				data, err := io.ReadAll(rec.Body)
-				require.NoError(t, err)
-
-				var getUsers Response[[]database.User]
-				err = json.Unmarshal(data, &getUsers)
-				require.NoError(t, err)
-				require.Equal(t, newResponse(users), getUsers)
-			},
-		},
-		{
-			name:   "OK: Offset is 0",
-			offset: "0",
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUsers(gomock.Any(), gomock.Eq(int32(0))).
-					Times(1).
-					Return(users, nil)
-			},
-			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
-				require.Equal(t, 200, rec.Code)
-
-				data, err := io.ReadAll(rec.Body)
-				require.NoError(t, err)
-
-				var getUsers Response[[]database.User]
-				err = json.Unmarshal(data, &getUsers)
-				require.NoError(t, err)
-				require.Equal(t, newResponse(users), getUsers)
-			},
-		},
-		{
-			name:   "OK: Offset is empty",
-			offset: "",
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUsers(gomock.Any(), gomock.Eq(int32(0))).
-					Times(1).
-					Return(users, nil)
-			},
-			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
-				require.Equal(t, 200, rec.Code)
-
-				data, err := io.ReadAll(rec.Body)
-				require.NoError(t, err)
-
-				var getUsers Response[[]database.User]
-				err = json.Unmarshal(data, &getUsers)
-				require.NoError(t, err)
-				require.Equal(t, newResponse(users), getUsers)
-			},
-		},
-		{
-			name:   "Invalid offset",
-			offset: "i am an invalid offset",
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUsers(gomock.Any(), gomock.Eq(0)).
-					Times(0)
-			},
-			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
-				require.Equal(t, 400, rec.Code)
-			},
-		},
-		{
-			name:   "Negative offset",
-			offset: "-1",
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().GetUsers(gomock.Any(), gomock.Eq(0)).Times(0)
-			},
-			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
-				require.Equal(t, 400, rec.Code)
-			},
-		},
-	}
-
-	for i := range testCases {
-		tc := testCases[i]
-
-		t.Run(tc.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-
-			store := mockdb.NewMockStore(ctrl)
-			tc.buildStubs(store)
-
-			server, err := NewServer(store, &cfg)
-			require.NoError(t, err)
-
-			rec := httptest.NewRecorder()
-			url := fmt.Sprintf("/api/v1/users?offset=%v", tc.offset)
-
-			req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
-
-			require.NoError(t, err)
-
-			server.router.ServeHTTP(rec, req)
-			tc.checkResponse(t, rec)
-		})
-	}
-}
-
-func TestGetUserAPI(t *testing.T) {
-	user, _ := randomUser(t)
-
-	testCases := []struct {
-		name          string
-		id            uuid.UUID
-		buildStubs    func(store *mockdb.MockStore)
-		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
-	}{
-		{
-			name: "OK",
-			id:   user.ID,
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUser(gomock.Any(), gomock.Eq(user.ID)).
-					Times(1).
-					Return(user, nil)
-			},
-			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusOK, rec.Code)
-				requireBodyMatch(t, rec.Body, &user)
-			},
-		},
-		{
-			name: "NotFound",
-			id:   user.ID,
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUser(gomock.Any(), gomock.Eq(user.ID)).
-					Times(1).
-					Return(database.User{}, sql.ErrNoRows)
-			},
-			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusNotFound, rec.Code)
-			},
-		},
-		{
-			name: "Inter server error",
-			id:   user.ID,
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetUser(gomock.Any(), gomock.Eq(user.ID)).
-					Times(1).Return(database.User{}, sql.ErrConnDone)
-			},
-			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusInternalServerError, rec.Code)
-			},
-		},
-	}
-
-	for i := range testCases {
-		tc := testCases[i]
-
-		t.Run(tc.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-
-			store := mockdb.NewMockStore(ctrl)
-			tc.buildStubs(store)
-
-			server, err := NewServer(store, &cfg)
-			require.NoError(t, err)
-
-			rec := httptest.NewRecorder()
-			url := fmt.Sprintf("/api/v1/users/%v", tc.id)
-
-			req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
-
-			require.NoError(t, err)
-
-			server.router.ServeHTTP(rec, req)
-			tc.checkResponse(t, rec)
-		})
-	}
-}
 
 type eqCreateUserParamsMatcher struct {
 	arg      database.CreateUserParams
@@ -369,7 +160,7 @@ func TestCreateUserAPI(t *testing.T) {
 
 			url := "/api/v1/signup"
 
-			req, err := http.NewRequest(http.MethodPost, url, data)
+			req := httptest.NewRequest(http.MethodPost, url, data)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			require.NoError(t, err)
 
@@ -377,43 +168,4 @@ func TestCreateUserAPI(t *testing.T) {
 			tc.checkResponse(rec)
 		})
 	}
-}
-
-func TestUpdateUserApi(t *testing.T) {
-	// TODO!
-}
-
-func TestDeleteUserApi(t *testing.T) {
-	// TODO!
-}
-
-func randomUser(t *testing.T) (user database.User, password string) {
-	password = utils.RandomString(12)
-	hashed_password, err := utils.Encrypt(password)
-	require.NoError(t, err)
-
-	user = database.User{
-		ID:         uuid.New(),
-		Username:   utils.RandomString(12),
-		Password:   hashed_password,
-		Email:      utils.RandomEmail(),
-		UserRole:   database.RoleSTUDENT,
-		Visibility: database.VisibilityPUBLIC,
-	}
-
-	return
-}
-
-func requireBodyMatch(t *testing.T, body *bytes.Buffer, user *database.User) {
-	data, err := io.ReadAll(body)
-	require.NoError(t, err)
-
-	var getUser Response[*database.User]
-	err = json.Unmarshal(data, &getUser)
-	log.Println(getUser)
-	require.NoError(t, err)
-
-	user.Password = ""
-
-	require.Equal(t, newResponse(user), getUser)
 }
