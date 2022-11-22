@@ -77,11 +77,3 @@ func (s *Server) authMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
-
-func RefreshTokenAuthMiddleware(cfg *utils.Config) echo.MiddlewareFunc {
-	return middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningMethod: "HS256",
-		SigningKey:    cfg.JwtRefreshSecretKey,
-		ContextKey:    "refresh",
-	})
-}
