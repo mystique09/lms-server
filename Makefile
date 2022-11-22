@@ -15,6 +15,9 @@ lint:
 
 test: clean
 	go test -v -cover -coverprofile=coverage.out ./...
+	
+docs:
+	swagger generate spec -o ./swagger.yaml --scan-models
 
 server:
 	go run cmd/main.go
