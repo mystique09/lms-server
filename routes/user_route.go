@@ -56,10 +56,10 @@ func (s *Server) getUsers(c echo.Context) error {
 	users, err := s.store.GetUsers(c.Request().Context(), int32(offset*10))
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, newError(err.Error()))
 	}
 
-	return c.JSON(200, newResponse(users, ""))
+	return c.JSON(200, newResponse(users))
 }
 
 func (s *Server) getUser(c echo.Context) error {
@@ -68,7 +68,7 @@ func (s *Server) getUser(c echo.Context) error {
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, newError(err.Error()))
 	}
 
 	if id == "" {
@@ -83,10 +83,10 @@ func (s *Server) getUser(c echo.Context) error {
 	}
 
 	if err == sql.ErrConnDone {
-		return c.JSON(http.StatusInternalServerError, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusInternalServerError, newError(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, newResponse(user, ""))
+	return c.JSON(http.StatusOK, newResponse(user))
 }
 
 func (s *Server) createUser(c echo.Context) error {
@@ -98,12 +98,12 @@ func (s *Server) createUser(c echo.Context) error {
 	}
 
 	if err := c.Validate(user_data); err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	hashed_password, err := utils.Encrypt(user_data.Password)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusInternalServerError, newError(err.Error()))
 	}
 
 	var new_user_param database.CreateUserParams = database.CreateUserParams{
@@ -121,7 +121,7 @@ func (s *Server) createUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, USER_ALREADY_EXIST)
 	}
 
-	return c.JSON(http.StatusOK, newResponse(user, ""))
+	return c.JSON(http.StatusOK, newResponse(user))
 }
 
 func (s *Server) updateUser(c echo.Context) error {

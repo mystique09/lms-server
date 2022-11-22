@@ -1,3 +1,20 @@
+// LMS - GOOGLE CLASSROOM CLONE
+// version 0.0.2
+// title: LMS
+// Schemes: http, https
+// Host: 0.0.0.0:5000
+// BasePath: /
+// Produces:
+//   - applicationjson
+//
+// securityDefinitions:
+//
+//	apiKey:
+//	  type: apiKey
+//	  in: header
+//	  name: authorization
+//
+// swagger:meta
 package routes
 
 import (

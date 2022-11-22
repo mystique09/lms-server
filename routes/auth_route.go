@@ -16,6 +16,10 @@ type authRequest struct {
 	Password string `json:"password" validate:"required,gt=6"`
 }
 
+type AuthRequestBody struct {
+	Body authRequest `json:"body"`
+}
+
 type authSuccessResponse struct {
 	Access string        `json:"access_token"`
 	User   database.User `json:"user"`
@@ -26,11 +30,11 @@ func (s *Server) loginHandler(c echo.Context) error {
 
 	bindErr := c.Bind(&payload)
 	if bindErr != nil {
-		return c.JSON(400, newResponse[any](nil, bindErr.Error()))
+		return c.JSON(400, newError(bindErr.Error()))
 	}
 
 	if err := c.Validate(payload); err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	user, err := s.store.GetUserByUsername(c.Request().Context(), payload.Username)
@@ -38,7 +42,7 @@ func (s *Server) loginHandler(c echo.Context) error {
 		if err == sql.ErrNoRows {
 			return c.JSON(http.StatusBadRequest, USER_NOTFOUND)
 		}
-		return c.JSON(http.StatusInternalServerError, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusInternalServerError, newError(err.Error()))
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)) != nil {
@@ -47,11 +51,11 @@ func (s *Server) loginHandler(c echo.Context) error {
 
 	accessToken, err := s.tokenMaker.CreateToken(user.Username, s.cfg.AccessTokenDuration)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusInternalServerError, newError(err.Error()))
 	}
 
 	resp := authSuccessResponse{Access: accessToken, User: user}
-	return c.JSON(http.StatusOK, newResponse(resp, ""))
+	return c.JSON(http.StatusOK, newResponse(resp))
 }
 
 func (s *Server) refreshToken(c echo.Context) error {
@@ -60,15 +64,15 @@ func (s *Server) refreshToken(c echo.Context) error {
 	updated_user, err := s.store.GetUser(c.Request().Context(), user.ID)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, newError(err.Error()))
 	}
 
 	new_access_token, err := token.NewJwtToken(token.NewJwtPayload(updated_user.ID, updated_user.Username, updated_user.Email, string(updated_user.UserRole), 5), []byte(s.cfg.JwtSecretKey))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, newError(err.Error()))
 	}
 
 	return c.JSON(http.StatusOK, newResponse(AccessToken{
 		Token: new_access_token,
-	}, ""))
+	}))
 }

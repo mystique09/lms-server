@@ -56,7 +56,7 @@ func TestGetAllUsersApi(t *testing.T) {
 				var getUsers Response[[]database.User]
 				err = json.Unmarshal(data, &getUsers)
 				require.NoError(t, err)
-				require.Equal(t, newResponse(users, ""), getUsers)
+				require.Equal(t, newResponse(users), getUsers)
 			},
 		},
 		{
@@ -77,7 +77,7 @@ func TestGetAllUsersApi(t *testing.T) {
 				var getUsers Response[[]database.User]
 				err = json.Unmarshal(data, &getUsers)
 				require.NoError(t, err)
-				require.Equal(t, newResponse(users, ""), getUsers)
+				require.Equal(t, newResponse(users), getUsers)
 			},
 		},
 		{
@@ -98,7 +98,7 @@ func TestGetAllUsersApi(t *testing.T) {
 				var getUsers Response[[]database.User]
 				err = json.Unmarshal(data, &getUsers)
 				require.NoError(t, err)
-				require.Equal(t, newResponse(users, ""), getUsers)
+				require.Equal(t, newResponse(users), getUsers)
 			},
 		},
 		{
@@ -415,5 +415,5 @@ func requireBodyMatch(t *testing.T, body *bytes.Buffer, user *database.User) {
 
 	user.Password = ""
 
-	require.Equal(t, newResponse(user, ""), getUser)
+	require.Equal(t, newResponse(user), getUser)
 }

@@ -29,7 +29,7 @@ type (
 
 func (cv *CustomValidator) Validate(i interface{}) error {
 	if err := cv.validator.Struct(i); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newResponse[any](nil, err.Error()))
+		return echo.NewHTTPError(http.StatusBadRequest, newError(err.Error()))
 	}
 	return nil
 }
@@ -39,12 +39,16 @@ type Response[T any] struct {
 	Error string `json:"error,omitempty"`
 }
 
-/*
-A function to create a new response.
-*/
-func newResponse[T any](data T, err string) Response[T] {
+func newResponse[T any](data T) Response[T] {
 	return Response[T]{
 		Data:  data,
+		Error: "",
+	}
+}
+
+func newError(err string) Response[string] {
+	return Response[string]{
+		Data:  "",
 		Error: err,
 	}
 }
