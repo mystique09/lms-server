@@ -62,11 +62,11 @@ build:
 	rm -rf lms-server
 	go build -o lms-server cmd/main.go
 
-test-server: build
+temp-server: build
 	rm -rfd test-server
 	mkdir -p test-server/database/migrations
 	cp database/migrations/* test-server/database/migrations
 	cp app.env test-server
 	mv lms-server test-server
 
-.PHONY: postgres create migrateup migratedown force test server mock docs cover build test-server
+.PHONY: postgres create migrateup migratedown force test server mock docs cover build temp-server
