@@ -1,30 +1,5 @@
 DB_NAME=class-manager
 
-clean:
-	rm -rf ./tmp coverage.out
-
-setup:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1 \
-    curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz \
-    sudo mv migrate /usr/bin
-
-lint:
-	gosec -quiet -exclude-generated ./...
-	gocritic check -enableAll ./...
-	golangci-lint run ./...
-
-test: clean
-	go test -v -cover -coverprofile=coverage.out ./...
-	
-cover:
-	go tool cover -html=coverage.out
-	
-docs:
-	swagger generate spec -o ./swagger.yaml --scan-models
-
-server:
-	go run cmd/main.go
-
 pgstart:
 	sudo docker run --name pg -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
 
@@ -57,5 +32,41 @@ sqlc:
 
 mock: sqlc
 	mockgen -package mockdb -destination database/mock/store.go server/database/sqlc Store
+	
+clean:
+	rm -rf ./tmp coverage.out
 
-.PHONY: postgres create migrateup migratedown force test server mock docs cover
+setup:
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1 \
+    curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz \
+    sudo mv migrate /usr/bin
+
+lint:
+	gosec -quiet -exclude-generated ./...
+	gocritic check -enableAll ./...
+	golangci-lint run ./...
+
+test: clean
+	go test -v -cover -coverprofile=coverage.out ./...
+	
+cover:
+	go tool cover -html=coverage.out
+	
+docs:
+	swagger generate spec -o ./lms-docs/swagger.yaml --scan-models
+
+server:
+	go run cmd/main.go
+	
+build:
+	rm -rf lms-server
+	go build -o lms-server cmd/main.go
+
+temp-server: build
+	rm -rfd test-server
+	mkdir -p test-server/database/migrations
+	cp database/migrations/* test-server/database/migrations
+	cp app.env test-server
+	mv lms-server test-server
+
+.PHONY: postgres create migrateup migratedown force test server mock docs cover build temp-server

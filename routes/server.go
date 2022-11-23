@@ -6,6 +6,7 @@ import (
 	"os"
 
 	database "server/database/sqlc"
+	lmsdocs "server/lms-docs"
 	"server/token"
 	"server/utils"
 
@@ -82,14 +83,11 @@ func (server *Server) setupRouter() {
 		},
 	}))
 
+	e.StaticFS("/docs", lmsdocs.BuildStaticHTTPS())
 	e.Use(RateLimitMiddleware(20))
 	e.Use(CorsMiddleware(&server.cfg))
 
-	e.GET("/", func(c echo.Context) error {
-		return c.Render(200, "indexPage", nil)
-	})
-
-	e.GET("/api/v1", server.indexRoute)
+	e.GET("/", server.indexRoute)
 	e.POST("/api/v1/signup", server.createUser)
 	e.POST("/api/v1/login", server.loginHandler)
 
