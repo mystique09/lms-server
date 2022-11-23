@@ -1,36 +1,93 @@
+// Package specification of Auth API.
+//
+// # The purpose of this API is to authenticate user.
+//
+// Schemes: http
+// Host: localhost:5000
+// BasePath: /
+// Version: 1.0.0
+//
+// Consumes:
+// - application/json
+//
+// Produces:
+// - application/json
+//
+// swagger:meta
 package routes
 
 import (
 	"database/sql"
 	"net/http"
 	database "server/database/sqlc"
-	"server/token"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
+// swagger:model
 type authRequest struct {
+	// The username in the json body
+	// unique: true
+	// in: body
+	// type: string
 	Username string `json:"username" validate:"required,gt=6"`
+
+	// The password in the json body
+	// in: body
+	// unique: true
+	// type: string
 	Password string `json:"password" validate:"required,gt=6"`
 }
 
-type authSuccessResponse struct {
-	Access string        `json:"access_token"`
-	User   database.User `json:"user"`
+// swagger:parameters authUser
+type AuthRequestBody struct {
+	// The json payload for login handler
+	// in: body
+	// required: true
+	Body authRequest `json:"body"`
 }
 
+// swagger:model authSuccessResponse
+type authSuccessResponse struct {
+	// The access token of response.
+	//
+	// required: true
+	Access string `json:"access_token"`
+
+	// The user object, the user that made the request.
+	//
+	// required: true
+	User database.User `json:"user"`
+}
+
+// authentication
 func (s *Server) loginHandler(c echo.Context) error {
+	// The login handler
+	// swagger:operation POST /api/v1/login auth authUser
+	//
+	// ---
+	// consumes:
+	// - application/json
+	//
+	// produces:
+	// - application/json
+	//
+	// responses:
+	//   '200':
+	//	   description: login success response
+	//	   schema:
+	//	     type: object
+	//		 	"$ref": "#/definitions/authSuccessResponse"
 	var payload authRequest
 
 	bindErr := c.Bind(&payload)
 	if bindErr != nil {
-		return c.JSON(400, newResponse[any](nil, bindErr.Error()))
+		return c.JSON(400, newError(bindErr.Error()))
 	}
 
 	if err := c.Validate(payload); err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	user, err := s.store.GetUserByUsername(c.Request().Context(), payload.Username)
@@ -38,7 +95,7 @@ func (s *Server) loginHandler(c echo.Context) error {
 		if err == sql.ErrNoRows {
 			return c.JSON(http.StatusBadRequest, USER_NOTFOUND)
 		}
-		return c.JSON(http.StatusInternalServerError, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusInternalServerError, newError(err.Error()))
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)) != nil {
@@ -47,28 +104,9 @@ func (s *Server) loginHandler(c echo.Context) error {
 
 	accessToken, err := s.tokenMaker.CreateToken(user.Username, s.cfg.AccessTokenDuration)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusInternalServerError, newError(err.Error()))
 	}
 
 	resp := authSuccessResponse{Access: accessToken, User: user}
-	return c.JSON(http.StatusOK, newResponse(resp, ""))
-}
-
-func (s *Server) refreshToken(c echo.Context) error {
-	refresh := c.Get("refresh").(*jwt.Token)
-	user := token.GetPayloadFromJwt(refresh)
-	updated_user, err := s.store.GetUser(c.Request().Context(), user.ID)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
-	}
-
-	new_access_token, err := token.NewJwtToken(token.NewJwtPayload(updated_user.ID, updated_user.Username, updated_user.Email, string(updated_user.UserRole), 5), []byte(s.cfg.JwtSecretKey))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
-	}
-
-	return c.JSON(http.StatusOK, newResponse(AccessToken{
-		Token: new_access_token,
-	}, ""))
+	return c.JSON(http.StatusOK, newResponse(resp))
 }

@@ -15,6 +15,12 @@ lint:
 
 test: clean
 	go test -v -cover -coverprofile=coverage.out ./...
+	
+cover:
+	go tool cover -html=coverage.out
+	
+docs:
+	swagger generate spec -o ./swagger.yaml --scan-models
 
 server:
 	go run cmd/main.go
@@ -52,4 +58,4 @@ sqlc:
 mock: sqlc
 	mockgen -package mockdb -destination database/mock/store.go server/database/sqlc Store
 
-.PHONY: postgres create migrateup migratedown force test server mock
+.PHONY: postgres create migrateup migratedown force test server mock docs cover

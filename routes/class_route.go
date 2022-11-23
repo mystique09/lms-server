@@ -132,11 +132,11 @@ func (s *Server) createNewClassroom(c echo.Context) error {
 
 	bindErr := c.Bind(&req)
 	if bindErr != nil {
-		return c.JSON(400, bindErr)
+		return c.JSON(400, newError(bindErr.Error()))
 	}
 
 	if err := c.Validate(req); err != nil {
-		return c.JSON(400, err)
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	payload := c.Get("user").(*token.Payload)
@@ -178,7 +178,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, newError(err.Error()))
 	}
 
 	classroom, err := s.store.GetClass(c.Request().Context(), uid)
@@ -203,7 +203,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 		}
 
 		if err := c.Validate(data); err != nil {
-			return c.JSON(400, newResponse[any](nil, err.Error()))
+			return c.JSON(400, newError(err.Error()))
 		}
 
 		updated_class, err := s.store.UpdateClassroomName(c.Request().Context(), database.UpdateClassroomNameParams{
@@ -212,7 +212,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 		})
 
 		if err != nil {
-			return c.JSON(400, newResponse[any](nil, err.Error()))
+			return c.JSON(400, newError(err.Error()))
 		}
 		return c.JSON(200, updated_class)
 
@@ -221,11 +221,11 @@ func (s *Server) updateClassroom(c echo.Context) error {
 
 		bindErr := c.Bind(&data)
 		if bindErr != nil {
-			return c.JSON(400, newResponse[any](nil, bindErr.Error()))
+			return c.JSON(400, newError(bindErr.Error()))
 		}
 
 		if err := c.Validate(data); err != nil {
-			return c.JSON(400, newResponse[any](nil, err.Error()))
+			return c.JSON(400, newError(err.Error()))
 		}
 
 		updated_class, err := s.store.UpdateClassroomDescription(c.Request().Context(), database.UpdateClassroomDescriptionParams{
@@ -234,7 +234,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 		})
 
 		if err != nil {
-			return c.JSON(400, newResponse[any](nil, err.Error()))
+			return c.JSON(400, newError(err.Error()))
 		}
 		return c.JSON(200, updated_class)
 
@@ -243,10 +243,10 @@ func (s *Server) updateClassroom(c echo.Context) error {
 
 		bindErr := c.Bind(&data)
 		if bindErr != nil {
-			return c.JSON(400, newResponse[any](nil, bindErr.Error()))
+			return c.JSON(400, newError(bindErr.Error()))
 		}
 		if err := c.Validate(data); err != nil {
-			return c.JSON(400, newResponse[any](nil, err.Error()))
+			return c.JSON(400, newError(err.Error()))
 		}
 
 		updated_class, err := s.store.UpdateClassroomSubject(c.Request().Context(), database.UpdateClassroomSubjectParams{
@@ -255,7 +255,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 		})
 
 		if err != nil {
-			return c.JSON(400, newResponse[any](nil, err.Error()))
+			return c.JSON(400, newError(err.Error()))
 		}
 		return c.JSON(200, updated_class)
 
@@ -264,10 +264,10 @@ func (s *Server) updateClassroom(c echo.Context) error {
 
 		bindErr := c.Bind(&data)
 		if bindErr != nil {
-			return c.JSON(400, newResponse[any](nil, bindErr.Error()))
+			return c.JSON(400, newError(bindErr.Error()))
 		}
 		if err := c.Validate(data); err != nil {
-			return c.JSON(400, newResponse[any](nil, err.Error()))
+			return c.JSON(400, newError(err.Error()))
 		}
 
 		updated_class, err := s.store.UpdateClassroomSection(c.Request().Context(), database.UpdateClassroomSectionParams{
@@ -276,7 +276,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 		})
 
 		if err != nil {
-			return c.JSON(400, newResponse[any](nil, err.Error()))
+			return c.JSON(400, newError(err.Error()))
 		}
 		return c.JSON(200, updated_class)
 
@@ -285,10 +285,10 @@ func (s *Server) updateClassroom(c echo.Context) error {
 
 		bindErr := c.Bind(&data)
 		if bindErr != nil {
-			return c.JSON(400, newResponse[any](nil, bindErr.Error()))
+			return c.JSON(400, newError(bindErr.Error()))
 		}
 		if err := c.Validate(data); err != nil {
-			return c.JSON(400, newResponse[any](nil, err.Error()))
+			return c.JSON(400, newError(err.Error()))
 		}
 
 		updated_class, err := s.store.UpdateClassroomRoom(c.Request().Context(), database.UpdateClassroomRoomParams{
@@ -297,7 +297,7 @@ func (s *Server) updateClassroom(c echo.Context) error {
 		})
 
 		if err != nil {
-			return c.JSON(400, newResponse[any](nil, err.Error()))
+			return c.JSON(400, newError(err.Error()))
 		}
 		return c.JSON(200, updated_class)
 
@@ -321,7 +321,7 @@ func (s *Server) deleteClassroom(c echo.Context) error {
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, newError(err.Error()))
 	}
 
 	payload := c.Get("user").(*token.Payload)
@@ -329,7 +329,7 @@ func (s *Server) deleteClassroom(c echo.Context) error {
 	classroom, err := s.store.GetClass(c.Request().Context(), uid)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, newError(err.Error()))
 	}
 
 	if payload.ID != classroom.AdminID {
@@ -339,10 +339,10 @@ func (s *Server) deleteClassroom(c echo.Context) error {
 	deleted_classroom, err := s.store.DeleteClass(c.Request().Context(), uid)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusBadRequest, newError(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, newResponse(deleted_classroom, ""))
+	return c.JSON(http.StatusOK, newResponse(deleted_classroom))
 }
 
 func (s *Server) getClassroomUsers(c echo.Context) error {
@@ -351,7 +351,7 @@ func (s *Server) getClassroomUsers(c echo.Context) error {
 
 	uid, err := uuid.Parse(id)
 	if err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	if page == "" {
@@ -361,7 +361,7 @@ func (s *Server) getClassroomUsers(c echo.Context) error {
 	offset, err := strconv.Atoi(page)
 
 	if err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	if offset < 0 {
@@ -376,7 +376,7 @@ func (s *Server) getClassroomUsers(c echo.Context) error {
 	if err != nil {
 		return c.JSON(400, CLASSROOM_NOTFOUND)
 	}
-	return c.JSON(200, newResponse(members, ""))
+	return c.JSON(200, newResponse(members))
 }
 
 func (s *Server) joinClassroom(c echo.Context) error {
@@ -384,7 +384,7 @@ func (s *Server) joinClassroom(c echo.Context) error {
 
 	uid, err := uuid.Parse(id)
 	if err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	check_user, err := s.store.GetUser(c.Request().Context(), uid)
@@ -394,11 +394,11 @@ func (s *Server) joinClassroom(c echo.Context) error {
 
 	var req ClassroomJoinRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &req); err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	if err := c.Validate(req); err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	classroom_id, err := s.store.GetClassroomWithInviteCode(c.Request().Context(), req.InviteCode)
@@ -406,7 +406,7 @@ func (s *Server) joinClassroom(c echo.Context) error {
 		if err == sql.ErrNoRows {
 			return c.JSON(400, CLASSROOM_NOTFOUND)
 		}
-		return c.JSON(http.StatusInternalServerError, newResponse[any](nil, err.Error()))
+		return c.JSON(http.StatusInternalServerError, newError(err.Error()))
 	}
 
 	payload := c.Get("user").(*token.Payload)
@@ -421,7 +421,7 @@ func (s *Server) joinClassroom(c echo.Context) error {
 		UserID:  uid,
 	})
 	if err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 	return c.JSON(200, joined)
 }
@@ -432,12 +432,12 @@ func (s *Server) leaveClassroom(c echo.Context) error {
 
 	uid, err := uuid.Parse(id)
 	if err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	parsed_classId, err := uuid.Parse(class_id)
 	if err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	check_user, err := s.store.GetUser(c.Request().Context(), uid)
@@ -464,7 +464,7 @@ func (s *Server) leaveClassroom(c echo.Context) error {
 		return c.JSON(400, err)
 	}
 
-	return c.JSON(200, newResponse(leaved, ""))
+	return c.JSON(200, newResponse(leaved))
 }
 
 func (s *Server) getClassroomPosts(c echo.Context) error {
@@ -472,7 +472,7 @@ func (s *Server) getClassroomPosts(c echo.Context) error {
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	page := c.QueryParam("page")
@@ -484,7 +484,7 @@ func (s *Server) getClassroomPosts(c echo.Context) error {
 	offset, err := strconv.Atoi(page)
 
 	if err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	if offset < 0 {
@@ -497,8 +497,8 @@ func (s *Server) getClassroomPosts(c echo.Context) error {
 	})
 
 	if err != nil {
-		return c.JSON(400, newResponse[any](nil, err.Error()))
+		return c.JSON(400, newError(err.Error()))
 	}
 
-	return c.JSON(200, newResponse(posts, ""))
+	return c.JSON(200, newResponse(posts))
 }

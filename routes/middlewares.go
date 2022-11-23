@@ -52,36 +52,28 @@ func (s *Server) authMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		authorizationHeader := c.Request().Header.Get(authorizationHeaderKey)
 		if authorizationHeader == "" {
-			return c.JSON(http.StatusUnauthorized, newResponse[any](nil, "authorization header is missing"))
+			return c.JSON(http.StatusUnauthorized, newError("authorization header is missing"))
 		}
 
 		fields := strings.Fields(authorizationHeader)
 
 		if len(fields) < 2 {
-			return c.JSON(http.StatusUnauthorized, newResponse[any](nil, "invalid authorization header format"))
+			return c.JSON(http.StatusUnauthorized, newError("invalid authorization header format"))
 		}
 
 		authorizationType := strings.ToLower(fields[0])
 		if authorizationType != authorizationHeaderType {
-			return c.JSON(http.StatusUnauthorized, newResponse[any](nil, "unsupported authorization header type"))
+			return c.JSON(http.StatusUnauthorized, newError("unsupported authorization header type"))
 		}
 
 		accessToken := fields[1]
 		payload, err := s.tokenMaker.VerifyToken(accessToken)
 		if err != nil {
-			return c.JSON(http.StatusUnauthorized, newResponse[any](nil, err.Error()))
+			return c.JSON(http.StatusUnauthorized, newError(err.Error()))
 		}
 
 		log.Println(payload)
 		c.Set(authorizationPayloadKey, payload)
 		return next(c)
 	}
-}
-
-func RefreshTokenAuthMiddleware(cfg *utils.Config) echo.MiddlewareFunc {
-	return middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningMethod: "HS256",
-		SigningKey:    cfg.JwtRefreshSecretKey,
-		ContextKey:    "refresh",
-	})
 }

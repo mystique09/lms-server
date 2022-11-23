@@ -1,69 +1,50 @@
 package routes
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestResponse(t *testing.T) {
-	type args[T any] struct {
-		Data  T
-		Error string
-	}
-
 	tests := []struct {
-		name string
-		args args[string]
-		want Response[string]
+		name     string
+		respType string
+		arg      string
+		want     Response[string]
 	}{
 		{
-			name: "TestResponse with valid arguments",
-			args: args[string]{
-				Data:  "Hello, World!",
-				Error: "",
-			},
-			want: Response[string]{
-				Data:  "Hello, World!",
-				Error: "",
-			},
+			name:     "Success response",
+			respType: "success",
+			arg:      "Hello, world",
+			want:     newResponse("Hello, world"),
 		},
 		{
-			name: "TestResponse with missing arguments",
-			args: args[string]{
-				Data: "Hello, World!",
-			},
-			want: Response[string]{
-				Data: "Hello, World!",
-			},
-		},
-		{
-			name: "TestResponse ",
-			args: args[string]{
-				Data:  "",
-				Error: "Please complete missing fields",
-			},
-			want: Response[string]{
-				Data:  "",
-				Error: "Please complete missing fields",
-			},
+			name:     "Error response",
+			respType: "success",
+			arg:      "Hello, world",
+			want:     newResponse("Hello, world"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := newResponse(tt.args.Data, tt.args.Error); got != tt.want {
-				t.Errorf("NewResponse() = %v, want %v", got, tt.want)
+			if tt.respType == "error" {
+				require.Equal(t, tt.arg, tt.want.Error)
+			} else {
+				require.Equal(t, tt.arg, tt.want.Data)
 			}
 		})
 	}
 }
 
 func TestNewResponseUtil(t *testing.T) {
-	resp1 := newResponse("Hello, World!", "")
-	resp2 := newResponse("", "Please complete missing fields")
+	resp1 := newResponse("Hello, World!")
+	resp2 := newError("Please complete missing fields")
 
-	if resp1.Data != "Hello, World!" || resp1.Error != "" {
-		t.Errorf("NewResponseUtil() = %v, want %v", resp1, newResponse("Hello, World!", ""))
-	}
+	require.Equal(t, "Hello, World!", resp1.Data)
+	require.Empty(t, resp1.Error)
 
-	if resp2.Data != "" || resp2.Error != "Please complete missing fields" {
-		t.Errorf("NewResponseUtil() = %v, want %v", resp2, newResponse("", "Please complete missing fields"))
-	}
+	require.Empty(t, resp2.Data)
+	require.Equal(t, "Please complete missing fields", resp2.Error)
 }

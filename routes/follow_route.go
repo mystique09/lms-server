@@ -133,7 +133,7 @@ func (s *Server) addNewFollower(c echo.Context) error {
 	}
 
 	if payload.UserId == uid {
-		return c.JSON(400, newResponse[any](nil, "you can't follow yourself"))
+		return c.JSON(400, newError("you can't follow yourself"))
 	}
 
 	if user.ID != uid {
@@ -146,7 +146,7 @@ func (s *Server) addNewFollower(c echo.Context) error {
 	})
 
 	if err == nil || check_follow.ID != uuid.Nil {
-		return c.JSON(400, newResponse[any](nil, "you already followed this user"))
+		return c.JSON(400, newError("you already followed this user"))
 	}
 
 	new_follower, err := s.store.FollowUser(c.Request().Context(), database.FollowUserParams{
@@ -185,7 +185,7 @@ func (s *Server) removeFollowing(c echo.Context) error {
 	check_following, err := s.store.GetFollowerById(c.Request().Context(), follow_id)
 
 	if check_following.ID == uuid.Nil || err != nil {
-		return c.JSON(400, newResponse[any](nil, fmt.Sprintf("[%v] is not in your followings list!", follow_id)))
+		return c.JSON(400, newError(fmt.Sprintf("[%v] is not in your followings list!", follow_id)))
 	}
 
 	jwt_token := c.Get("user").(*jwt.Token)
