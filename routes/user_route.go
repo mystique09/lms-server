@@ -24,7 +24,6 @@ import (
 	"server/utils"
 	"strconv"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -263,23 +262,22 @@ func (s *Server) deleteUser(c echo.Context) error {
 	uid, err := uuid.Parse(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, newError(err.Error()))
 	}
 
-	if id == "" {
-		return c.JSON(http.StatusBadRequest, MISSING_ID_FIELD)
-	}
-
-	jwt_token := c.Get("user").(*jwt.Token)
-	payload := token.GetPayloadFromJwt(jwt_token)
+	payload := c.Get("user").(*token.Payload)
 
 	check_user, err := s.store.GetUser(c.Request().Context(), uid)
 
-	if err != nil || check_user.ID == uuid.Nil {
+	if err == sql.ErrNoRows {
 		return c.JSON(http.StatusBadRequest, USER_NOTFOUND)
 	}
 
-	if check_user.Username != payload.Username || check_user.Email != payload.Email {
+	if err == sql.ErrConnDone {
+		return c.JSON(http.StatusInternalServerError, newError("Something went wrong."))
+	}
+
+	if check_user.Username != payload.Username {
 		return c.JSON(http.StatusUnauthorized, UNAUTHORIZED)
 	}
 
@@ -289,5 +287,5 @@ func (s *Server) deleteUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	return c.JSON(http.StatusOK, deleted_user)
+	return c.JSON(http.StatusOK, newResponse(deleted_user))
 }
