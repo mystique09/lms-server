@@ -11,7 +11,7 @@
   "swagger": "2.0",
   "info": {
     "description": "# Documentation for the LMS API.",
-    "title": "of LMS API.",
+    "title": "LMS API.",
     "version": "1.0.0"
   },
   "host": "localhost:5000",
