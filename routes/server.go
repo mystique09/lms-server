@@ -1,3 +1,19 @@
+// Package specification LMS API.
+//
+// # Documentation for the LMS API.
+//
+// Schemes: http
+// Host: localhost:5000
+// BasePath: /
+// Version: 1.0.0
+//
+// Consumes:
+// - application/json
+//
+// Produces:
+// - application/json
+//
+// swagger:meta
 package routes
 
 import (

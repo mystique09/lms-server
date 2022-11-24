@@ -45,7 +45,7 @@ type refreshSuccessResponse struct {
 // authentication
 func (s *Server) refreshHandler(c echo.Context) error {
 	// The refreshToken handler.
-	// swagger:operation POST /api/v1/refresh-token refreshToken refreshTokenParameter
+	// swagger:operation POST /api/v1/refresh-token auth refreshTokenParameter
 	//
 	// ---
 	// consumes:
