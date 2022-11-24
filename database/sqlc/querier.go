@@ -13,6 +13,7 @@ import (
 type Querier interface {
 	AddNewClassroomMember(ctx context.Context, arg AddNewClassroomMemberParams) (ClassroomMember, error)
 	CreateClass(ctx context.Context, arg CreateClassParams) (Classroom, error)
+	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (string, error)
 	DeleteClass(ctx context.Context, id uuid.UUID) (Classroom, error)
 	DeleteClassworkFromClass(ctx context.Context, arg DeleteClassworkFromClassParams) (ClassWork, error)
@@ -35,6 +36,7 @@ type Querier interface {
 	GetFollowerById(ctx context.Context, id uuid.UUID) (GetFollowerByIdRow, error)
 	GetOneFollower(ctx context.Context, arg GetOneFollowerParams) (UserFollow, error)
 	GetOnePost(ctx context.Context, id uuid.UUID) (Post, error)
+	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUsers(ctx context.Context, offset int32) ([]User, error)

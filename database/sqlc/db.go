@@ -30,6 +30,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createClassStmt, err = db.PrepareContext(ctx, createClass); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateClass: %w", err)
 	}
+	if q.createSessionStmt, err = db.PrepareContext(ctx, createSession); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateSession: %w", err)
+	}
 	if q.createUserStmt, err = db.PrepareContext(ctx, createUser); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateUser: %w", err)
 	}
@@ -95,6 +98,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getOnePostStmt, err = db.PrepareContext(ctx, getOnePost); err != nil {
 		return nil, fmt.Errorf("error preparing query GetOnePost: %w", err)
+	}
+	if q.getSessionStmt, err = db.PrepareContext(ctx, getSession); err != nil {
+		return nil, fmt.Errorf("error preparing query GetSession: %w", err)
 	}
 	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
@@ -196,6 +202,11 @@ func (q *Queries) Close() error {
 	if q.createClassStmt != nil {
 		if cerr := q.createClassStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createClassStmt: %w", cerr)
+		}
+	}
+	if q.createSessionStmt != nil {
+		if cerr := q.createSessionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createSessionStmt: %w", cerr)
 		}
 	}
 	if q.createUserStmt != nil {
@@ -306,6 +317,11 @@ func (q *Queries) Close() error {
 	if q.getOnePostStmt != nil {
 		if cerr := q.getOnePostStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getOnePostStmt: %w", cerr)
+		}
+	}
+	if q.getSessionStmt != nil {
+		if cerr := q.getSessionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getSessionStmt: %w", cerr)
 		}
 	}
 	if q.getUserStmt != nil {
@@ -494,6 +510,7 @@ type Queries struct {
 	tx                             *sql.Tx
 	addNewClassroomMemberStmt      *sql.Stmt
 	createClassStmt                *sql.Stmt
+	createSessionStmt              *sql.Stmt
 	createUserStmt                 *sql.Stmt
 	deleteClassStmt                *sql.Stmt
 	deleteClassworkFromClassStmt   *sql.Stmt
@@ -516,6 +533,7 @@ type Queries struct {
 	getFollowerByIdStmt            *sql.Stmt
 	getOneFollowerStmt             *sql.Stmt
 	getOnePostStmt                 *sql.Stmt
+	getSessionStmt                 *sql.Stmt
 	getUserStmt                    *sql.Stmt
 	getUserByUsernameStmt          *sql.Stmt
 	getUsersStmt                   *sql.Stmt
@@ -553,6 +571,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		tx:                             tx,
 		addNewClassroomMemberStmt:      q.addNewClassroomMemberStmt,
 		createClassStmt:                q.createClassStmt,
+		createSessionStmt:              q.createSessionStmt,
 		createUserStmt:                 q.createUserStmt,
 		deleteClassStmt:                q.deleteClassStmt,
 		deleteClassworkFromClassStmt:   q.deleteClassworkFromClassStmt,
@@ -575,6 +594,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getFollowerByIdStmt:            q.getFollowerByIdStmt,
 		getOneFollowerStmt:             q.getOneFollowerStmt,
 		getOnePostStmt:                 q.getOnePostStmt,
+		getSessionStmt:                 q.getSessionStmt,
 		getUserStmt:                    q.getUserStmt,
 		getUserByUsernameStmt:          q.getUserByUsernameStmt,
 		getUsersStmt:                   q.getUsersStmt,
