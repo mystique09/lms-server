@@ -29,10 +29,38 @@ import (
 )
 
 type (
+	// swagger:model userCreateRequest
 	UserCreateDTO struct {
+		// The username.
+		//
+		// unique: true
+		// required: true
+		// type: string
 		Username string `json:"username" validate:"required,gt=6"`
-		Email    string `json:"email" validate:"required,email"`
+
+		// The email.
+		//
+		// unique: true
+		// required: true
+		// type: string
+		Email string `json:"email" validate:"required,email"`
+
+		// The password.
+		//
+		// unique: true
+		// required: true
+		// type: string
 		Password string `json:"password" validate:"required,gt=6"`
+	}
+
+	// swagger:parameters newUser
+	SignupRequest struct {
+		// The json payload for login handler
+		//
+		// ---
+		// in: body
+		// required: true
+		Body UserCreateDTO `json:"body"`
 	}
 
 	UserUpdateDTO struct {
@@ -41,11 +69,32 @@ type (
 		Password string `json:"password" validate:"required,gt=6"`
 	}
 
+	// swagger:model userResponse
 	UserResponse struct {
-		ID         uuid.UUID           `json:"id"`
-		Username   string              `json:"username"`
-		Email      string              `json:"email"`
-		UserRole   database.Role       `json:"user_role"`
+
+		// The id of user.
+		//
+		// type: uuid.UUID
+		ID uuid.UUID `json:"id"`
+
+		// The username of user.
+		//
+		// type: string
+		Username string `json:"username"`
+
+		// The email of user.
+		//
+		// type: string
+		Email string `json:"email"`
+
+		// The role of user.
+		//
+		// type: string
+		UserRole database.Role `json:"user_role"`
+
+		// The isibility of user.
+		//
+		// type: string
 		Visibility database.Visibility `json:"visibility"`
 	}
 )
@@ -56,22 +105,6 @@ type UserClassrooms struct {
 }
 
 func (s *Server) getUsers(c echo.Context) error {
-	// swagger:operation GET /api/v1/users Responses[database.User] getUsers
-	//
-	// produces:
-	// - application/json
-	// parameters:
-	// - name: offset
-	// 	in: query
-	//  description: the offset
-	//	required: false
-	//  type: integer
-	//
-	// responses:
-	//  '200':
-	//    description: user response
-	//    schema:
-	//      "$ref": "#/definitions/database.User"
 	ofst := c.QueryParam("offset")
 
 	if ofst == "" || ofst == "0" {
@@ -121,6 +154,22 @@ func (s *Server) getUser(c echo.Context) error {
 }
 
 func (s *Server) createUser(c echo.Context) error {
+	// The signup handler.
+	// swagger:operation POST /api/v1/signup createUser newUser
+	//
+	// ---
+	// consumes:
+	// - application/json
+	//
+	// produces:
+	// - application/json
+	//
+	// responses:
+	//   '200':
+	//	   description: login success response
+	//	   schema:
+	//	     type: object
+	//		 	"$ref": "#/definitions/userResponse"
 	user_data := new(UserCreateDTO)
 
 	bindErr := c.Bind(&user_data)

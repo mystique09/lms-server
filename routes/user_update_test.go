@@ -154,8 +154,9 @@ func TestUpdateUserApi(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/api/v1/users/%v?field=%v", user.ID, tc.field), data)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-			paseto_token, err := server.tokenMaker.CreateToken(user.Username, cfg.AccessTokenDuration)
+			paseto_token, tokenPayload, err := server.tokenMaker.CreateToken(user.Username, cfg.AccessTokenDuration)
 			require.NoError(t, err)
+			require.NotNil(t, tokenPayload)
 
 			req.Header.Set("authorization", fmt.Sprintf("Bearer %v", paseto_token))
 

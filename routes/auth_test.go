@@ -30,6 +30,7 @@ func TestLogin(t *testing.T) {
 			payload: fmt.Sprintf(`{"username":"%v","password":"%v"}`, user.Username, password),
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().GetUserByUsername(gomock.Any(), gomock.Eq(user.Username)).Times(1).Return(user, nil)
+				store.EXPECT().CreateSession(gomock.Any(), gomock.Any()).Times(1)
 			},
 			checkResponse: func(t *testing.T, rec *httptest.ResponseRecorder) {
 				var res Response[authSuccessResponse]
@@ -40,7 +41,7 @@ func TestLogin(t *testing.T) {
 				err = json.Unmarshal(body, &res)
 				require.NoError(t, err)
 
-				require.NotEmpty(t, res.Data.Access)
+				require.NotEmpty(t, res.Data.AccessToken)
 				require.NotEmpty(t, res.Data.User)
 				require.Equal(t, 200, rec.Code)
 			},

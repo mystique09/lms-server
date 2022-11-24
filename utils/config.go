@@ -8,14 +8,15 @@ import (
 )
 
 type Config struct {
-	DBUrl               string        `mapstructure:"DB_URL"`
-	Host                string        `mapstructure:"HOST"`
-	JwtSecretKey        string        `mapstructure:"JWT_SECRET"`
-	JwtRefreshSecretKey string        `mapstructure:"JWT_REFRESH"`
-	PasetoSymmetricKey  string        `mapstructure:"PASETO_SYMMETRIC_KEY"`
-	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
-	FrontendUrl         string        `mapstructure:"FRONTEND_URL"`
-	CldUrl              string        `mapstructure:"CLD_URL"`
+	DBUrl                string        `mapstructure:"DB_URL"`
+	Host                 string        `mapstructure:"HOST"`
+	JwtSecretKey         string        `mapstructure:"JWT_SECRET"`
+	JwtRefreshSecretKey  string        `mapstructure:"JWT_REFRESH"`
+	PasetoSymmetricKey   string        `mapstructure:"PASETO_SYMMETRIC_KEY"`
+	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+	FrontendUrl          string        `mapstructure:"FRONTEND_URL"`
+	CldUrl               string        `mapstructure:"CLD_URL"`
 }
 
 func LoadConfig(path, configName string) (Config, error) {

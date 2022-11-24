@@ -1,0 +1,327 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "# The purpose of this API is to query the Users",
+    "title": "of User API.",
+    "version": "1.0.0"
+  },
+  "host": "localhost:5000",
+  "basePath": "/",
+  "paths": {
+    "/api/v1/login": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "auth"
+        ],
+        "operationId": "authUser",
+        "parameters": [
+          {
+            "x-go-name": "Body",
+            "description": "The json payload for login handler",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/authRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "login success response",
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/authSuccessResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/refresh-token": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "refreshToken"
+        ],
+        "operationId": "refreshTokenParameter",
+        "parameters": [
+          {
+            "x-go-name": "Body",
+            "description": "The json payload for login handler",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/refreshTokenParameter"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "refresh-token success response",
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/refreshSuccessResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/signup": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "createUser"
+        ],
+        "operationId": "newUser",
+        "parameters": [
+          {
+            "x-go-name": "Body",
+            "description": "The json payload for login handler",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/userCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "login success response",
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/userResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Role": {
+      "type": "string",
+      "x-go-package": "server/database/sqlc"
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "CreatedAt"
+        },
+        "email": {
+          "type": "string",
+          "x-go-name": "Email"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "UpdatedAt"
+        },
+        "user_role": {
+          "$ref": "#/definitions/Role"
+        },
+        "username": {
+          "type": "string",
+          "x-go-name": "Username"
+        },
+        "visibility": {
+          "$ref": "#/definitions/Visibility"
+        }
+      },
+      "x-go-package": "server/database/sqlc"
+    },
+    "Visibility": {
+      "type": "string",
+      "x-go-package": "server/database/sqlc"
+    },
+    "authRequest": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "description": "The password in the json body",
+          "type": "string",
+          "uniqueItems": true,
+          "x-go-name": "Password"
+        },
+        "username": {
+          "description": "The username in the json body",
+          "type": "string",
+          "uniqueItems": true,
+          "x-go-name": "Username"
+        }
+      },
+      "x-go-package": "server/routes"
+    },
+    "authSuccessResponse": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "access_token",
+        "access_token_expiry",
+        "refresh_token",
+        "refresh_token_expiry",
+        "user"
+      ],
+      "properties": {
+        "access_token": {
+          "description": "The access token of response.",
+          "type": "string",
+          "x-go-name": "AccessToken"
+        },
+        "access_token_expiry": {
+          "description": "The expiry of access token.",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "AccessTokenExpiresAt"
+        },
+        "refresh_token": {
+          "description": "The refresh token.",
+          "type": "string",
+          "x-go-name": "RefreshToken"
+        },
+        "refresh_token_expiry": {
+          "description": "The expiry of refresh token.",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "RefreshTokenExpiresAt"
+        },
+        "session_id": {
+          "description": "The session ID.",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "SessionId"
+        },
+        "user": {
+          "$ref": "#/definitions/User"
+        }
+      },
+      "x-go-package": "server/routes"
+    },
+    "refreshSuccessResponse": {
+      "type": "object",
+      "required": [
+        "access_token",
+        "access_token_expiry"
+      ],
+      "properties": {
+        "access_token": {
+          "description": "The access token of response.",
+          "type": "string",
+          "x-go-name": "AccessToken"
+        },
+        "access_token_expiry": {
+          "description": "The expiry of access token.",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "AccessTokenExpiresAt"
+        }
+      },
+      "x-go-package": "server/routes"
+    },
+    "refreshTokenParameter": {
+      "type": "object",
+      "properties": {
+        "refresh_token": {
+          "description": "The refresh token in the json body",
+          "type": "string",
+          "uniqueItems": true,
+          "x-go-name": "RefreshToken"
+        }
+      },
+      "x-go-name": "refreshRequest",
+      "x-go-package": "server/routes"
+    },
+    "userCreateRequest": {
+      "type": "object",
+      "required": [
+        "username",
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "description": "The email.",
+          "type": "string",
+          "uniqueItems": true,
+          "x-go-name": "Email"
+        },
+        "password": {
+          "description": "The password.",
+          "type": "string",
+          "uniqueItems": true,
+          "x-go-name": "Password"
+        },
+        "username": {
+          "description": "The username.",
+          "type": "string",
+          "uniqueItems": true,
+          "x-go-name": "Username"
+        }
+      },
+      "x-go-name": "UserCreateDTO",
+      "x-go-package": "server/routes"
+    },
+    "userResponse": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "description": "The email of user.\n\ntype: string",
+          "type": "string",
+          "x-go-name": "Email"
+        },
+        "id": {
+          "description": "The id of user.\n\ntype: uuid.UUID",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "user_role": {
+          "$ref": "#/definitions/Role"
+        },
+        "username": {
+          "description": "The username of user.\n\ntype: string",
+          "type": "string",
+          "x-go-name": "Username"
+        },
+        "visibility": {
+          "$ref": "#/definitions/Visibility"
+        }
+      },
+      "x-go-name": "UserResponse",
+      "x-go-package": "server/routes"
+    }
+  }
+}
