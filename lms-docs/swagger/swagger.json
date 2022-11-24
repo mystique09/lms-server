@@ -72,7 +72,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/refreshRequest"
+              "$ref": "#/definitions/refreshTokenParameter"
             }
           }
         ],
@@ -230,18 +230,6 @@
       },
       "x-go-package": "server/routes"
     },
-    "refreshRequest": {
-      "type": "object",
-      "properties": {
-        "refresh_token": {
-          "description": "The refresh token in the json body",
-          "type": "string",
-          "uniqueItems": true,
-          "x-go-name": "RefreshToken"
-        }
-      },
-      "x-go-package": "server/routes"
-    },
     "refreshSuccessResponse": {
       "type": "object",
       "required": [
@@ -261,6 +249,19 @@
           "x-go-name": "AccessTokenExpiresAt"
         }
       },
+      "x-go-package": "server/routes"
+    },
+    "refreshTokenParameter": {
+      "type": "object",
+      "properties": {
+        "refresh_token": {
+          "description": "The refresh token in the json body",
+          "type": "string",
+          "uniqueItems": true,
+          "x-go-name": "RefreshToken"
+        }
+      },
+      "x-go-name": "refreshRequest",
       "x-go-package": "server/routes"
     },
     "userCreateRequest": {
