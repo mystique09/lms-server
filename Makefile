@@ -53,7 +53,8 @@ cover:
 	go tool cover -html=coverage.out
 	
 docs:
-	swagger generate spec -o ./lms-docs/swagger.yaml --scan-models
+	rm -rf ./lms-docs/swagger/swagger.json
+	swagger generate spec -o ./lms-docs/swagger/swagger.json --scan-models
 
 server:
 	go run cmd/main.go
