@@ -90,25 +90,9 @@ func (server *Server) setupRouter() {
 	e.GET("/", server.indexRoute)
 	e.POST("/api/v1/signup", server.createUser)
 	e.POST("/api/v1/login", server.loginHandler)
+	e.POST("/api/v1/refresh-token", server.refreshHandler)
 
 	user_group := e.Group("/api/v1/users", server.authMiddleware)
-
-	// swagger:operation GET /api/v1/users Responses[database.User] getUsers
-	//
-	// produces:
-	// - application/json
-	// parameters:
-	// - name: offset
-	//	 in: query
-	//   description: the offset
-	//	 required: false
-	//   type: integer
-	//
-	// responses:
-	//  '200':
-	//    description: user response
-	//    schema:
-	//      "$ref": "#/definitions/database.User"
 	user_group.GET("", server.getUsers)
 	user_group.GET("/:id", server.getUser)
 	user_group.PUT("/:id", server.updateUser)
