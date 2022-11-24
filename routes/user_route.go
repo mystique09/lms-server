@@ -1,19 +1,3 @@
-// Package specification of User API.
-//
-// # The purpose of this API is to query the Users
-//
-// Schemes: http
-// Host: localhost:5000
-// BasePath: /
-// Version: 1.0.0
-//
-// Consumes:
-// - application/json
-//
-// Produces:
-// - application/json
-//
-// swagger:meta
 package routes
 
 import (
@@ -155,7 +139,7 @@ func (s *Server) getUser(c echo.Context) error {
 
 func (s *Server) createUser(c echo.Context) error {
 	// The signup handler.
-	// swagger:operation POST /api/v1/signup createUser newUser
+	// swagger:operation POST /api/v1/signup user newUser
 	//
 	// ---
 	// consumes:
