@@ -18,9 +18,10 @@ func TestPasteMaker(t *testing.T) {
 	issuedAt := time.Now()
 	expiredAt := issuedAt.Add(duration)
 
-	token, err := maker.CreateToken(username, duration)
+	token, tokenPayload, err := maker.CreateToken(username, duration)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
+	require.NotNil(t, tokenPayload)
 
 	payload, err := maker.VerifyToken(token)
 	require.NoError(t, err)
@@ -39,9 +40,10 @@ func TestExpirePasteToken(t *testing.T) {
 	username := utils.RandomString(8)
 	duration := -time.Minute
 
-	token, err := maker.CreateToken(username, duration)
+	token, tokenPayload, err := maker.CreateToken(username, duration)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
+	require.NotNil(t, tokenPayload)
 
 	payload, err := maker.VerifyToken(token)
 	require.Error(t, err)
