@@ -171,8 +171,9 @@ func TestDeleteUserApi(t *testing.T) {
 			server, err := NewServer(store, &cfg)
 			require.NoError(t, err)
 
-			pasetoToken, err := server.tokenMaker.CreateToken(tc.tokenPayload, server.cfg.AccessTokenDuration)
+			pasetoToken, tokenPayload, err := server.tokenMaker.CreateToken(tc.tokenPayload, server.cfg.AccessTokenDuration)
 			require.NoError(t, err)
+			require.NotNil(t, tokenPayload)
 
 			rec := httptest.NewRecorder()
 			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/api/v1/users/%v", tc.body), nil)
