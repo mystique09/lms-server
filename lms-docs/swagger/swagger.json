@@ -10,8 +10,8 @@
   ],
   "swagger": "2.0",
   "info": {
-    "description": "# The purpose of this API is to query the Users",
-    "title": "of User API.",
+    "description": "# Documentation for the LMS API.",
+    "title": "of LMS API.",
     "version": "1.0.0"
   },
   "host": "localhost:5000",
@@ -61,7 +61,7 @@
           "application/json"
         ],
         "tags": [
-          "refreshToken"
+          "auth"
         ],
         "operationId": "refreshTokenParameter",
         "parameters": [
@@ -96,7 +96,7 @@
           "application/json"
         ],
         "tags": [
-          "createUser"
+          "user"
         ],
         "operationId": "newUser",
         "parameters": [
