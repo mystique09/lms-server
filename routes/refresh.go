@@ -3,29 +3,12 @@ package routes
 import (
 	"database/sql"
 	"net/http"
-	// Package specification of Auth API.
-	//
-	// # The purpose of this API is to authenticate user.
-	//
-	// Schemes: http
-	// Host: localhost:5000
-	// BasePath: /
-	// Version: 1.0.0
-	//
-	// Consumes:
-	// - application/json
-	//
-	// Produces:
-	// - application/json
-	//
-	// swagger:meta
-
 	"time"
 
 	"github.com/labstack/echo/v4"
 )
 
-// swagger:model
+// swagger:model refreshTokenParameter
 type refreshRequest struct {
 	// The refresh token in the json body
 	//
@@ -37,7 +20,7 @@ type refreshRequest struct {
 }
 
 // swagger:parameters refreshTokenParameter
-type refreshRequestBody struct {
+type RefreshRequestBody struct {
 	// The json payload for login handler
 	//
 	// ---
