@@ -54,7 +54,7 @@ type (
 	}
 
 	// swagger:parameters newUser
-	signupRequest struct {
+	SignupRequest struct {
 		// The json payload for login handler
 		//
 		// ---
