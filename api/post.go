@@ -1,4 +1,4 @@
-package routes
+package api
 
 import (
 	database "server/database/sqlc"

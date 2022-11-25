@@ -1,4 +1,4 @@
-package routes
+package api
 
 // auth errors
 var LOGIN_FAILED = newError("Incorrect username or password.")

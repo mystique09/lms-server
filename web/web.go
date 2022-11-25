@@ -1,4 +1,4 @@
-package lmsdocs
+package web
 
 import (
 	"embed"

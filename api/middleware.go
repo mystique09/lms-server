@@ -1,4 +1,4 @@
-package routes
+package api
 
 import (
 	"log"
@@ -8,15 +8,24 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/rs/zerolog"
 	"golang.org/x/time/rate"
 )
 
-func LoggerMiddleware() echo.MiddlewareFunc {
-	return middleware.LoggerWithConfig(
-		middleware.LoggerConfig{
-			Format: `[${time_rfc3339}] [${method}] ${status} ${host}${path} ${latency_human}` + "\n",
+func LoggerMiddleware(logger *zerolog.Logger) echo.MiddlewareFunc {
+	return middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogURI:    true,
+		LogStatus: true,
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			logger.Info().
+				Time("time", v.StartTime.UTC()).
+				Str("URI", v.URI).
+				Int("status", v.Status).
+				Msg("request")
+
+			return nil
 		},
-	)
+	})
 }
 
 func CorsMiddleware(cfg *utils.Config) echo.MiddlewareFunc {
