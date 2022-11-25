@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"server/routes"
+	"server/api"
 	"server/utils"
 )
 
@@ -13,5 +13,5 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	routes.Launch(&cfg)
+	api.Launch(&cfg)
 }
