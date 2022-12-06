@@ -106,7 +106,7 @@ SELECT id, username, password, email, user_role, visibility, created_at, updated
 FROM users
 ORDER BY created_at
 ASC
-LIMIT 50
+LIMIT 20
 OFFSET $1
 `
 
