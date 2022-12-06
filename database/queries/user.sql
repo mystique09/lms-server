@@ -9,7 +9,7 @@ SELECT *
 FROM users
 ORDER BY created_at
 ASC
-LIMIT 50
+LIMIT 20
 OFFSET $1;
 
 -- name: GetUserByUsername :one
