@@ -21,6 +21,7 @@ func LoggerMiddleware(logger *zerolog.Logger) echo.MiddlewareFunc {
 				Time("time", v.StartTime.UTC()).
 				Str("URI", v.URI).
 				Int("status", v.Status).
+				Int64("latency", v.Latency.Milliseconds()).
 				Msg("request")
 
 			return nil

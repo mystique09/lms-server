@@ -50,24 +50,24 @@ type ClassroomJoinRequest struct {
 
 func (s *Server) getClassrooms(c echo.Context) error {
 	id := c.Param("id")
+
 	uid, err := uuid.Parse(id)
-
 	if err != nil {
-		return c.JSON(400, err)
+		return c.JSON(400, newError(err.Error()))
 	}
-	page := c.QueryParam("page")
 
+	page := c.QueryParam("page")
 	if page == "" {
 		page = "0"
 	}
 
 	offset, err := strconv.Atoi(page)
-	if offset < 0 {
-		return c.JSON(400, NEGATIVE_OFFSET)
+	if err != nil {
+		return c.JSON(400, newError(err.Error()))
 	}
 
-	if err != nil {
-		return c.JSON(400, err)
+	if offset < 0 {
+		return c.JSON(400, NEGATIVE_OFFSET)
 	}
 
 	param := database.GetAllClassFromUserParams{
@@ -75,13 +75,12 @@ func (s *Server) getClassrooms(c echo.Context) error {
 		Offset:  int32(offset * 10),
 	}
 
-	classes, err := s.store.GetAllClassFromUser(c.Request().Context(), param)
-
+	classrooms, err := s.store.GetAllClassFromUser(c.Request().Context(), param)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, newError(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, classes)
+	return c.JSON(http.StatusOK, newResponse(classrooms))
 }
 
 func (s *Server) getAllClassrooms(c echo.Context) error {
@@ -92,9 +91,8 @@ func (s *Server) getAllClassrooms(c echo.Context) error {
 	}
 
 	offset, err := strconv.Atoi(page)
-
 	if err != nil {
-		return c.JSON(400, err)
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	if offset < 0 {
@@ -102,9 +100,8 @@ func (s *Server) getAllClassrooms(c echo.Context) error {
 	}
 
 	public_classrooms, err := s.store.ListAllPublicClass(c.Request().Context(), int32(offset*10))
-
 	if err != nil {
-		return c.JSON(400, err)
+		return c.JSON(400, newError(err.Error()))
 	}
 
 	return c.JSON(200, public_classrooms)

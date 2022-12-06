@@ -25,7 +25,7 @@ force:
 	migrate -path ./database/migrations/ -database "postgresql://root:secret@localhost:5432/$(DB_NAME)?sslmode=disable" -verbose force 1
 
 inspect:
-	sudo docker exec -it postgres2 psql $(DB_NAME)
+	sudo docker exec -it pg psql $(DB_NAME)
 
 sqlc:
 	sqlc generate
