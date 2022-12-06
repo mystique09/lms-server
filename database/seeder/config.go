@@ -115,7 +115,8 @@ func seedClassroomRunner(q *database.Queries, r chan string, amount int) {
 		return
 	}
 
-	for _, user := range users {
+	for i := range users {
+		user := users[i]
 		r <- fmt.Sprintf("Seeding user %s with %d classrooms", user.ID.String(), amount)
 		for i := 0; i < amount; i++ {
 			randomClassroom := database.CreateClassParams{
@@ -142,8 +143,9 @@ func seedClassroomRunner(q *database.Queries, r chan string, amount int) {
 }
 
 func seedClasswork(amount int, q *database.Queries) {
+	ch := make(chan string)
 	for i := 0; i < amount; i++ {
-
+		go seedClassworkRunner(q, ch)
 	}
 }
 
