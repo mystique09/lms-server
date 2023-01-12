@@ -31,7 +31,7 @@ sqlc:
 	sqlc generate
 
 mock: sqlc
-	mockgen -package mockdb -destination database/mock/store.go server/database/sqlc Store
+	mockgen -package mockdb -destination database/mocks/mockdb/store.go server/database/store Store
 	
 clean:
 	rm -rf ./tmp coverage.out
