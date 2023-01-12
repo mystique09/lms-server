@@ -12,6 +12,7 @@ func main() {
 	defer app.CloseDBConnection()
 
 	e := echo.New()
+	e.Validator = bootstrap.NewValidator()
 	routeV1 := e.Group("/api/v1")
 
 	route.Setup(&app, app.Store, routeV1)
