@@ -6,6 +6,7 @@ import (
 )
 
 type Store interface {
+	postgresql.Querier
 }
 
 type SQLStore struct {
