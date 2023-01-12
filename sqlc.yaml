@@ -2,11 +2,11 @@ version: "1"
 project:
     id: ""
 packages: 
-- name: "database"
-  path: "./database/sqlc"
+- name: "postgresql"
+  path: "./database/postgresql"
   engine: "postgresql"
   schema: "./database/migrations"
-  queries: "./database/queries"
+  queries: "./database/query"
   emit_json_tags: true
   emit_prepared_queries: true
   emit_interface: true

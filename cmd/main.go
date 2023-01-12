@@ -1,33 +1,20 @@
 package main
 
 import (
-	"flag"
-	"log"
-	"server/api"
-	"server/database/seeder"
-	"server/utils"
-)
+	"server/api/route/v1"
+	"server/bootstrap"
 
-var (
-	seedDatabase = flag.Bool("seed", false, "Seed the database with random data...")
-	seedAmount   = flag.Int("amount", 10, "amount of data to put in the database.")
-	tableName    = flag.String("table", "users", "the database table to seed the data")
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
-	flag.Parse()
+	app := bootstrap.App()
+	defer app.CloseDBConnection()
 
-	cfg, err := utils.LoadConfig(".", "app")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	e := echo.New()
+	e.Validator = bootstrap.NewValidator()
+	routeV1 := e.Group("/api/v1")
 
-	if *seedDatabase {
-		seedRunner := seeder.New(*tableName, *seedAmount, &cfg)
-		seedRunner.Run()
-		log.Println("Seeding done")
-		return
-	}
-
-	api.Launch(&cfg)
+	route.Setup(&app, app.Store, routeV1)
+	app.Launch(e)
 }

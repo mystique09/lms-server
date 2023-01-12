@@ -31,7 +31,7 @@ sqlc:
 	sqlc generate
 
 mock: sqlc
-	mockgen -package mockdb -destination database/mock/store.go server/database/sqlc Store
+	mockgen -package mockdb -destination database/mocks/mockdb/store.go server/database/store Store
 	
 clean:
 	rm -rf ./tmp coverage.out
@@ -56,7 +56,7 @@ docs:
 	rm -rf ./lms-docs/swagger/swagger.json
 	swagger generate spec -o ./lms-docs/swagger/swagger.json --scan-models
 
-server:
+run:
 	go run cmd/main.go
 	
 build:
@@ -70,4 +70,4 @@ temp-server: build
 	cp app.env test-server
 	mv lms-server test-server
 
-.PHONY: postgres create migrateup migratedown force test server mock docs cover build temp-server
+.PHONY: postgres create migrateup migratedown force test run mock docs cover build temp-server
