@@ -1,21 +1,16 @@
 package route
 
 import (
-	"log"
 	"server/bootstrap"
 	"server/database/store"
 
 	"github.com/labstack/echo/v4"
 )
 
-// Serves API from routes
-func Setup(env *bootstrap.Env, st store.Store, routeV1 *echo.Group) {
+func Setup(app *bootstrap.Application, st store.Store, routeV1 *echo.Group) {
 	publicRouterV1 := routeV1.Group("")
-	// TODO!
-	// remove this one
-	publicRouterV1.GET("/health", func(c echo.Context) error {
-		return c.JSON(200, `{"health":"100", "status": "good"}`)
-	})
+	publicRouterV1.GET("/health", healthRoute)
+	NewLoginRouter(app, st, publicRouterV1)
 
 	protectedRouterV1 := routeV1.Group("")
 	// TODO!
@@ -25,6 +20,6 @@ func Setup(env *bootstrap.Env, st store.Store, routeV1 *echo.Group) {
 	})
 }
 
-func Launch(env *bootstrap.Env, router *echo.Echo) {
-	log.Fatal(router.Start(env.Host))
+func healthRoute(c echo.Context) error {
+	return c.JSON(200, `{health: 100, status: "good"}`)
 }
