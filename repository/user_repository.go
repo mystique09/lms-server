@@ -5,11 +5,11 @@ import (
 )
 
 type userRepository struct {
-	database *store.Store
+	userStore *store.Store
 }
 
-func NewUserRepository(store *store.Store) userRepository {
+func NewUserRepository(st store.Store) userRepository {
 	return userRepository{
-		database: store,
+		userStore: &st,
 	}
 }

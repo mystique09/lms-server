@@ -12,9 +12,9 @@ func main() {
 	env := app.Env
 	defer app.CloseDBConnection()
 
-	echo := echo.New()
-	routeV1 := echo.Group("/api/v1")
+	e := echo.New()
+	routeV1 := e.Group("/api/v1")
 
-	route.Setup(&env, &app.Store, routeV1)
-	route.Launch(&env, echo)
+	route.Setup(&env, app.Store, routeV1)
+	route.Launch(&env, e)
 }

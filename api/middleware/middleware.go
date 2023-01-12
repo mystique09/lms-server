@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"server/bootstrap"
 
 	"github.com/labstack/echo/v4"
@@ -50,3 +51,7 @@ const (
 	authorizationHeaderType = "bearer"
 	authorizationPayloadKey = "user"
 )
+
+func Todo() {
+	log.Println(authorizationHeaderKey, authorizationHeaderType, authorizationPayloadKey)
+}

@@ -10,7 +10,7 @@ import (
 )
 
 // Serves API from routes
-func Setup(env *bootstrap.Env, store *store.Store, routeV1 *echo.Group) {
+func Setup(env *bootstrap.Env, st store.Store, routeV1 *echo.Group) {
 	publicRouterV1 := routeV1.Group("")
 	// TODO!
 	// remove this one
@@ -26,6 +26,6 @@ func Setup(env *bootstrap.Env, store *store.Store, routeV1 *echo.Group) {
 	})
 }
 
-func Launch(cfg *bootstrap.Env, router *echo.Echo) {
-	log.Fatal(router.Start(cfg.Host))
+func Launch(env *bootstrap.Env, router *echo.Echo) {
+	log.Fatal(router.Start(env.Host))
 }
