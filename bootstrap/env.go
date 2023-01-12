@@ -10,6 +10,7 @@ import (
 type Env struct {
 	DBUrl                string        `mapstructure:"DB_URL"`
 	Host                 string        `mapstructure:"HOST"`
+	Port                 string        `mapstructure:"PORT"`
 	JwtSecretKey         string        `mapstructure:"JWT_SECRET"`
 	JwtRefreshSecretKey  string        `mapstructure:"JWT_REFRESH"`
 	PasetoSymmetricKey   string        `mapstructure:"PASETO_SYMMETRIC_KEY"`
