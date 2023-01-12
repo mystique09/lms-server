@@ -13,6 +13,6 @@ func Encrypt(plain_text string) (string, error) {
 	return string(hashed_password), nil
 }
 
-func MatchPassword(p, hash []byte) error {
-	return bcrypt.CompareHashAndPassword(hash, p)
+func MatchPassword(hashed_password, plain_password []byte) error {
+	return bcrypt.CompareHashAndPassword(hashed_password, plain_password)
 }
