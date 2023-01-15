@@ -19,11 +19,11 @@ func NewSignupUsecase(userRepository domain.UserRepository) domain.SignupUsecase
 }
 
 func (su *signupUsecase) GetUserByUsername(c echo.Context, username string) (domain.User, error) {
-	return su.userRepository.GetByUsername(c, username)
+	return su.userRepository.GetByUsername(c.Request().Context(), username)
 }
 
 func (su *signupUsecase) CreateUser(c echo.Context, username, email, password string) error {
-	return su.userRepository.Create(c, &postgresql.CreateUserParams{
+	return su.userRepository.Create(c.Request().Context(), &postgresql.CreateUserParams{
 		ID:         uuid.New(),
 		Username:   username,
 		Email:      email,

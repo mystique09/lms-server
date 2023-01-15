@@ -21,7 +21,7 @@ func NewLoginUsecase(userRepository domain.UserRepository, tokenMaker tokenutil.
 }
 
 func (lu *loginUsecase) GetUserByUsername(c echo.Context, username string) (domain.User, error) {
-	return lu.userRepository.GetByUsername(c, username)
+	return lu.userRepository.GetByUsername(c.Request().Context(), username)
 }
 
 func (lu *loginUsecase) CreateAccessToken(username string, duration time.Duration) (string, *tokenutil.Payload, error) {
