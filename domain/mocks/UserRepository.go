@@ -5,12 +5,12 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 	postgresql "server/database/postgresql"
 
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
-	echo "github.com/labstack/echo/v4"
 )
 
 // MockUserRepository is a mock of UserRepository interface.
@@ -37,7 +37,7 @@ func (m *MockUserRepository) EXPECT() *MockUserRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockUserRepository) Create(arg0 echo.Context, arg1 *postgresql.CreateUserParams) error {
+func (m *MockUserRepository) Create(arg0 context.Context, arg1 *postgresql.CreateUserParams) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -51,7 +51,7 @@ func (mr *MockUserRepositoryMockRecorder) Create(arg0, arg1 interface{}) *gomock
 }
 
 // Delete mocks base method.
-func (m *MockUserRepository) Delete(arg0 echo.Context, arg1 uuid.UUID) error {
+func (m *MockUserRepository) Delete(arg0 context.Context, arg1 uuid.UUID) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -65,7 +65,7 @@ func (mr *MockUserRepositoryMockRecorder) Delete(arg0, arg1 interface{}) *gomock
 }
 
 // Fetch mocks base method.
-func (m *MockUserRepository) Fetch(arg0 echo.Context, arg1 int32) ([]postgresql.User, error) {
+func (m *MockUserRepository) Fetch(arg0 context.Context, arg1 int32) ([]postgresql.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Fetch", arg0, arg1)
 	ret0, _ := ret[0].([]postgresql.User)
@@ -80,7 +80,7 @@ func (mr *MockUserRepositoryMockRecorder) Fetch(arg0, arg1 interface{}) *gomock.
 }
 
 // GetByID mocks base method.
-func (m *MockUserRepository) GetByID(arg0 echo.Context, arg1 uuid.UUID) (postgresql.User, error) {
+func (m *MockUserRepository) GetByID(arg0 context.Context, arg1 uuid.UUID) (postgresql.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByID", arg0, arg1)
 	ret0, _ := ret[0].(postgresql.User)
@@ -95,7 +95,7 @@ func (mr *MockUserRepositoryMockRecorder) GetByID(arg0, arg1 interface{}) *gomoc
 }
 
 // GetByUsername mocks base method.
-func (m *MockUserRepository) GetByUsername(arg0 echo.Context, arg1 string) (postgresql.User, error) {
+func (m *MockUserRepository) GetByUsername(arg0 context.Context, arg1 string) (postgresql.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByUsername", arg0, arg1)
 	ret0, _ := ret[0].(postgresql.User)
@@ -110,7 +110,7 @@ func (mr *MockUserRepositoryMockRecorder) GetByUsername(arg0, arg1 interface{}) 
 }
 
 // UpdateEmail mocks base method.
-func (m *MockUserRepository) UpdateEmail(arg0 echo.Context, arg1 *postgresql.UpdateUserEmailParams) error {
+func (m *MockUserRepository) UpdateEmail(arg0 context.Context, arg1 *postgresql.UpdateUserEmailParams) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateEmail", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -124,7 +124,7 @@ func (mr *MockUserRepositoryMockRecorder) UpdateEmail(arg0, arg1 interface{}) *g
 }
 
 // UpdatePassword mocks base method.
-func (m *MockUserRepository) UpdatePassword(arg0 echo.Context, arg1 *postgresql.UpdateUserPasswordParams) error {
+func (m *MockUserRepository) UpdatePassword(arg0 context.Context, arg1 *postgresql.UpdateUserPasswordParams) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdatePassword", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -138,7 +138,7 @@ func (mr *MockUserRepositoryMockRecorder) UpdatePassword(arg0, arg1 interface{})
 }
 
 // UpdateUsername mocks base method.
-func (m *MockUserRepository) UpdateUsername(arg0 echo.Context, arg1 *postgresql.UpdateUsernameParams) error {
+func (m *MockUserRepository) UpdateUsername(arg0 context.Context, arg1 *postgresql.UpdateUsernameParams) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUsername", arg0, arg1)
 	ret0, _ := ret[0].(error)
