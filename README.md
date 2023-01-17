@@ -43,3 +43,23 @@ While developing, you need to install this binaries.
 1. Sqlc, sqlc is used to generate typesafe sql queries. [Install sqlc](https://docs.sqlc.dev/en/latest/overview/install.html).
 1. golang-migrate for manual migration. [Install golang-migrate](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate).
 1. mockgen for code mocks, also used for testing. [Install gomock](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate).
+1. Gosec, a go linter for security. [Install gosec](https://github.com/securego/gosec#go-116).
+1. Go-critic, a linter used to critic go code. [Install go-critic](https://github.com/go-critic/go-critic#installation).
+1. Golangci-lint, powerful golang linter. [Install golangci-lint](https://golangci-lint.run/usage/install/).
+
+To run tests:
+```bash
+	go test -v -cover -coverprofile=coverage.out
+	# or
+	make test
+```
+To run linters:
+```bash
+	gosec -quiet -exclude-generated ./...
+	gocritic check -enableAll ./...
+	golangci-lint run ./...
+	# or
+	make lint
+```
+
+[Apache License 2.0](./LICENSE)
