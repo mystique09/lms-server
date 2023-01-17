@@ -13,6 +13,8 @@ func Setup(app *bootstrap.Application, st store.Store, routeV1 *echo.Group) {
 	publicRouterV1.GET("/health", healthRoute)
 	NewLoginRouter(app, st, publicRouterV1)
 	NewSignupRouter(app, st, publicRouterV1)
+	NewRefreshTokenRouter(app, st, publicRouterV1)
+	NewAccessTokenRouter(app, st, publicRouterV1)
 
 	protectedRouterV1 := routeV1.Group("", middleware.AuthMiddleware(app.TokenMaker))
 	// TODO!
