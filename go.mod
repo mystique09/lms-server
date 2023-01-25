@@ -16,6 +16,7 @@ require (
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/crypto v0.3.0
+	golang.org/x/net v0.2.0
 	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9
 )
 
@@ -49,7 +50,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/net v0.2.0 // indirect
 	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
