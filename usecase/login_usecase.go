@@ -9,19 +9,19 @@ import (
 )
 
 type loginUsecase struct {
-	userRepository domain.UserRepository
-	tokenMaker     tokenutil.Maker
+	repository domain.UserRepository
+	tokenMaker tokenutil.Maker
 }
 
-func NewLoginUsecase(userRepository domain.UserRepository, tokenMaker tokenutil.Maker) domain.LoginUsecase {
+func NewLoginUsecase(repository domain.UserRepository, tokenMaker tokenutil.Maker) domain.LoginUsecase {
 	return &loginUsecase{
-		userRepository: userRepository,
-		tokenMaker:     tokenMaker,
+		repository: repository,
+		tokenMaker: tokenMaker,
 	}
 }
 
 func (lu *loginUsecase) GetUserByUsername(c echo.Context, username string) (domain.User, error) {
-	return lu.userRepository.GetByUsername(c.Request().Context(), username)
+	return lu.repository.GetByUsername(c.Request().Context(), username)
 }
 
 func (lu *loginUsecase) CreateAccessToken(username string, duration time.Duration) (string, *tokenutil.Payload, error) {
