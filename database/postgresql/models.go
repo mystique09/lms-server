@@ -103,8 +103,8 @@ type ClassWork struct {
 	UserID    uuid.UUID     `json:"user_id"`
 	ClassID   uuid.UUID     `json:"class_id"`
 	Mark      sql.NullInt32 `json:"mark"`
-	CreatedAt sql.NullTime  `json:"created_at"`
-	UpdatedAt sql.NullTime  `json:"updated_at"`
+	CreatedAt time.Time     `json:"created_at"`
+	UpdatedAt time.Time     `json:"updated_at"`
 }
 
 type Classroom struct {
@@ -139,11 +139,11 @@ type Comment struct {
 }
 
 type CommentLike struct {
-	ID        uuid.UUID    `json:"id"`
-	CommentID uuid.UUID    `json:"comment_id"`
-	UserID    uuid.UUID    `json:"user_id"`
-	CreatedAt time.Time    `json:"created_at"`
-	UpdatedAt sql.NullTime `json:"updated_at"`
+	ID        uuid.UUID `json:"id"`
+	CommentID uuid.UUID `json:"comment_id"`
+	UserID    uuid.UUID `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type Post struct {
@@ -183,12 +183,4 @@ type User struct {
 	Visibility Visibility `json:"visibility"`
 	CreatedAt  time.Time  `json:"created_at"`
 	UpdatedAt  time.Time  `json:"updated_at"`
-}
-
-type UserFollow struct {
-	ID        uuid.UUID `json:"id"`
-	Follower  uuid.UUID `json:"follower"`
-	Following uuid.UUID `json:"following"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
 }

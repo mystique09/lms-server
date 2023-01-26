@@ -51,9 +51,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteUserStmt, err = db.PrepareContext(ctx, deleteUser); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteUser: %w", err)
 	}
-	if q.followUserStmt, err = db.PrepareContext(ctx, followUser); err != nil {
-		return nil, fmt.Errorf("error preparing query FollowUser: %w", err)
-	}
 	if q.getAllClassFromUserStmt, err = db.PrepareContext(ctx, getAllClassFromUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAllClassFromUser: %w", err)
 	}
@@ -65,12 +62,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getAllCommentsFromPostStmt, err = db.PrepareContext(ctx, getAllCommentsFromPost); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAllCommentsFromPost: %w", err)
-	}
-	if q.getAllFollowersStmt, err = db.PrepareContext(ctx, getAllFollowers); err != nil {
-		return nil, fmt.Errorf("error preparing query GetAllFollowers: %w", err)
-	}
-	if q.getAllFollowingStmt, err = db.PrepareContext(ctx, getAllFollowing); err != nil {
-		return nil, fmt.Errorf("error preparing query GetAllFollowing: %w", err)
 	}
 	if q.getAllJoinedClassroomsStmt, err = db.PrepareContext(ctx, getAllJoinedClassrooms); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAllJoinedClassrooms: %w", err)
@@ -89,12 +80,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getClassroomWithInviteCodeStmt, err = db.PrepareContext(ctx, getClassroomWithInviteCode); err != nil {
 		return nil, fmt.Errorf("error preparing query GetClassroomWithInviteCode: %w", err)
-	}
-	if q.getFollowerByIdStmt, err = db.PrepareContext(ctx, getFollowerById); err != nil {
-		return nil, fmt.Errorf("error preparing query GetFollowerById: %w", err)
-	}
-	if q.getOneFollowerStmt, err = db.PrepareContext(ctx, getOneFollower); err != nil {
-		return nil, fmt.Errorf("error preparing query GetOneFollower: %w", err)
 	}
 	if q.getOnePostStmt, err = db.PrepareContext(ctx, getOnePost); err != nil {
 		return nil, fmt.Errorf("error preparing query GetOnePost: %w", err)
@@ -143,9 +128,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.listSubmittedClassworksStmt, err = db.PrepareContext(ctx, listSubmittedClassworks); err != nil {
 		return nil, fmt.Errorf("error preparing query ListSubmittedClassworks: %w", err)
-	}
-	if q.unfollowUserStmt, err = db.PrepareContext(ctx, unfollowUser); err != nil {
-		return nil, fmt.Errorf("error preparing query UnfollowUser: %w", err)
 	}
 	if q.unlikeCommentStmt, err = db.PrepareContext(ctx, unlikeComment); err != nil {
 		return nil, fmt.Errorf("error preparing query UnlikeComment: %w", err)
@@ -239,11 +221,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing deleteUserStmt: %w", cerr)
 		}
 	}
-	if q.followUserStmt != nil {
-		if cerr := q.followUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing followUserStmt: %w", cerr)
-		}
-	}
 	if q.getAllClassFromUserStmt != nil {
 		if cerr := q.getAllClassFromUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getAllClassFromUserStmt: %w", cerr)
@@ -262,16 +239,6 @@ func (q *Queries) Close() error {
 	if q.getAllCommentsFromPostStmt != nil {
 		if cerr := q.getAllCommentsFromPostStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getAllCommentsFromPostStmt: %w", cerr)
-		}
-	}
-	if q.getAllFollowersStmt != nil {
-		if cerr := q.getAllFollowersStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getAllFollowersStmt: %w", cerr)
-		}
-	}
-	if q.getAllFollowingStmt != nil {
-		if cerr := q.getAllFollowingStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getAllFollowingStmt: %w", cerr)
 		}
 	}
 	if q.getAllJoinedClassroomsStmt != nil {
@@ -302,16 +269,6 @@ func (q *Queries) Close() error {
 	if q.getClassroomWithInviteCodeStmt != nil {
 		if cerr := q.getClassroomWithInviteCodeStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getClassroomWithInviteCodeStmt: %w", cerr)
-		}
-	}
-	if q.getFollowerByIdStmt != nil {
-		if cerr := q.getFollowerByIdStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getFollowerByIdStmt: %w", cerr)
-		}
-	}
-	if q.getOneFollowerStmt != nil {
-		if cerr := q.getOneFollowerStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getOneFollowerStmt: %w", cerr)
 		}
 	}
 	if q.getOnePostStmt != nil {
@@ -392,11 +349,6 @@ func (q *Queries) Close() error {
 	if q.listSubmittedClassworksStmt != nil {
 		if cerr := q.listSubmittedClassworksStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing listSubmittedClassworksStmt: %w", cerr)
-		}
-	}
-	if q.unfollowUserStmt != nil {
-		if cerr := q.unfollowUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing unfollowUserStmt: %w", cerr)
 		}
 	}
 	if q.unlikeCommentStmt != nil {
@@ -517,21 +469,16 @@ type Queries struct {
 	deleteCommentFromPostStmt      *sql.Stmt
 	deletePostFromClassStmt        *sql.Stmt
 	deleteUserStmt                 *sql.Stmt
-	followUserStmt                 *sql.Stmt
 	getAllClassFromUserStmt        *sql.Stmt
 	getAllClassroomMembersStmt     *sql.Stmt
 	getAllCommentLikesStmt         *sql.Stmt
 	getAllCommentsFromPostStmt     *sql.Stmt
-	getAllFollowersStmt            *sql.Stmt
-	getAllFollowingStmt            *sql.Stmt
 	getAllJoinedClassroomsStmt     *sql.Stmt
 	getAllPostLikesStmt            *sql.Stmt
 	getClassStmt                   *sql.Stmt
 	getClassWorkStmt               *sql.Stmt
 	getClassroomMemberByIdStmt     *sql.Stmt
 	getClassroomWithInviteCodeStmt *sql.Stmt
-	getFollowerByIdStmt            *sql.Stmt
-	getOneFollowerStmt             *sql.Stmt
 	getOnePostStmt                 *sql.Stmt
 	getSessionStmt                 *sql.Stmt
 	getUserStmt                    *sql.Stmt
@@ -548,7 +495,6 @@ type Queries struct {
 	listAllPublicClassStmt         *sql.Stmt
 	listClassworkAdminStmt         *sql.Stmt
 	listSubmittedClassworksStmt    *sql.Stmt
-	unfollowUserStmt               *sql.Stmt
 	unlikeCommentStmt              *sql.Stmt
 	unlikePostStmt                 *sql.Stmt
 	updateAClassworkMarkStmt       *sql.Stmt
@@ -578,21 +524,16 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteCommentFromPostStmt:      q.deleteCommentFromPostStmt,
 		deletePostFromClassStmt:        q.deletePostFromClassStmt,
 		deleteUserStmt:                 q.deleteUserStmt,
-		followUserStmt:                 q.followUserStmt,
 		getAllClassFromUserStmt:        q.getAllClassFromUserStmt,
 		getAllClassroomMembersStmt:     q.getAllClassroomMembersStmt,
 		getAllCommentLikesStmt:         q.getAllCommentLikesStmt,
 		getAllCommentsFromPostStmt:     q.getAllCommentsFromPostStmt,
-		getAllFollowersStmt:            q.getAllFollowersStmt,
-		getAllFollowingStmt:            q.getAllFollowingStmt,
 		getAllJoinedClassroomsStmt:     q.getAllJoinedClassroomsStmt,
 		getAllPostLikesStmt:            q.getAllPostLikesStmt,
 		getClassStmt:                   q.getClassStmt,
 		getClassWorkStmt:               q.getClassWorkStmt,
 		getClassroomMemberByIdStmt:     q.getClassroomMemberByIdStmt,
 		getClassroomWithInviteCodeStmt: q.getClassroomWithInviteCodeStmt,
-		getFollowerByIdStmt:            q.getFollowerByIdStmt,
-		getOneFollowerStmt:             q.getOneFollowerStmt,
 		getOnePostStmt:                 q.getOnePostStmt,
 		getSessionStmt:                 q.getSessionStmt,
 		getUserStmt:                    q.getUserStmt,
@@ -609,7 +550,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		listAllPublicClassStmt:         q.listAllPublicClassStmt,
 		listClassworkAdminStmt:         q.listClassworkAdminStmt,
 		listSubmittedClassworksStmt:    q.listSubmittedClassworksStmt,
-		unfollowUserStmt:               q.unfollowUserStmt,
 		unlikeCommentStmt:              q.unlikeCommentStmt,
 		unlikePostStmt:                 q.unlikePostStmt,
 		updateAClassworkMarkStmt:       q.updateAClassworkMarkStmt,
