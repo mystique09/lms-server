@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"database/sql"
 	"server/bootstrap"
 	"server/domain"
 	"server/internal/passwordutil"
@@ -26,15 +25,6 @@ func (sc *SignupController) Signup(c echo.Context) error {
 		return c.JSON(400, domain.ErrorResponse{Message: err.Error()})
 	}
 
-	user, err := sc.SignupUsecase.GetUserByUsername(c, request.Username)
-	if err != nil && err == sql.ErrConnDone {
-		return c.JSON(500, domain.ErrorResponse{Message: err.Error()})
-	}
-
-	if user.Username != "" {
-		return c.JSON(400, domain.ErrorResponse{Message: "User already exists."})
-	}
-
 	hashesPassword, err := passwordutil.Encrypt(request.Password)
 	if err != nil {
 		return c.JSON(500, domain.ErrorResponse{Message: err.Error()})
@@ -42,7 +32,13 @@ func (sc *SignupController) Signup(c echo.Context) error {
 
 	if err := sc.SignupUsecase.CreateUser(c, request.Username, request.Email, hashesPassword); err != nil {
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
-			return c.JSON(400, domain.ErrorResponse{Message: "Email already used by another user."})
+			if strings.Contains(err.Error(), "email") {
+				return c.JSON(400, domain.ErrorResponse{Message: "Email already used by another user."})
+			}
+
+			if strings.Contains(err.Error(), "username") {
+				return c.JSON(400, domain.ErrorResponse{Message: "Username already used by another user."})
+			}
 		}
 		return c.JSON(500, domain.ErrorResponse{Message: err.Error()})
 	}
