@@ -10,20 +10,21 @@ import (
 
 func Setup(app *bootstrap.Application, st store.Store, routeV1 *echo.Group) {
 	publicRouterV1 := routeV1.Group("")
+	publicRouterV1.GET("", indexRoute)
 	publicRouterV1.GET("/health", healthRoute)
 	NewLoginRouter(app, st, publicRouterV1)
 	NewSignupRouter(app, st, publicRouterV1)
 	NewRefreshTokenRouter(app, st, publicRouterV1)
 	NewAccessTokenRouter(app, st, publicRouterV1)
 
-	protectedRouterV1 := routeV1.Group("", middleware.AuthMiddleware(app.TokenMaker))
-	// TODO!
-	// remove this one
-	protectedRouterV1.GET("/protected", func(c echo.Context) error {
-		return c.JSON(200, `{"message": "protected"}`)
-	})
+	classroomsGroup := routeV1.Group("/classrooms", middleware.AuthMiddleware(app.TokenMaker))
+	NewClassroomRouter(app, st, classroomsGroup)
+}
+
+func indexRoute(c echo.Context) error {
+	return c.HTML(200, `Welcome, you are in the backend of lms-server. <a href="/api/v1/health">Server status</a>`)
 }
 
 func healthRoute(c echo.Context) error {
-	return c.JSON(200, `{health: 100, status: "good"}`)
+	return c.String(200, `{health: 100, status: "good"}`)
 }
