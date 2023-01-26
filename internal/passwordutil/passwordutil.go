@@ -6,11 +6,7 @@ import (
 
 func Encrypt(plain_text string) (string, error) {
 	hashed_password, err := bcrypt.GenerateFromPassword([]byte(plain_text), bcrypt.DefaultCost)
-
-	if err != nil {
-		return plain_text, err
-	}
-	return string(hashed_password), nil
+	return string(hashed_password), err
 }
 
 func MatchPassword(hashed_password, plain_password []byte) error {
