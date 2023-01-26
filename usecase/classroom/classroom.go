@@ -14,7 +14,6 @@ type (
 	updateClassroomUsecase struct {
 		repository domain.ClassroomRepository
 	}
-
 	deleteClassroomUsecase struct {
 		repository domain.ClassroomRepository
 	}
