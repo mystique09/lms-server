@@ -14,11 +14,11 @@ type ClassroomController struct {
 }
 
 func (clc *ClassroomController) GetClassrooms(c echo.Context) error {
-	return c.String(200, "[GET] TODO!")
+	return c.String(200, "[GET:all] TODO!")
 }
 
 func (clc *ClassroomController) GetClassroom(c echo.Context) error {
-	return c.String(200, "[GET:all] TODO!")
+	return c.String(200, "[GET:one] TODO!")
 }
 
 func (clc *ClassroomController) CreateClassroom(c echo.Context) error {
