@@ -5,7 +5,7 @@ import (
 	"server/bootstrap"
 	"server/database/store"
 	"server/repository"
-	"server/usecase/classroom"
+	"server/usecase"
 
 	"github.com/labstack/echo/v4"
 )
