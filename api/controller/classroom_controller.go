@@ -40,7 +40,7 @@ func (clc *ClassroomController) GetClassrooms(c echo.Context) error {
 
 	classrooms, err := clc.GetUsecase.GetClasroomByUser(c.Request().Context(), postgresql.GetAllClassFromUserParams{
 		AdminID: payload.UserID,
-		Offset:  int32(offset) * 10,
+		Offset:  int32(offset * 10),
 	})
 	if err != nil {
 		if err == sql.ErrNoRows {
