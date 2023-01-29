@@ -4,7 +4,7 @@ import (
 	"context"
 	"server/database/postgresql"
 	"server/database/store"
-	"server/domain/classroom"
+	"server/domain"
 
 	"github.com/google/uuid"
 )
@@ -25,23 +25,19 @@ func (cr *classroomRepository) Create(c context.Context, cl *postgresql.CreateCl
 }
 
 func (cr *classroomRepository) Fetch(c context.Context, offset int32) ([]domain.Classroom, error) {
-	classrooms, err := cr.store.ListAllPublicClass(c, offset*10)
-	return classrooms, err
+	return cr.store.ListAllPublicClass(c, offset*10)
 }
 
 func (cr *classroomRepository) GetByID(c context.Context, id uuid.UUID) (domain.Classroom, error) {
-	classroom, err := cr.store.GetClass(c, id)
-	return classroom, err
+	return cr.store.GetClass(c, id)
 }
 
 func (cr *classroomRepository) GetByInviteCode(c context.Context, inviteCode uuid.UUID) (uuid.UUID, error) {
-	classroom, err := cr.store.GetClassroomWithInviteCode(c, inviteCode)
-	return classroom, err
+	return cr.store.GetClassroomWithInviteCode(c, inviteCode)
 }
 
 func (cr *classroomRepository) GetClasroomByUser(c context.Context, opts postgresql.GetAllClassFromUserParams) ([]domain.Classroom, error) {
-	classrooms, err := cr.store.GetAllClassFromUser(c, opts)
-	return classrooms, err
+	return cr.store.GetAllClassFromUser(c, opts)
 }
 
 func (cr *classroomRepository) UpdateClassroomName(c context.Context, cl *postgresql.UpdateClassroomNameParams) error {
