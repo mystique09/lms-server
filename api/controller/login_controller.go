@@ -37,12 +37,12 @@ func (lc *LoginController) Login(c echo.Context) error {
 		return c.JSON(400, domain.ErrorResponse{Message: "Wrong password."})
 	}
 
-	access_token, access_token_payload, err := lc.LoginUsecase.CreateAccessToken(user.Username, lc.Env.AccessTokenDuration)
+	access_token, access_token_payload, err := lc.LoginUsecase.CreateAccessToken(user.Username, user.ID, lc.Env.AccessTokenDuration)
 	if err != nil {
 		return c.JSON(500, domain.ErrorResponse{Message: err.Error()})
 	}
 
-	refresh_token, refresh_token_payload, err := lc.LoginUsecase.CreateRefreshToken(user.Username, lc.Env.RefreshTokenDuration)
+	refresh_token, refresh_token_payload, err := lc.LoginUsecase.CreateRefreshToken(user.Username, user.ID, lc.Env.RefreshTokenDuration)
 	if err != nil {
 		return c.JSON(500, domain.ErrorResponse{Message: err.Error()})
 	}

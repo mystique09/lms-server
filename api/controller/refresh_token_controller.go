@@ -28,7 +28,7 @@ func (rtc *RefreshTokenController) RefreshToken(c echo.Context) error {
 		return c.JSON(400, domain.ErrorResponse{Message: err.Error()})
 	}
 
-	access_token, access_token_payload, err := rtc.RefreshTokenUsecase.CreateAccessToken(refresh_token_payload.Username, rtc.Env.AccessTokenDuration)
+	access_token, access_token_payload, err := rtc.RefreshTokenUsecase.CreateAccessToken(refresh_token_payload.Username, refresh_token_payload.UserID, rtc.Env.AccessTokenDuration)
 	if err != nil {
 		return c.JSON(500, domain.ErrorResponse{Message: err.Error()})
 	}
