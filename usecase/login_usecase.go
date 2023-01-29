@@ -5,6 +5,7 @@ import (
 	"server/internal/tokenutil"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,10 +25,10 @@ func (lu *loginUsecase) GetUserByUsername(c echo.Context, username string) (doma
 	return lu.repository.GetByUsername(c.Request().Context(), username)
 }
 
-func (lu *loginUsecase) CreateAccessToken(username string, duration time.Duration) (string, *tokenutil.Payload, error) {
-	return lu.tokenMaker.CreateToken(username, duration)
+func (lu *loginUsecase) CreateAccessToken(username string, uid uuid.UUID, duration time.Duration) (string, *tokenutil.Payload, error) {
+	return lu.tokenMaker.CreateToken(username, uid, duration)
 }
 
-func (lu *loginUsecase) CreateRefreshToken(username string, duration time.Duration) (string, *tokenutil.Payload, error) {
-	return lu.tokenMaker.CreateToken(username, duration)
+func (lu *loginUsecase) CreateRefreshToken(username string, uid uuid.UUID, duration time.Duration) (string, *tokenutil.Payload, error) {
+	return lu.tokenMaker.CreateToken(username, uid, duration)
 }
