@@ -4,6 +4,7 @@ import (
 	"server/internal/tokenutil"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,6 +23,6 @@ type LoginResponse struct {
 
 type LoginUsecase interface {
 	GetUserByUsername(c echo.Context, username string) (User, error)
-	CreateAccessToken(username string, duration time.Duration) (string, *tokenutil.Payload, error)
-	CreateRefreshToken(username string, duration time.Duration) (string, *tokenutil.Payload, error)
+	CreateAccessToken(username string, uid uuid.UUID, duration time.Duration) (string, *tokenutil.Payload, error)
+	CreateRefreshToken(username string, uid uuid.UUID, duration time.Duration) (string, *tokenutil.Payload, error)
 }

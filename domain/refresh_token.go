@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"github.com/google/uuid"
 	"server/internal/tokenutil"
 	"time"
 )
@@ -16,5 +17,5 @@ type RefreshTokenResponse struct {
 
 type RefreshTokenUsecase interface {
 	ValidateRefreshToken(refreshToken string) (*tokenutil.Payload, error)
-	CreateAccessToken(username string, duration time.Duration) (string, *tokenutil.Payload, error)
+	CreateAccessToken(username string, uid uuid.UUID, duration time.Duration) (string, *tokenutil.Payload, error)
 }
