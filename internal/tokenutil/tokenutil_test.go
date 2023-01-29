@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,12 +14,13 @@ func TestPasteMaker(t *testing.T) {
 	require.NoError(t, err)
 
 	username := stringutil.RandomString(8)
+	uid := uuid.New()
 	duration := time.Minute
 
 	issuedAt := time.Now()
 	expiredAt := issuedAt.Add(duration)
 
-	token, tokenPayload, err := maker.CreateToken(username, duration)
+	token, tokenPayload, err := maker.CreateToken(username, uid, duration)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	require.NotNil(t, tokenPayload)
@@ -38,9 +40,10 @@ func TestExpirePasteToken(t *testing.T) {
 	require.NoError(t, err)
 
 	username := stringutil.RandomString(8)
+	uid := uuid.New()
 	duration := -time.Minute
 
-	token, tokenPayload, err := maker.CreateToken(username, duration)
+	token, tokenPayload, err := maker.CreateToken(username, uid, duration)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	require.NotNil(t, tokenPayload)
