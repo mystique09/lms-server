@@ -8,13 +8,15 @@ import (
 )
 
 type Classroom = postgresql.Classroom
+type ClassroomMember = postgresql.ClassroomMember
 
 type ClassroomRepository interface {
 	Create(c context.Context, cl *postgresql.CreateClassParams) error
 	Fetch(c context.Context, offsent int32) ([]Classroom, error)
 	GetByID(c context.Context, id uuid.UUID) (Classroom, error)
 	GetByInviteCode(c context.Context, inviteCode uuid.UUID) (uuid.UUID, error)
-	GetClasroomByUser(c context.Context, opts postgresql.GetAllClassFromUserParams) ([]Classroom, error)
+	GetClasroomsByUser(c context.Context, opts postgresql.GetAllClassFromUserParams) ([]Classroom, error)
+	GetClassroomMembers(c context.Context, id uuid.UUID) ([]ClassroomMember, error)
 	UpdateClassroomName(c context.Context, cl *postgresql.UpdateClassroomNameParams) error
 	UpdateClassroomDescription(c context.Context, cl *postgresql.UpdateClassroomDescriptionParams) error
 	UpdateClassroomSection(c context.Context, cl *postgresql.UpdateClassroomSectionParams) error
@@ -53,7 +55,8 @@ type DeleteClassroomUsecase interface {
 type GetClassroomUsecase interface {
 	GetByID(c context.Context, id uuid.UUID) (Classroom, error)
 	GetByInviteCode(c context.Context, inviteCode uuid.UUID) (uuid.UUID, error)
-	GetClasroomByUser(c context.Context, opts postgresql.GetAllClassFromUserParams) ([]Classroom, error)
+	GetClasroomsByUser(c context.Context, opts postgresql.GetAllClassFromUserParams) ([]Classroom, error)
+	GetClassroomMembers(c context.Context, id uuid.UUID) ([]ClassroomMember, error)
 }
 
 type UpdateClassroomUsecase interface {
