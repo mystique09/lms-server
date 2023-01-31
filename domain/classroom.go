@@ -33,8 +33,12 @@ type CreateClassroomRequest struct {
 	Subject     string    `json:"subject" validate:"required,gte=1"`
 }
 
-type CreateClassroomResponse struct {
-	Classroom Classroom `json:"classroom"`
+type UpdateClassroomRequest struct {
+	Name        string `json:"name" validate:"gte=0"`
+	Description string `json:"description" validate:"gte=0"`
+	Section     string `json:"section" validate:"gte=0"`
+	Room        string `json:"room" validate:"gte=0"`
+	Subject     string `json:"subject" validate:"gte=0"`
 }
 
 type CreateClassroomUsecase interface {
