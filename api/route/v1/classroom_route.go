@@ -12,17 +12,17 @@ import (
 
 func NewClassroomRouter(app *bootstrap.Application, st store.Store, group *echo.Group) {
 	clr := repository.NewClassroomRepository(st)
-	cls := &controller.ClassroomController{
+	clc := &controller.ClassroomController{
 		GetUsecase:    usecase.NewGetClassroomUsecase(clr),
 		CreateUsecase: usecase.NewCreateClassroomUsecase(clr),
 		UpdateUsecase: usecase.NewUpdateClassroomUsecase(clr),
 		DeleteUsecase: usecase.NewDeleteClassroomUsecase(clr),
 	}
 
-	group.GET("", cls.GetClassrooms)
-	group.GET("/:id", cls.GetClassroom)
-	group.GET("/:id/members", cls.GetMembers)
-	group.POST("", cls.CreateClassroom)
-	group.PUT("/:id", cls.UpdateClassroom)
-	group.DELETE("/:id", cls.DeleteClassroom)
+	group.GET("", clc.GetClassrooms)
+	group.GET("/:id", clc.GetClassroom)
+	group.GET("/:id/members", clc.GetMembers)
+	group.POST("", clc.CreateClassroom)
+	group.PUT("/:id", clc.UpdateClassroom)
+	group.DELETE("/:id", clc.DeleteClassroom)
 }
