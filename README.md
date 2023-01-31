@@ -33,9 +33,9 @@ Install required tools if you want to self-host.
 	```
 1. Run the server
 	```bash
-	go run cmd/main.go
+	PORT=8000 go run cmd/main.go
 	# or, if you have cmake/make
-	make run
+	PORT=8000 make run
 	```
 
 ### Development
