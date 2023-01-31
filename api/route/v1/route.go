@@ -17,12 +17,19 @@ func Setup(app *bootstrap.Application, st store.Store, routeV1 *echo.Group) {
 	NewRefreshTokenRouter(app, st, publicRouterV1)
 	NewAccessTokenRouter(app, st, publicRouterV1)
 
+	userGroup := routeV1.Group("/profile", middleware.AuthMiddleware(app.TokenMaker))
+	NewProfileRouter(app, st, userGroup)
+
 	classroomsGroup := routeV1.Group("/classrooms", middleware.AuthMiddleware(app.TokenMaker))
 	NewClassroomRouter(app, st, classroomsGroup)
 }
 
 func indexRoute(c echo.Context) error {
-	return c.HTML(200, `Welcome, you are in the backend of lms-server. <a href="/api/v1/health">Server status</a>`)
+	return c.HTML(200, `
+		Welcome, you are in the backend of lms-server. <br> 
+		<a href="/api/v1/health">Server status</a> <br>
+		<a href="/api/v1/docs">Visit APIv1 Documentation</a>		
+	`)
 }
 
 func healthRoute(c echo.Context) error {
