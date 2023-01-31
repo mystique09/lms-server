@@ -79,6 +79,21 @@ func (mr *MockUserRepositoryMockRecorder) Fetch(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Fetch", reflect.TypeOf((*MockUserRepository)(nil).Fetch), arg0, arg1)
 }
 
+// GetAllJoinedClassrooms mocks base method.
+func (m *MockUserRepository) GetAllJoinedClassrooms(arg0 context.Context, arg1 uuid.UUID) ([]postgresql.Classroom, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllJoinedClassrooms", arg0, arg1)
+	ret0, _ := ret[0].([]postgresql.Classroom)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllJoinedClassrooms indicates an expected call of GetAllJoinedClassrooms.
+func (mr *MockUserRepositoryMockRecorder) GetAllJoinedClassrooms(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllJoinedClassrooms", reflect.TypeOf((*MockUserRepository)(nil).GetAllJoinedClassrooms), arg0, arg1)
+}
+
 // GetByID mocks base method.
 func (m *MockUserRepository) GetByID(arg0 context.Context, arg1 uuid.UUID) (postgresql.User, error) {
 	m.ctrl.T.Helper()
