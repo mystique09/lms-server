@@ -17,10 +17,11 @@ func NewProfileUsecase(userRepo domain.UserRepository) domain.ProfileUsecase {
 	}
 }
 
-func (pfu *profileUsecase) GetProfile(c context.Context, id uuid.UUID) (domain.User, error) {
-	return pfu.userRepository.GetByID(c, id)
+func (usruc *profileUsecase) GetProfile(c context.Context, id uuid.UUID) (domain.User, error) {
+	// TODO!: fetch the profile table, instead of user table
+	return usruc.userRepository.GetByID(c, id)
 }
 
-func (pfu *profileUsecase) GetClassrooms(c context.Context, id uuid.UUID) ([]domain.Classroom, error) {
-	return pfu.userRepository.GetAllJoinedClassrooms(c, id)
+func (usruc *profileUsecase) GetClassrooms(c context.Context, id uuid.UUID) ([]domain.Classroom, error) {
+	return usruc.userRepository.GetAllJoinedClassrooms(c, id)
 }

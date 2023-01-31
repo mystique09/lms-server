@@ -13,10 +13,7 @@ import (
 func NewClassroomRouter(app *bootstrap.Application, st store.Store, group *echo.Group) {
 	clr := repository.NewClassroomRepository(st)
 	clc := &controller.ClassroomController{
-		GetUsecase:    usecase.NewGetClassroomUsecase(clr),
-		CreateUsecase: usecase.NewCreateClassroomUsecase(clr),
-		UpdateUsecase: usecase.NewUpdateClassroomUsecase(clr),
-		DeleteUsecase: usecase.NewDeleteClassroomUsecase(clr),
+		ClassroomUsecase: usecase.NewClassroomUsecase(clr),
 	}
 
 	group.GET("", clc.GetClassrooms)

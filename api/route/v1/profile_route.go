@@ -12,10 +12,10 @@ import (
 
 func NewProfileRouter(app *bootstrap.Application, st store.Store, group *echo.Group) {
 	ur := repository.NewUserRepository(st)
-	pfc := &controller.ProfileController{
+	usrc := &controller.ProfileController{
 		ProfileUsecase: usecase.NewProfileUsecase(ur),
 	}
 
-	group.GET("/:id", pfc.GetProfile)
-	group.GET("/:id/classrooms", pfc.GetClassrooms)
+	group.GET("/:id", usrc.GetProfile)
+	group.GET("/:id/classrooms", usrc.GetClassrooms)
 }

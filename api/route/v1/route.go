@@ -17,7 +17,7 @@ func Setup(app *bootstrap.Application, st store.Store, routeV1 *echo.Group) {
 	NewRefreshTokenRouter(app, st, publicRouterV1)
 	NewAccessTokenRouter(app, st, publicRouterV1)
 
-	userGroup := routeV1.Group("/profile", middleware.AuthMiddleware(app.TokenMaker))
+	userGroup := routeV1.Group("/users", middleware.AuthMiddleware(app.TokenMaker))
 	NewProfileRouter(app, st, userGroup)
 
 	classroomsGroup := routeV1.Group("/classrooms", middleware.AuthMiddleware(app.TokenMaker))
