@@ -14,6 +14,7 @@ type UserRepository interface {
 	Fetch(c context.Context, offsent int32) ([]User, error)
 	GetByID(c context.Context, id uuid.UUID) (User, error)
 	GetByUsername(c context.Context, email string) (User, error)
+	GetAllJoinedClassrooms(c context.Context, id uuid.UUID) ([]Classroom, error)
 	UpdateUsername(c context.Context, u *postgresql.UpdateUsernameParams) error
 	UpdateEmail(c context.Context, u *postgresql.UpdateUserEmailParams) error
 	UpdatePassword(c context.Context, u *postgresql.UpdateUserPasswordParams) error
