@@ -14,10 +14,7 @@ import (
 )
 
 type ClassroomController struct {
-	GetUsecase    domain.GetClassroomUsecase
-	CreateUsecase domain.CreateClassroomUsecase
-	UpdateUsecase domain.UpdateClassroomUsecase
-	DeleteUsecase domain.DeleteClassroomUsecase
+	ClassroomUsecase domain.ClassroomUsecase
 }
 
 func (clc *ClassroomController) GetClassrooms(c echo.Context) error {
@@ -38,7 +35,7 @@ func (clc *ClassroomController) GetClassrooms(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, domain.NewError(domain.NO_PAYLOAD))
 	}
 
-	classrooms, err := clc.GetUsecase.GetClasroomsByUser(c.Request().Context(), postgresql.GetAllClassFromUserParams{
+	classrooms, err := clc.ClassroomUsecase.GetClasroomsByUser(c.Request().Context(), postgresql.GetAllClassFromUserParams{
 		AdminID: payload.UserID,
 		Offset:  int32(offset * 10),
 	})
@@ -60,7 +57,7 @@ func (clc *ClassroomController) GetClassroom(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, domain.NewError(err.Error()))
 	}
 
-	classroom, err := clc.GetUsecase.GetByID(c.Request().Context(), class_id)
+	classroom, err := clc.ClassroomUsecase.GetByID(c.Request().Context(), class_id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return c.JSON(http.StatusBadRequest, domain.NewError(domain.RESOURCE_NOT_FOUND))
@@ -79,7 +76,7 @@ func (clc *ClassroomController) GetMembers(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, domain.NewError(err.Error()))
 	}
 
-	members, err := clc.GetUsecase.GetClassroomMembers(c.Request().Context(), class_id)
+	members, err := clc.ClassroomUsecase.GetClassroomMembers(c.Request().Context(), class_id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return c.JSON(404, domain.NewError(domain.RESOURCE_NOT_FOUND))
@@ -122,7 +119,7 @@ func (clc *ClassroomController) CreateClassroom(c echo.Context) error {
 		Visibility:  postgresql.VisibilityPUBLIC,
 	}
 
-	if err := clc.CreateUsecase.Create(c.Request().Context(), &classroom_arg); err != nil {
+	if err := clc.ClassroomUsecase.Create(c.Request().Context(), &classroom_arg); err != nil {
 		return c.JSON(400, domain.NewError(domain.ERROR_DEFAULT))
 	}
 
@@ -165,7 +162,7 @@ func (clc *ClassroomController) UpdateClassroom(c echo.Context) error {
 		return c.JSON(400, domain.NewError(domain.NO_PAYLOAD))
 	}
 
-	classroom, err := clc.UpdateUsecase.GetByID(c.Request().Context(), class_id)
+	classroom, err := clc.ClassroomUsecase.GetByID(c.Request().Context(), class_id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return c.JSON(404, domain.NewError(domain.RESOURCE_NOT_FOUND))
@@ -180,7 +177,7 @@ func (clc *ClassroomController) UpdateClassroom(c echo.Context) error {
 	for i := range fields {
 		field := fields[i]
 		if field == "name" {
-			if err := clc.UpdateUsecase.UpdateClassroomName(c.Request().Context(), &postgresql.UpdateClassroomNameParams{
+			if err := clc.ClassroomUsecase.UpdateClassroomName(c.Request().Context(), &postgresql.UpdateClassroomNameParams{
 				Name: request.Name,
 				ID:   class_id,
 			}); err != nil {
@@ -192,7 +189,7 @@ func (clc *ClassroomController) UpdateClassroom(c echo.Context) error {
 		}
 
 		if field == "description" {
-			if err := clc.UpdateUsecase.UpdateClassroomDescription(c.Request().Context(), &postgresql.UpdateClassroomDescriptionParams{
+			if err := clc.ClassroomUsecase.UpdateClassroomDescription(c.Request().Context(), &postgresql.UpdateClassroomDescriptionParams{
 				Description: request.Description,
 				ID:          class_id,
 			}); err != nil {
@@ -204,7 +201,7 @@ func (clc *ClassroomController) UpdateClassroom(c echo.Context) error {
 		}
 
 		if field == "subject" {
-			if err := clc.UpdateUsecase.UpdateClassroomSubject(c.Request().Context(), &postgresql.UpdateClassroomSubjectParams{
+			if err := clc.ClassroomUsecase.UpdateClassroomSubject(c.Request().Context(), &postgresql.UpdateClassroomSubjectParams{
 				Subject: request.Subject,
 				ID:      class_id,
 			}); err != nil {
@@ -216,7 +213,7 @@ func (clc *ClassroomController) UpdateClassroom(c echo.Context) error {
 		}
 
 		if field == "room" {
-			if err := clc.UpdateUsecase.UpdateClassroomRoom(c.Request().Context(), &postgresql.UpdateClassroomRoomParams{
+			if err := clc.ClassroomUsecase.UpdateClassroomRoom(c.Request().Context(), &postgresql.UpdateClassroomRoomParams{
 				Room: request.Room,
 				ID:   class_id,
 			}); err != nil {
@@ -228,7 +225,7 @@ func (clc *ClassroomController) UpdateClassroom(c echo.Context) error {
 		}
 
 		if field == "section" {
-			if err := clc.UpdateUsecase.UpdateClassroomSection(c.Request().Context(), &postgresql.UpdateClassroomSectionParams{
+			if err := clc.ClassroomUsecase.UpdateClassroomSection(c.Request().Context(), &postgresql.UpdateClassroomSectionParams{
 				Section: request.Section,
 				ID:      class_id,
 			}); err != nil {
@@ -255,7 +252,7 @@ func (clc *ClassroomController) DeleteClassroom(c echo.Context) error {
 		return c.JSON(400, domain.NewError(domain.NO_PAYLOAD))
 	}
 
-	classroom, err := clc.DeleteUsecase.GetByID(c.Request().Context(), class_id)
+	classroom, err := clc.ClassroomUsecase.GetByID(c.Request().Context(), class_id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return c.JSON(404, domain.NewError(domain.RESOURCE_NOT_FOUND))
@@ -267,7 +264,7 @@ func (clc *ClassroomController) DeleteClassroom(c echo.Context) error {
 		return c.JSON(401, domain.NewError(domain.UNAUTHORIZED))
 	}
 
-	if err := clc.DeleteUsecase.Delete(c.Request().Context(), class_id); err != nil {
+	if err := clc.ClassroomUsecase.Delete(c.Request().Context(), class_id); err != nil {
 		return c.JSON(400, domain.NewError(domain.ERROR_DEFAULT))
 	}
 
