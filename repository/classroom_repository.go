@@ -36,8 +36,15 @@ func (cr *classroomRepository) GetByInviteCode(c context.Context, inviteCode uui
 	return cr.store.GetClassroomWithInviteCode(c, inviteCode)
 }
 
-func (cr *classroomRepository) GetClasroomByUser(c context.Context, opts postgresql.GetAllClassFromUserParams) ([]domain.Classroom, error) {
+func (cr *classroomRepository) GetClasroomsByUser(c context.Context, opts postgresql.GetAllClassFromUserParams) ([]domain.Classroom, error) {
 	return cr.store.GetAllClassFromUser(c, opts)
+}
+
+func (cr *classroomRepository) GetClassroomMembers(c context.Context, id uuid.UUID) ([]domain.ClassroomMember, error) {
+	return cr.store.GetAllClassroomMembers(c, postgresql.GetAllClassroomMembersParams{
+		ClassID: id,
+		Offset:  0,
+	})
 }
 
 func (cr *classroomRepository) UpdateClassroomName(c context.Context, cl *postgresql.UpdateClassroomNameParams) error {

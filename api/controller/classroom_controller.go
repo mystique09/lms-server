@@ -38,7 +38,7 @@ func (clc *ClassroomController) GetClassrooms(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, domain.NewError(domain.NO_PAYLOAD))
 	}
 
-	classrooms, err := clc.GetUsecase.GetClasroomByUser(c.Request().Context(), postgresql.GetAllClassFromUserParams{
+	classrooms, err := clc.GetUsecase.GetClasroomsByUser(c.Request().Context(), postgresql.GetAllClassFromUserParams{
 		AdminID: payload.UserID,
 		Offset:  int32(offset * 10),
 	})
@@ -69,6 +69,25 @@ func (clc *ClassroomController) GetClassroom(c echo.Context) error {
 	}
 
 	return c.JSON(200, domain.OkResponse(domain.OK_ONE, classroom))
+}
+
+func (clc *ClassroomController) GetMembers(c echo.Context) error {
+	var id = c.Param("id")
+	class_id, err := uuid.Parse(id)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, domain.NewError(err.Error()))
+	}
+
+	members, err := clc.GetUsecase.GetClassroomMembers(c.Request().Context(), class_id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.JSON(404, domain.NewError(domain.RESOURCE_NOT_FOUND))
+		}
+		return c.JSON(500, domain.NewError(domain.INTERNAL_ERROR))
+	}
+
+	return c.JSON(200, domain.OkResponse(domain.OK_ALL, members))
 }
 
 func (clc *ClassroomController) CreateClassroom(c echo.Context) error {

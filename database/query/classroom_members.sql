@@ -1,9 +1,9 @@
 -- name: GetAllClassroomMembers :many
-SELECT id, user_id, created_at AS joined_at
+SELECT *
 FROM classroom_members
 WHERE class_id = $1
 ORDER BY created_at
-LIMIT 10
+LIMIT 100
 OFFSET $2;
 
 -- name: GetClassroomMemberById :one

@@ -21,7 +21,7 @@ type Querier interface {
 	DeletePostFromClass(ctx context.Context, arg DeletePostFromClassParams) (interface{}, error)
 	DeleteUser(ctx context.Context, id uuid.UUID) (uuid.UUID, error)
 	GetAllClassFromUser(ctx context.Context, arg GetAllClassFromUserParams) ([]Classroom, error)
-	GetAllClassroomMembers(ctx context.Context, arg GetAllClassroomMembersParams) ([]GetAllClassroomMembersRow, error)
+	GetAllClassroomMembers(ctx context.Context, arg GetAllClassroomMembersParams) ([]ClassroomMember, error)
 	GetAllCommentLikes(ctx context.Context, commentID uuid.UUID) ([]CommentLike, error)
 	GetAllCommentsFromPost(ctx context.Context, arg GetAllCommentsFromPostParams) ([]Comment, error)
 	GetAllJoinedClassrooms(ctx context.Context, arg GetAllJoinedClassroomsParams) ([]Classroom, error)

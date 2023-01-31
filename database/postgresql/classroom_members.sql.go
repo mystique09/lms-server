@@ -7,7 +7,6 @@ package postgresql
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -44,11 +43,11 @@ func (q *Queries) AddNewClassroomMember(ctx context.Context, arg AddNewClassroom
 }
 
 const getAllClassroomMembers = `-- name: GetAllClassroomMembers :many
-SELECT id, user_id, created_at AS joined_at
+SELECT id, class_id, user_id, created_at, updated_at
 FROM classroom_members
 WHERE class_id = $1
 ORDER BY created_at
-LIMIT 10
+LIMIT 100
 OFFSET $2
 `
 
@@ -57,22 +56,22 @@ type GetAllClassroomMembersParams struct {
 	Offset  int32     `json:"offset"`
 }
 
-type GetAllClassroomMembersRow struct {
-	ID       uuid.UUID `json:"id"`
-	UserID   uuid.UUID `json:"user_id"`
-	JoinedAt time.Time `json:"joined_at"`
-}
-
-func (q *Queries) GetAllClassroomMembers(ctx context.Context, arg GetAllClassroomMembersParams) ([]GetAllClassroomMembersRow, error) {
+func (q *Queries) GetAllClassroomMembers(ctx context.Context, arg GetAllClassroomMembersParams) ([]ClassroomMember, error) {
 	rows, err := q.query(ctx, q.getAllClassroomMembersStmt, getAllClassroomMembers, arg.ClassID, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetAllClassroomMembersRow
+	var items []ClassroomMember
 	for rows.Next() {
-		var i GetAllClassroomMembersRow
-		if err := rows.Scan(&i.ID, &i.UserID, &i.JoinedAt); err != nil {
+		var i ClassroomMember
+		if err := rows.Scan(
+			&i.ID,
+			&i.ClassID,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

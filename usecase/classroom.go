@@ -60,8 +60,12 @@ func (gcu *getClassroomUsecase) GetByInviteCode(c context.Context, inviteCode uu
 	return gcu.repository.GetByInviteCode(c, inviteCode)
 }
 
-func (gcu *getClassroomUsecase) GetClasroomByUser(c context.Context, opts postgresql.GetAllClassFromUserParams) ([]domain.Classroom, error) {
-	return gcu.repository.GetClasroomByUser(c, opts)
+func (gcu *getClassroomUsecase) GetClasroomsByUser(c context.Context, opts postgresql.GetAllClassFromUserParams) ([]domain.Classroom, error) {
+	return gcu.repository.GetClasroomsByUser(c, opts)
+}
+
+func (gcu *getClassroomUsecase) GetClassroomMembers(c context.Context, id uuid.UUID) ([]domain.ClassroomMember, error) {
+	return gcu.repository.GetClassroomMembers(c, id)
 }
 
 func NewUpdateClassroomUsecase(repository domain.ClassroomRepository) domain.UpdateClassroomUsecase {
