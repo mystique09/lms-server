@@ -109,19 +109,34 @@ func (mr *MockClassroomRepositoryMockRecorder) GetByInviteCode(arg0, arg1 interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByInviteCode", reflect.TypeOf((*MockClassroomRepository)(nil).GetByInviteCode), arg0, arg1)
 }
 
-// GetClasroomByUser mocks base method.
-func (m *MockClassroomRepository) GetClasroomByUser(arg0 context.Context, arg1 postgresql.GetAllClassFromUserParams) ([]postgresql.Classroom, error) {
+// GetClasroomsByUser mocks base method.
+func (m *MockClassroomRepository) GetClasroomsByUser(arg0 context.Context, arg1 postgresql.GetAllClassFromUserParams) ([]postgresql.Classroom, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetClasroomByUser", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetClasroomsByUser", arg0, arg1)
 	ret0, _ := ret[0].([]postgresql.Classroom)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetClasroomByUser indicates an expected call of GetClasroomByUser.
-func (mr *MockClassroomRepositoryMockRecorder) GetClasroomByUser(arg0, arg1 interface{}) *gomock.Call {
+// GetClasroomsByUser indicates an expected call of GetClasroomsByUser.
+func (mr *MockClassroomRepositoryMockRecorder) GetClasroomsByUser(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClasroomByUser", reflect.TypeOf((*MockClassroomRepository)(nil).GetClasroomByUser), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClasroomsByUser", reflect.TypeOf((*MockClassroomRepository)(nil).GetClasroomsByUser), arg0, arg1)
+}
+
+// GetClassroomMembers mocks base method.
+func (m *MockClassroomRepository) GetClassroomMembers(arg0 context.Context, arg1 uuid.UUID) ([]postgresql.ClassroomMember, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetClassroomMembers", arg0, arg1)
+	ret0, _ := ret[0].([]postgresql.ClassroomMember)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetClassroomMembers indicates an expected call of GetClassroomMembers.
+func (mr *MockClassroomRepositoryMockRecorder) GetClassroomMembers(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClassroomMembers", reflect.TypeOf((*MockClassroomRepository)(nil).GetClassroomMembers), arg0, arg1)
 }
 
 // UpdateClassroomDescription mocks base method.

@@ -187,10 +187,10 @@ func (mr *MockStoreMockRecorder) GetAllClassFromUser(arg0, arg1 interface{}) *go
 }
 
 // GetAllClassroomMembers mocks base method.
-func (m *MockStore) GetAllClassroomMembers(arg0 context.Context, arg1 postgresql.GetAllClassroomMembersParams) ([]postgresql.GetAllClassroomMembersRow, error) {
+func (m *MockStore) GetAllClassroomMembers(arg0 context.Context, arg1 postgresql.GetAllClassroomMembersParams) ([]postgresql.ClassroomMember, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllClassroomMembers", arg0, arg1)
-	ret0, _ := ret[0].([]postgresql.GetAllClassroomMembersRow)
+	ret0, _ := ret[0].([]postgresql.ClassroomMember)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
