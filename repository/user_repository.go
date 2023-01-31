@@ -25,18 +25,22 @@ func (ur *userRepository) Create(c context.Context, u *postgresql.CreateUserPara
 }
 
 func (ur *userRepository) Fetch(c context.Context, offset int32) ([]domain.User, error) {
-	users, err := ur.store.GetUsers(c, offset*10)
-	return users, err
+	return ur.store.GetUsers(c, offset*10)
 }
 
 func (ur *userRepository) GetByID(c context.Context, id uuid.UUID) (domain.User, error) {
-	user, err := ur.store.GetUser(c, id)
-	return user, err
+	return ur.store.GetUser(c, id)
+}
+
+func (ur *userRepository) GetAllJoinedClassrooms(c context.Context, id uuid.UUID) ([]domain.Classroom, error) {
+	return ur.store.GetAllJoinedClassrooms(c, postgresql.GetAllJoinedClassroomsParams{
+		UserID: id,
+		Offset: 0,
+	})
 }
 
 func (ur *userRepository) GetByUsername(c context.Context, username string) (domain.User, error) {
-	user, err := ur.store.GetUserByUsername(c, username)
-	return user, err
+	return ur.store.GetUserByUsername(c, username)
 }
 
 func (ur *userRepository) UpdateUsername(c context.Context, u *postgresql.UpdateUsernameParams) error {
