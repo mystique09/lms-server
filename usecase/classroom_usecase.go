@@ -2,9 +2,10 @@ package usecase
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"server/database/postgresql"
 	"server/domain"
+
+	"github.com/google/uuid"
 )
 
 type (
@@ -23,8 +24,16 @@ func (clu *classroomUsecase) Create(c context.Context, cl *postgresql.CreateClas
 	return clu.repository.Create(c, cl)
 }
 
+func (clu *classroomUsecase) JoinClassroom(c context.Context, opt postgresql.AddNewClassroomMemberParams) (domain.ClassroomMember, error) {
+	return clu.repository.JoinClassroom(c, opt)
+}
+
 func (clu *classroomUsecase) Delete(c context.Context, id uuid.UUID) error {
 	return clu.repository.Delete(c, id)
+}
+
+func (clu *classroomUsecase) LeaveClassroom(c context.Context, opt postgresql.LeaveClassroomParams) (domain.ClassroomMember, error) {
+	return clu.repository.Leave(c, opt)
 }
 
 func (clu *classroomUsecase) GetByInviteCode(c context.Context, inviteCode uuid.UUID) (uuid.UUID, error) {
