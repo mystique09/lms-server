@@ -24,6 +24,10 @@ func (cr *classroomRepository) Create(c context.Context, cl *postgresql.CreateCl
 	return err
 }
 
+func (cr *classroomRepository) JoinClassroom(c context.Context, opt postgresql.AddNewClassroomMemberParams) (domain.ClassroomMember, error) {
+	return cr.store.AddNewClassroomMember(c, opt)
+}
+
 func (cr *classroomRepository) Fetch(c context.Context, offset int32) ([]domain.Classroom, error) {
 	return cr.store.ListAllPublicClass(c, offset*10)
 }
@@ -80,4 +84,8 @@ func (cr *classroomRepository) UpdateClassroomInviteCode(c context.Context, cl *
 func (cr *classroomRepository) Delete(c context.Context, id uuid.UUID) error {
 	_, err := cr.store.DeleteClass(c, id)
 	return err
+}
+
+func (cr *classroomRepository) Leave(c context.Context, opt postgresql.LeaveClassroomParams) (domain.ClassroomMember, error) {
+	return cr.store.LeaveClassroom(c, opt)
 }
