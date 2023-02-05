@@ -68,6 +68,88 @@ func (clc *ClassroomController) GetClassroom(c echo.Context) error {
 	return c.JSON(200, domain.OkResponse(domain.OK_ONE, classroom))
 }
 
+func (clc *ClassroomController) JoinClassroom(c echo.Context) error {
+	var code = c.Param("code")
+	inviteCode, err := uuid.Parse(code)
+	if err != nil {
+		return c.JSON(400, domain.NewError(err.Error()))
+	}
+
+	classroom, err := clc.ClassroomUsecase.GetByInviteCode(c.Request().Context(), inviteCode)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.JSON(400, domain.NewError(domain.RESOURCE_NOT_FOUND))
+		}
+		return c.JSON(500, domain.NewError(domain.INTERNAL_ERROR))
+	}
+
+	members, err := clc.ClassroomUsecase.GetClassroomMembers(c.Request().Context(), classroom)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.JSON(400, domain.NewError(domain.RESOURCE_NOT_FOUND))
+		}
+		return c.JSON(500, domain.NewError(domain.INTERNAL_ERROR))
+	}
+
+	payload, ok := c.Get("user").(*tokenutil.Payload)
+	if !ok {
+		return c.JSON(401, domain.NewError(domain.NO_PAYLOAD))
+	}
+
+	var hasJoined = false
+	for i := range members {
+		member := members[i]
+
+		if member.UserID == payload.UserID {
+			hasJoined = true
+		}
+	}
+
+	if hasJoined {
+		return c.JSON(200, domain.OkResponse("you already joined the classroom", inviteCode))
+	}
+
+	member, err := clc.ClassroomUsecase.JoinClassroom(c.Request().Context(), postgresql.AddNewClassroomMemberParams{
+		ID:      uuid.New(),
+		ClassID: classroom,
+		UserID:  payload.UserID,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.JSON(400, domain.NewError(domain.RESOURCE_NOT_FOUND))
+		}
+		return c.JSON(500, domain.NewError(err.Error()))
+	}
+
+	return c.JSON(200, domain.OkResponse("you joined the classroom", member))
+}
+
+func (clc *ClassroomController) LeaveClassroom(c echo.Context) error {
+	var id = c.Param("id")
+	classId, err := uuid.Parse(id)
+	if err != nil {
+		return c.JSON(400, domain.NewError(err.Error()))
+	}
+
+	payload, ok := c.Get("user").(*tokenutil.Payload)
+	if !ok {
+		return c.JSON(400, domain.NewError(domain.NO_PAYLOAD))
+	}
+
+	member, err := clc.ClassroomUsecase.LeaveClassroom(c.Request().Context(), postgresql.LeaveClassroomParams{
+		UserID:  payload.UserID,
+		ClassID: classId,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.JSON(400, domain.NewError(domain.RESOURCE_NOT_FOUND))
+		}
+		return c.JSON(500, domain.NewError(err.Error()))
+	}
+
+	return c.JSON(200, domain.OkResponse(domain.OK_DELETE, member))
+}
+
 func (clc *ClassroomController) GetMembers(c echo.Context) error {
 	var id = c.Param("id")
 	class_id, err := uuid.Parse(id)
@@ -138,7 +220,7 @@ func (clc *ClassroomController) UpdateClassroom(c echo.Context) error {
 	var query = c.QueryParam("fields")
 	fields := strings.Split(query, ",")
 
-	if len(fields) == 0 {
+	if len(fields) == 0 || len(fields) > 5 {
 		return c.JSON(400, domain.NewError("fields must be one of: [name, description, room, section, and subject]"))
 	}
 
