@@ -17,9 +17,11 @@ func NewClassroomRouter(app *bootstrap.Application, st store.Store, group *echo.
 	}
 
 	group.GET("", clc.GetClassrooms)
-	group.GET("/:id", clc.GetClassroom)
-	group.GET("/:id/members", clc.GetMembers)
 	group.POST("", clc.CreateClassroom)
+	group.GET("/:id", clc.GetClassroom)
+	group.POST("/:code/join", clc.JoinClassroom)
+	group.DELETE("/:id/leave", clc.LeaveClassroom)
 	group.PUT("/:id", clc.UpdateClassroom)
 	group.DELETE("/:id", clc.DeleteClassroom)
+	group.GET("/:id/members", clc.GetMembers)
 }
