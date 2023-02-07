@@ -52,8 +52,3 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 
 	return payload, nil
 }
-
-func GetTokenInHeader(c echo.Context) (*Payload, bool) {
-	payload, ok := c.Get("user").(*Payload)
-	return payload, ok
-}
