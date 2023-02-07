@@ -1,4 +1,3 @@
 .env
 dbml-error.log
 tmp/
-app.env

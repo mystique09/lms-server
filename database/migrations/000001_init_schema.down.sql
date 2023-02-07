@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS user_follows;
 DROP TABLE IF EXISTS comment_likes;
 DROP TABLE IF EXISTS post_likes;
 DROP TABLE IF EXISTS class_works;

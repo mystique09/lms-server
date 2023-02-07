@@ -171,21 +171,6 @@ func (mr *MockStoreMockRecorder) DeleteUser(arg0, arg1 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockStore)(nil).DeleteUser), arg0, arg1)
 }
 
-// FollowUser mocks base method.
-func (m *MockStore) FollowUser(arg0 context.Context, arg1 postgresql.FollowUserParams) (postgresql.UserFollow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FollowUser", arg0, arg1)
-	ret0, _ := ret[0].(postgresql.UserFollow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FollowUser indicates an expected call of FollowUser.
-func (mr *MockStoreMockRecorder) FollowUser(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FollowUser", reflect.TypeOf((*MockStore)(nil).FollowUser), arg0, arg1)
-}
-
 // GetAllClassFromUser mocks base method.
 func (m *MockStore) GetAllClassFromUser(arg0 context.Context, arg1 postgresql.GetAllClassFromUserParams) ([]postgresql.Classroom, error) {
 	m.ctrl.T.Helper()
@@ -202,10 +187,10 @@ func (mr *MockStoreMockRecorder) GetAllClassFromUser(arg0, arg1 interface{}) *go
 }
 
 // GetAllClassroomMembers mocks base method.
-func (m *MockStore) GetAllClassroomMembers(arg0 context.Context, arg1 postgresql.GetAllClassroomMembersParams) ([]postgresql.GetAllClassroomMembersRow, error) {
+func (m *MockStore) GetAllClassroomMembers(arg0 context.Context, arg1 postgresql.GetAllClassroomMembersParams) ([]postgresql.ClassroomMember, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllClassroomMembers", arg0, arg1)
-	ret0, _ := ret[0].([]postgresql.GetAllClassroomMembersRow)
+	ret0, _ := ret[0].([]postgresql.ClassroomMember)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -244,36 +229,6 @@ func (m *MockStore) GetAllCommentsFromPost(arg0 context.Context, arg1 postgresql
 func (mr *MockStoreMockRecorder) GetAllCommentsFromPost(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllCommentsFromPost", reflect.TypeOf((*MockStore)(nil).GetAllCommentsFromPost), arg0, arg1)
-}
-
-// GetAllFollowers mocks base method.
-func (m *MockStore) GetAllFollowers(arg0 context.Context, arg1 postgresql.GetAllFollowersParams) ([]postgresql.GetAllFollowersRow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllFollowers", arg0, arg1)
-	ret0, _ := ret[0].([]postgresql.GetAllFollowersRow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAllFollowers indicates an expected call of GetAllFollowers.
-func (mr *MockStoreMockRecorder) GetAllFollowers(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFollowers", reflect.TypeOf((*MockStore)(nil).GetAllFollowers), arg0, arg1)
-}
-
-// GetAllFollowing mocks base method.
-func (m *MockStore) GetAllFollowing(arg0 context.Context, arg1 postgresql.GetAllFollowingParams) ([]postgresql.GetAllFollowingRow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllFollowing", arg0, arg1)
-	ret0, _ := ret[0].([]postgresql.GetAllFollowingRow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAllFollowing indicates an expected call of GetAllFollowing.
-func (mr *MockStoreMockRecorder) GetAllFollowing(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFollowing", reflect.TypeOf((*MockStore)(nil).GetAllFollowing), arg0, arg1)
 }
 
 // GetAllJoinedClassrooms mocks base method.
@@ -364,36 +319,6 @@ func (m *MockStore) GetClassroomWithInviteCode(arg0 context.Context, arg1 uuid.U
 func (mr *MockStoreMockRecorder) GetClassroomWithInviteCode(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClassroomWithInviteCode", reflect.TypeOf((*MockStore)(nil).GetClassroomWithInviteCode), arg0, arg1)
-}
-
-// GetFollowerById mocks base method.
-func (m *MockStore) GetFollowerById(arg0 context.Context, arg1 uuid.UUID) (postgresql.GetFollowerByIdRow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFollowerById", arg0, arg1)
-	ret0, _ := ret[0].(postgresql.GetFollowerByIdRow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetFollowerById indicates an expected call of GetFollowerById.
-func (mr *MockStoreMockRecorder) GetFollowerById(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFollowerById", reflect.TypeOf((*MockStore)(nil).GetFollowerById), arg0, arg1)
-}
-
-// GetOneFollower mocks base method.
-func (m *MockStore) GetOneFollower(arg0 context.Context, arg1 postgresql.GetOneFollowerParams) (postgresql.UserFollow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOneFollower", arg0, arg1)
-	ret0, _ := ret[0].(postgresql.UserFollow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetOneFollower indicates an expected call of GetOneFollower.
-func (mr *MockStoreMockRecorder) GetOneFollower(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOneFollower", reflect.TypeOf((*MockStore)(nil).GetOneFollower), arg0, arg1)
 }
 
 // GetOnePost mocks base method.
@@ -634,21 +559,6 @@ func (m *MockStore) ListSubmittedClassworks(arg0 context.Context, arg1 postgresq
 func (mr *MockStoreMockRecorder) ListSubmittedClassworks(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSubmittedClassworks", reflect.TypeOf((*MockStore)(nil).ListSubmittedClassworks), arg0, arg1)
-}
-
-// UnfollowUser mocks base method.
-func (m *MockStore) UnfollowUser(arg0 context.Context, arg1 uuid.UUID) (postgresql.UserFollow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UnfollowUser", arg0, arg1)
-	ret0, _ := ret[0].(postgresql.UserFollow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UnfollowUser indicates an expected call of UnfollowUser.
-func (mr *MockStoreMockRecorder) UnfollowUser(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnfollowUser", reflect.TypeOf((*MockStore)(nil).UnfollowUser), arg0, arg1)
 }
 
 // UnlikeComment mocks base method.

@@ -8,14 +8,27 @@ import (
 
 func LoggerMiddleware(logger *zerolog.Logger) echo.MiddlewareFunc {
 	return middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
-		LogURI:    true,
-		LogStatus: true,
+		LogURI:     true,
+		LogStatus:  true,
+		LogLatency: true,
+		LogHost:    true,
+		LogMethod:  true,
+		LogError:   true,
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-			logger.Info().
+			statusCode := v.Status
+			var logRow *zerolog.Event
+			if v.Error != nil {
+				logRow = logger.Error().Err(v.Error)
+			} else {
+				logRow = logger.Info()
+			}
+
+			logRow.
+				Str("host", v.Host).
 				Time("time", v.StartTime.UTC()).
 				Str("URI", v.URI).
-				Int("status", v.Status).
-				Int64("latency", v.Latency.Milliseconds()).
+				Int("status", statusCode).
+				Str("latency", v.Latency.String()).
 				Msg("request")
 
 			return nil

@@ -9,21 +9,17 @@ import (
 )
 
 type signupUsecase struct {
-	userRepository domain.UserRepository
+	repository domain.UserRepository
 }
 
-func NewSignupUsecase(userRepository domain.UserRepository) domain.SignupUsecase {
+func NewSignupUsecase(repository domain.UserRepository) domain.SignupUsecase {
 	return &signupUsecase{
-		userRepository: userRepository,
+		repository: repository,
 	}
 }
 
-func (su *signupUsecase) GetUserByUsername(c echo.Context, username string) (domain.User, error) {
-	return su.userRepository.GetByUsername(c, username)
-}
-
 func (su *signupUsecase) CreateUser(c echo.Context, username, email, password string) error {
-	return su.userRepository.Create(c, &postgresql.CreateUserParams{
+	return su.repository.Create(c.Request().Context(), &postgresql.CreateUserParams{
 		ID:         uuid.New(),
 		Username:   username,
 		Email:      email,

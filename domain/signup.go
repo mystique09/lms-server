@@ -18,6 +18,5 @@ type SignupResponse struct {
 }
 
 type SignupUsecase interface {
-	GetUserByUsername(c echo.Context, username string) (User, error)
 	CreateUser(c echo.Context, username, email, password string) error
 }

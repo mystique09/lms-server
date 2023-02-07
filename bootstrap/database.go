@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"database/sql"
 	"log"
+	"strings"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -11,8 +12,7 @@ import (
 )
 
 func NewPostgresqlClient(env *Env) *sql.DB {
-	databaseUrl := env.DBUrl
-	db, err := sql.Open("postgres", databaseUrl)
+	db, err := sql.Open("postgres", env.DBUrl)
 
 	if err != nil {
 		log.Fatal(err)
@@ -35,7 +35,11 @@ func NewPostgresqlClient(env *Env) *sql.DB {
 
 	migrateErr := m.Up()
 	if migrateErr != nil {
-		log.Println("Migration err: ", migrateErr.Error())
+		if strings.Contains(migrateErr.Error(), "no change") {
+			log.Println("Migration: ", migrateErr.Error())
+		} else {
+			log.Println("Migration err: ", migrateErr.Error())
+		}
 	}
 
 	log.Println("-- Migration done --")

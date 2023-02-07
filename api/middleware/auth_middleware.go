@@ -19,10 +19,6 @@ const (
 func AuthMiddleware(maker tokenutil.Maker) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			if c.Request().Method == http.MethodGet {
-				return next(c)
-			}
-
 			authorizationHeader := c.Request().Header.Get(authorizationHeaderKey)
 			if authorizationHeader == "" {
 				return c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Message: "authorization header is required"})
