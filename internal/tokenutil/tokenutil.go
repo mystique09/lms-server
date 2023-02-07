@@ -6,7 +6,6 @@ import (
 
 	"github.com/aead/chacha20poly1305"
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 	"github.com/o1egl/paseto"
 )
 
