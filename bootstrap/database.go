@@ -31,18 +31,18 @@ func NewPostgresqlClient(env *Env) *sql.DB {
 		log.Fatalf("error while migrating: %v", err.Error())
 	}
 
-	log.Println("-- Migration started --")
+	log.Println("starting migration")
 
 	migrateErr := m.Up()
 	if migrateErr != nil {
 		if strings.Contains(migrateErr.Error(), "no change") {
-			log.Println("Migration: ", migrateErr.Error())
+			log.Println("migration: ", migrateErr.Error())
 		} else {
-			log.Println("Migration err: ", migrateErr.Error())
+			log.Println("migration err: ", migrateErr.Error())
 		}
 	}
 
-	log.Println("-- Migration done --")
+	log.Println("migration done")
 
 	return db
 }
@@ -57,5 +57,5 @@ func ClosePostgresqlConnection(client *sql.DB) {
 		log.Fatal(err)
 	}
 
-	log.Panicln("Connection to Postgresql is now close.")
+	log.Panicln("connection to postgresql is now close.")
 }
