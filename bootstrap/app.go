@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"database/sql"
 	"log"
+
 	"server/database/store"
 	"server/internal/tokenutil"
 
@@ -13,6 +14,7 @@ type Application struct {
 	Env              Env
 	TokenMaker       tokenutil.Maker
 	Store            store.Store
+	StorageProvider  Storage
 	PostgresqlClient *sql.DB
 }
 
@@ -32,6 +34,7 @@ func App() Application {
 	app.TokenMaker = tokenMaker
 	app.PostgresqlClient = NewPostgresqlClient(&env)
 	app.Store = store.NewStore(app.PostgresqlClient)
+	app.StorageProvider = NewStorageProvider(&app.Env)
 	return *app
 }
 
@@ -40,5 +43,7 @@ func (app *Application) Launch(e *echo.Echo) {
 }
 
 func (app *Application) CloseDBConnection() {
+	log.Println("disconnecting db connection")
 	ClosePostgresqlConnection(app.PostgresqlClient)
+	log.Println("db connection disconnected")
 }
