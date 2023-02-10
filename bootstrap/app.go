@@ -14,7 +14,7 @@ type Application struct {
 	Env              Env
 	TokenMaker       tokenutil.Maker
 	Store            store.Store
-	StorageProvider  Storage
+	StorageProvider  IStorage
 	PostgresqlClient *sql.DB
 }
 
