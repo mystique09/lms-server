@@ -1,21 +1,23 @@
 package domain
 
 import (
+	"bytes"
 	"context"
+	"server/database/postgresql"
 
-	"github.com/cloudinary/cloudinary-go/v2/api/admin"
 	"github.com/google/uuid"
 )
 
 type AssetID = string
+type Classwork = postgresql.ClassWork
 
 type (
 	ClassworkRepository interface {
-		GetOne(c context.Context, id AssetID) (admin.AssetResult, error)
-		GetAllClassworksByUserID(c context.Context, id uuid.UUID) (admin.AssetsResult, error)
-		GetAllClassworksByClassID(c context.Context, id uuid.UUID) (admin.AssetsResult, error)
-		Upload(c context.Context, buffer []byte) error
-		Delete(c context.Context, id AssetID) error
+		GetOne(c context.Context, id, user_id uuid.UUID) (Classwork, error)
+		GetAllClassworksByUserID(c context.Context, user_id uuid.UUID, offset int32) ([]Classwork, error)
+		GetAllClassworksByClassID(c context.Context, class_id uuid.UUID, offset int32) ([]Classwork, error)
+		Upload(c context.Context, data bytes.Buffer) error
+		Delete(c context.Context, id uuid.UUID) (*string, error)
 	}
 
 	// TODO!: implement usecase for classwork
