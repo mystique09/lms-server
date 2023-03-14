@@ -5,6 +5,7 @@ import (
 	"server/api/middleware"
 	"server/api/route/v1"
 	"server/bootstrap"
+	"server/ui"
 
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
@@ -14,9 +15,11 @@ func main() {
 	app := bootstrap.App()
 	defer app.CloseDBConnection()
 	logger := zerolog.New(os.Stdout)
+	renderer := ui.NewTemplateRenderer("ui/public/**.*.html")
 
 	e := echo.New()
-	e.Static("/", "ui/static")
+	e.Renderer = renderer
+	e.Static("/static", "ui/static")
 	e.Use(middleware.LoggerMiddleware(&logger))
 	e.Use(middleware.CorsMiddleware(&app.Env))
 	e.Use(middleware.RateLimitMiddleware(20))
