@@ -11,7 +11,7 @@ import (
 func Setup(app *bootstrap.Application, st store.Store, router *echo.Group) {
 	publicRouterV1 := router.Group("/api/v1")
 	privateRouter := router.Group("/api/v1", middleware.AuthMiddleware(app.TokenMaker))
-	// uiRouter := router.Group("")
+	uiRouter := router.Group("")
 
 	publicRouterV1.GET("", indexRoute)
 	publicRouterV1.GET("/health", healthRoute)
@@ -25,6 +25,10 @@ func Setup(app *bootstrap.Application, st store.Store, router *echo.Group) {
 
 	classroomsGroup := privateRouter.Group("/classrooms")
 	NewClassroomRouter(app, st, classroomsGroup)
+
+	uiRouter.GET("/", func(c echo.Context) error {
+		return c.Render(200, "index.page.html", nil)
+	})
 }
 
 func indexRoute(c echo.Context) error {
