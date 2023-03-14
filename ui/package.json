@@ -4,14 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tailwindcss -i static/css/main.css -o static/css/tailwindcss.css -m",
-    "build": "pnpx esbuild index.js --outfile=static/js/bundle.js --bundle --minify"
+    "dev": "concurrently --kill-others \"pnpm run bundle\" \"pnpm run tailwind\"",
+    "tailwind": "tailwindcss -i static/css/main.css -o static/css/tailwindcss.css -m --watch",
+    "bundle": "esbuild index.js --outfile=static/js/bundle.js --bundle --minify --watch"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "alpinejs": "^3.12.0",
+    "concurrently": "^7.6.0",
     "esbuild": "^0.17.11",
     "htmx.org": "^1.8.6",
     "tailwindcss": "^3.2.7"
