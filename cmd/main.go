@@ -16,13 +16,14 @@ func main() {
 	logger := zerolog.New(os.Stdout)
 
 	e := echo.New()
+	e.Static("/", "ui/static")
 	e.Use(middleware.LoggerMiddleware(&logger))
 	e.Use(middleware.CorsMiddleware(&app.Env))
 	e.Use(middleware.RateLimitMiddleware(20))
 	e.Validator = bootstrap.NewValidator()
 
-	routeV1 := e.Group("/api/v1")
+	router := e.Group("")
 
-	route.Setup(&app, app.Store, routeV1)
+	route.Setup(&app, app.Store, router)
 	app.Launch(e)
 }

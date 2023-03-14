@@ -8,8 +8,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Setup(app *bootstrap.Application, st store.Store, routeV1 *echo.Group) {
-	publicRouterV1 := routeV1.Group("")
+func Setup(app *bootstrap.Application, st store.Store, router *echo.Group) {
+	publicRouterV1 := router.Group("/api/v1")
+	privateRouter := router.Group("/api/v1", middleware.AuthMiddleware(app.TokenMaker))
+	// uiRouter := router.Group("")
+
 	publicRouterV1.GET("", indexRoute)
 	publicRouterV1.GET("/health", healthRoute)
 	NewLoginRouter(app, st, publicRouterV1)
@@ -17,10 +20,10 @@ func Setup(app *bootstrap.Application, st store.Store, routeV1 *echo.Group) {
 	NewRefreshTokenRouter(app, st, publicRouterV1)
 	NewAccessTokenRouter(app, st, publicRouterV1)
 
-	userGroup := routeV1.Group("/users", middleware.AuthMiddleware(app.TokenMaker))
+	userGroup := privateRouter.Group("/users")
 	NewProfileRouter(app, st, userGroup)
 
-	classroomsGroup := routeV1.Group("/classrooms", middleware.AuthMiddleware(app.TokenMaker))
+	classroomsGroup := privateRouter.Group("/classrooms")
 	NewClassroomRouter(app, st, classroomsGroup)
 }
 
