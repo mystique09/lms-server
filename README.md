@@ -17,26 +17,26 @@ Install required tools if you want to self-host.
 
 ### Installation
 1. Clone repository
-	```bash
-	git clone https://github.com/mystique09/lms-server
-	```
+```bash
+git clone https://github.com/mystique09/lms-server
+```
 1. Install dependencies
-	```bash
-	cd lms-server
-	go mod tidy
-	```
+```bash
+cd lms-server
+go mod tidy
+```
 1. Copy the app.sample.env to app.env add your environment variables
-	```bash
-	cp app.sample.env app.env
-	# or
-	cat app.sample.env > app.env
-	```
+```bash
+cp app.sample.env app.env
+# or
+cat app.sample.env > app.env
+```
 1. Run the server
-	```bash
-	PORT=8000 go run cmd/main.go
-	# or, if you have cmake/make
-	PORT=8000 make run
-	```
+```bash
+PORT=8000 go run cmd/main.go
+# or, if you have cmake/make
+PORT=8000 make run
+```
 
 ### Development
 While developing, you need to install this binaries.
@@ -49,17 +49,17 @@ While developing, you need to install this binaries.
 
 To run tests:
 ```bash
-	go test -v -cover -coverprofile=coverage.out
-	# or
-	make test
+go test -v -cover -coverprofile=coverage.out
+# or
+make test
 ```
 To run linters:
 ```bash
-	gosec -quiet -exclude-generated ./...
-	gocritic check -enableAll ./...
-	golangci-lint run ./...
-	# or
-	make lint
+gosec -quiet -exclude-generated ./...
+gocritic check -enableAll ./...
+golangci-lint run ./...
+# or
+make lint
 ```
 
 [Apache License 2.0](./LICENSE)
