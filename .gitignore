@@ -2,3 +2,4 @@
 dbml-error.log
 tmp/
 node_modules
+bin/
