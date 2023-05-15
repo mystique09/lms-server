@@ -13,7 +13,6 @@ func Setup(app *bootstrap.Application, st store.Store, router *echo.Group) {
 	privateRouter := router.Group("/api/v1", middleware.AuthMiddleware(app.TokenMaker))
 	uiRouter := router.Group("")
 
-	publicRouterV1.GET("", indexRoute)
 	publicRouterV1.GET("/health", healthRoute)
 	NewLoginRouter(app, st, publicRouterV1)
 	NewSignupRouter(app, st, publicRouterV1)
@@ -29,14 +28,6 @@ func Setup(app *bootstrap.Application, st store.Store, router *echo.Group) {
 	uiRouter.GET("/", func(c echo.Context) error {
 		return c.Render(200, "index.page.html", nil)
 	})
-}
-
-func indexRoute(c echo.Context) error {
-	return c.HTML(200, `
-		Welcome, you are in the backend of lms-server. <br> 
-		<a href="/api/v1/health">Server status</a> <br>
-		<a href="/api/v1/docs">Visit APIv1 Documentation</a>		
-	`)
 }
 
 func healthRoute(c echo.Context) error {
